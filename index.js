@@ -48,6 +48,8 @@ function createGrid() {
 createGrid();
 
 function createNode(x, y) {
+  // TODO: Probably won't use <g>, will use classes instead to manage moving multiple elements
+  // since <g> is entirely useless in mouseevents and we do unnecessary calculations
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   node.setAttribute('class', 'node');
   node.setAttribute('transform', `translate(${x},${y})`);
@@ -58,13 +60,11 @@ function createNode(x, y) {
   circle.setAttribute('stroke-width', 5);
   circle.setAttribute('cx', 0);
   circle.setAttribute('cy', 0);
+
   node.appendChild(circle);
   svg.appendChild(node);
 }
 createNode(350, 350);
-createNode(450, 450);
-createNode(550, 550);
-
 const createNodeBtn = document.querySelector('#create-node-btn');
 createNodeBtn.addEventListener('click', nodeBtnClick);
 function nodeBtnClick() {
@@ -78,7 +78,7 @@ function nodeDrag() {
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
-    // TODO: Toggle create node button... for now using limit
+    // // TODO: Toggle create node button... for now using limit
     if (createNodeBtn.disabled && numNodes < 5) {
       console.log('Created a node!')
       createNode(event.pageX, event.pageY);
@@ -93,6 +93,7 @@ function nodeDrag() {
     let y = event.pageY;
     if (selected) {
       // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
+      // TODO: Toggle gridlike movements
       let gridX = round(Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, x)), gridBoxSize);
       let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
       selected.setAttribute('transform', `translate(${gridX}, ${gridY})`);
@@ -114,5 +115,9 @@ nodeDrag();
 
 //TODO: Firebase will need to keep track of all of the node's positions using translate(x,y)
 
+
+
+// TODO: Select multiple elements with drag selection
+// Use a div and detect whether the svgs are overlapping with it
 
 
