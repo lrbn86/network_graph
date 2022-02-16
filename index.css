@@ -25,8 +25,24 @@ svg {
 
 #left-sidebar {
   left: 25px;
+  border-radius: 25px;
+  width: 80px;
 }
 
 #right-sidebar {
   right: 25px;
+}
+
+li{
+    list-style-type: none;
+}
+
+.btn {
+    position:relative;
+    display: inline-block;
+    vertical-align: text-top;
+    border-radius: 7px;
+    width: 50px;
+    height: 50px;
+    left: -25px;
 }
