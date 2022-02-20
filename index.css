@@ -6,13 +6,10 @@
 body {
   background-color: #181818;
   margin: 0;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 #main {
-  width: 5000px;
-  height: 5000px;
-  overflow: scroll;
 }
 
 svg {
@@ -34,41 +31,41 @@ svg {
 }
 
 #far-right-sidebar {
-    right: 25px;
-    border-radius: 25px;
+  right: 25px;
+  border-radius: 25px;
 }
 #close-right-sidebar {
-    right: 250px;
-    border-radius: 25px;
+  right: 250px;
+  border-radius: 25px;
 }
 
-li{
-    list-style-type: none;
+li {
+  list-style-type: none;
 }
 
 .btn {
-    position:relative;
-    display: inline-block;
-    vertical-align: text-top;
-    border-radius: 7px;
-    width: 50px;
-    height: 50px;
-    left: -25px;
+  position: relative;
+  display: inline-block;
+  vertical-align: text-top;
+  border-radius: 7px;
+  width: 50px;
+  height: 50px;
+  left: -25px;
 }
 .btn-horiz {
-    position: relative;
-    display: inline-block;
-    vertical-align: text-top;
-    border-radius: 7px;
-    width: 50px;
-    height: 50px;
-    padding-right: 10px;
+  position: relative;
+  display: inline-block;
+  vertical-align: text-top;
+  border-radius: 7px;
+  width: 50px;
+  height: 50px;
+  padding-right: 10px;
 }
 
 #lower-left-sidebar {
-    position: fixed;
-    top: 750px;
-    left: 25px;
-    border-radius: 25px;
-    width: 80px;
+  position: fixed;
+  top: 750px;
+  left: 25px;
+  border-radius: 25px;
+  width: 80px;
 }
