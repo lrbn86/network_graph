@@ -9,34 +9,28 @@ svg.setAttribute('width', svgWidth);
 svg.setAttribute('height', svgHeight);
 main.appendChild(svg);
 
-// TODO: Toggle drag selection with boolean variable
-//       we need to make sure to remove addeventlistener on toggle off
-// source: https://codepen.io/thenutz/pen/VwYeYEE
-let drag = false;
-let startX;
-let startY;
-let scrollLeft;
-let scrollTop;
-main.addEventListener('mousedown', (event) => {
-  drag = true;
-  startX = event.pageX - main.offsetLeft;
-  startY = event.pageY - main.offsetTop;
-  scrollLeft = main.scrollLeft;
-  scrollTop = main.scrollTop;
-});
-main.addEventListener('mouseup', (event) => {
-  drag = false;
-});
-main.addEventListener('mousemove', (event) => {
-  if (drag) {
-    const x = event.pageX - main.offsetLeft;
-    const y = event.pageY - main.offsetTop;
-    const walk = (x - startX) * 1;
-    const walk2 = (y - startY) * 1;
-    main.scrollLeft = scrollLeft - walk;
-    main.scrollTop = scrollTop - walk2;
-  }
-});
+// Center the document body
+window.scrollTo(svgWidth / 2, svgHeight / 2);
+
+// TODO: If the mouse leaves the window, it still scrolls...
+function toggleMousePanning() {
+  let drag = false;
+  main.addEventListener('mousedown', (event) => {
+    drag = true;
+  });
+  main.addEventListener('mouseup', (event) => {
+    drag = false;
+  });
+  document.body.addEventListener('mouseleave', (event) => {
+    drag = false;
+  });
+  main.addEventListener('mousemove', (event) => {
+    if (drag) {
+      window.scrollBy(-event.movementX, -event.movementY);
+    }
+  });
+}
+toggleMousePanning();
 
 // Let the browser handle scroll and zoom
 function createGrid() {
@@ -93,7 +87,8 @@ function createNode(x, y) {
   node.appendChild(circle);
   svg.appendChild(node);
 }
-createNode(350, 350);
+createNode(svgWidth / 2 + 650, svgHeight / 2 + 350);
+
 const createNodeBtn = document.querySelector('#create-node-btn');
 createNodeBtn.addEventListener('click', nodeBtnClick);
 function nodeBtnClick() {
@@ -107,19 +102,19 @@ function nodeDrag() {
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
-    // // TODO: Toggle create node button... for now using limit
-    if (createNodeBtn.disabled && numNodes < 1) {
-      console.log('Created a node!')
-      createNode(event.pageX, event.pageY);
-      numNodes++;
-    }
+    // // // TODO: Toggle create node button... for now using limit
+    // if (createNodeBtn.disabled && numNodes < 1) {
+    //   console.log('Created a node!')
+    //   createNode(event.pageX, event.pageY);
+    //   numNodes++;
+    // }
   }
   function dragEnd(event) {
     selected = null;
   }
   function drag(event) {
     let x = event.pageX;
-    let y = event.pageY;
+    let y = event.pageY; 
     if (selected) {
       // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
       // TODO: Toggle gridlike movements
