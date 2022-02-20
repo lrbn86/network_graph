@@ -9,6 +9,35 @@ svg.setAttribute('width', svgWidth);
 svg.setAttribute('height', svgHeight);
 main.appendChild(svg);
 
+// TODO: Toggle drag selection with boolean variable
+//       we need to make sure to remove addeventlistener on toggle off
+// source: https://codepen.io/thenutz/pen/VwYeYEE
+let drag = false;
+let startX;
+let startY;
+let scrollLeft;
+let scrollTop;
+main.addEventListener('mousedown', (event) => {
+  drag = true;
+  startX = event.pageX - main.offsetLeft;
+  startY = event.pageY - main.offsetTop;
+  scrollLeft = main.scrollLeft;
+  scrollTop = main.scrollTop;
+});
+main.addEventListener('mouseup', (event) => {
+  drag = false;
+});
+main.addEventListener('mousemove', (event) => {
+  if (drag) {
+    const x = event.pageX - main.offsetLeft;
+    const y = event.pageY - main.offsetTop;
+    const walk = (x - startX) * 1;
+    const walk2 = (y - startY) * 1;
+    main.scrollLeft = scrollLeft - walk;
+    main.scrollTop = scrollTop - walk2;
+  }
+});
+
 // Let the browser handle scroll and zoom
 function createGrid() {
   let lineColor = 'black'
@@ -48,6 +77,8 @@ function createGrid() {
 createGrid();
 
 function createNode(x, y) {
+  // TODO: Probably won't use <g>, will use classes instead to manage moving multiple elements
+  // since <g> is entirely useless in mouseevents and we do unnecessary calculations
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   node.setAttribute('class', 'node');
   node.setAttribute('transform', `translate(${x},${y})`);
@@ -58,13 +89,11 @@ function createNode(x, y) {
   circle.setAttribute('stroke-width', 5);
   circle.setAttribute('cx', 0);
   circle.setAttribute('cy', 0);
+
   node.appendChild(circle);
   svg.appendChild(node);
 }
 createNode(350, 350);
-createNode(450, 450);
-createNode(550, 550);
-
 const createNodeBtn = document.querySelector('#create-node-btn');
 createNodeBtn.addEventListener('click', nodeBtnClick);
 function nodeBtnClick() {
@@ -78,8 +107,8 @@ function nodeDrag() {
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
-    // TODO: Toggle create node button... for now using limit
-    if (createNodeBtn.disabled && numNodes < 5) {
+    // // TODO: Toggle create node button... for now using limit
+    if (createNodeBtn.disabled && numNodes < 1) {
       console.log('Created a node!')
       createNode(event.pageX, event.pageY);
       numNodes++;
@@ -93,6 +122,7 @@ function nodeDrag() {
     let y = event.pageY;
     if (selected) {
       // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
+      // TODO: Toggle gridlike movements
       let gridX = round(Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, x)), gridBoxSize);
       let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
       selected.setAttribute('transform', `translate(${gridX}, ${gridY})`);
@@ -108,6 +138,27 @@ function nodeDrag() {
 }
 nodeDrag();
 
+function zoom() {
+  window.addEventListener('wheel', (event) => {
+  // TODO: Think about whether to stick with DOM manipulation or Canvas manipulation
+  // We do not want to interfere with the default zoom in on the browser
+  // We want to be able to zoom in with just the div??
+  // We also need to implement a zoom feature that accepts two keys (hold down a ctrl button or something)
+  if (event.altKey) { // We will use the alt key for modifier key
+    // The alt key needs to be held down for zooming to work
+    console.log('scrolling')
+    
+  }
+  });
+  window.addEventListener('keydown', (event) => {
+    // MacOS: CMD is 'OSLeft', vice versa for the left
+    //        Option is 'AltLeft', vice versa for right
+    //        Control is 'ControlLeft'
+    // Window: 
+  })
+}
+zoom();
+
 //TODO: Study SVG paths to connect the nodes
 
 //TODO: See how to add/create text 
@@ -116,3 +167,23 @@ nodeDrag();
 
 
 
+// TODO: Select multiple elements with drag selection
+// Use a div and detect whether the svgs are overlapping with it
+
+// TODO: The unit of time is days
+
+// TODO: CSS Desktop only display, if it was on mobile then just view only
+
+// TODO: Calculate expected duration: E = (O + (4*M) + P) / 6 
+//       where O is optimistic time - the least amount of time to accomplish
+//       where P is the max time to accomplish, worst case
+//       where M is the most likely time, best estimate, assume no problems
+//       where E is the expected time, realistic duration
+function calculateExpectedDuration(O, P, M) {
+  return (O + (4 * M) + P) / 6;
+}
+
+// The larger this result, the less confidence you have in estimate, vice versa
+function calculateStandardDeviationDuration(P, O) {
+  return (P- O) / 6;
+}
