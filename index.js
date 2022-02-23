@@ -1,16 +1,29 @@
 const main = document.querySelector('#main');
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+svg.setAttribute('id', 'svg')
 const svgWidth = 10000;
 const svgHeight = 10000;
 const gridBoxSize = 50;
 const nodeRadius = 50;
 let numNodes = 0;
-svg.setAttribute('width', svgWidth);
-svg.setAttribute('height', svgHeight);
-main.appendChild(svg);
 
-// Center the document body
-window.scrollTo(svgWidth / 2, svgHeight / 2);
+
+function startApp() {
+  initialize();
+}
+startApp();
+
+function initialize() {
+  svg.setAttribute('width', svgWidth);
+  svg.setAttribute('height', svgHeight);
+  main.appendChild(svg);
+  window.scrollTo(svgWidth / 2, svgHeight / 2); // Center document.body
+  createGrid();
+  toggleMousePanning();
+  createNode(svgWidth / 2 + 650, svgHeight / 2 + 350);
+  nodeDrag();
+}
+
 
 // TODO: If the mouse leaves the window, it still scrolls...
 function toggleMousePanning() {
@@ -30,7 +43,6 @@ function toggleMousePanning() {
     }
   });
 }
-toggleMousePanning();
 
 // Let the browser handle scroll and zoom
 function createGrid() {
@@ -68,7 +80,6 @@ function createGrid() {
   }
   svg.appendChild(horizontalLineGroup);
 }
-createGrid();
 
 function createNode(x, y) {
   // TODO: Probably won't use <g>, will use classes instead to manage moving multiple elements
@@ -87,7 +98,6 @@ function createNode(x, y) {
   node.appendChild(circle);
   svg.appendChild(node);
 }
-createNode(svgWidth / 2 + 650, svgHeight / 2 + 350);
 
 const createNodeBtn = document.querySelector('#create-node-btn');
 createNodeBtn.addEventListener('click', nodeBtnClick);
@@ -102,12 +112,6 @@ function nodeDrag() {
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
-    // // // TODO: Toggle create node button... for now using limit
-    // if (createNodeBtn.disabled && numNodes < 1) {
-    //   console.log('Created a node!')
-    //   createNode(event.pageX, event.pageY);
-    //   numNodes++;
-    // }
   }
   function dragEnd(event) {
     selected = null;
@@ -131,28 +135,6 @@ function nodeDrag() {
   window.addEventListener('mouseup', dragEnd);
   window.addEventListener('mousemove', drag);
 }
-nodeDrag();
-
-function zoom() {
-  window.addEventListener('wheel', (event) => {
-  // TODO: Think about whether to stick with DOM manipulation or Canvas manipulation
-  // We do not want to interfere with the default zoom in on the browser
-  // We want to be able to zoom in with just the div??
-  // We also need to implement a zoom feature that accepts two keys (hold down a ctrl button or something)
-  if (event.altKey) { // We will use the alt key for modifier key
-    // The alt key needs to be held down for zooming to work
-    console.log('scrolling')
-    
-  }
-  });
-  window.addEventListener('keydown', (event) => {
-    // MacOS: CMD is 'OSLeft', vice versa for the left
-    //        Option is 'AltLeft', vice versa for right
-    //        Control is 'ControlLeft'
-    // Window: 
-  })
-}
-zoom();
 
 //TODO: Study SVG paths to connect the nodes
 
