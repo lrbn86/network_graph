@@ -1,61 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="index.css">
-  <script src="index.js" defer></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
 </head>
 <body>
     <div id="left-sidebar" class="sidebar">
-        <ul>
-            <li>
-                <input type="image" src="images/pointer.svg" name="pointer" class="btn" id="pointer-btn" />
-            </li>
-            <br />
-            <li>
-                <input type="image" src="images/pan.svg" name="pan" class="btn" id="pan-btn" />
-            </li>
-            <br />
-            <li>
-                <input type="image" src="images/addNode.svg" name="node" class="btn" id="create-node-btn" />
-            </li>
-            <br />
-            <li>
-                <input type="image" src="images/line.svg" name="line" class="btn" id="create-line-btn" />
-            </li>
-            <br />
-            <li>
-                <input type="image" src="images/text.svg" name="text" class="btn" id="create-text-btn" />
-            </li>
-            <br />
-            <li>
-                <input type="image" src="images/comment.svg" name="comment" class="btn" id="create-comment-btn" />
-            </li>
-        </ul>
+        <input id="pointer-btn" class="btn" name="pointer" type="image" src="images/pointer.svg" />
+        <input id="pan-btn" class="btn" name="pan" type="image" src="images/pan.svg" />
+        <input id="create-node-btn" class="btn" name="node" type="image" src="images/addNode.svg" />
+        <input id="create-line-btn" btn="btn" name="line" type="image" src="images/line.svg" />
+        <input id="create-text-btn" class="btn" type="image" src="images/text.svg" />
+        <input id="create-comment-btn" class="btn" name="comment" type="image" src="images/comment.svg" />
     </div>
     <div id="lower-left-sidebar" class="sidebar">
-        <ul>
-            <li>
-                <input type="image" src="images/undo.svg" name="undo" class="btn" id="undo-btn" />
-            </li>
-            <br />
-            <li>
-                <input type="image" src="images/redo.svg" name="redo" class="btn" id="redo-btn" />
-            </li>
-        </ul>
-
+        <input id="undo-btn" class="btn" name="undo" type="image" src="images/undo.svg" />
+        <input id="redo-btn" class="btn" name="redo" type="image" src="images/redo.svg" />
     </div>
     <div id="main"></div>
     <div id="far-right-sidebar" class="sidebar">
-        <input type="image" src="images/account.svg" name="account" class="btn-horiz" id="account-btn" />
-        <input type="image" src="images/share.svg" name="share" class="btn-horiz" id="share-btn" />
+        <input id="account-btn" class="btn-horiz" name="account" type="image" src="images/account.svg" />
+        <input id="share-btn" class="btn-horiz" name="share" type="image" src="images/share.svg" />
     </div>
     <div id="close-right-sidebar" class="sidebar">
-        <input type="image" src="images/graph.svg" name="graph" class="btn-horiz" id="graph-btn" />
-        <input type="image" src="images/presentation.svg" name="present" class="btn-horiz" id="present-btn" />
+        <input id="graph-btn" class="btn-horiz" name="graph" type="image" src="images/graph.svg" />
+        <input id="present-btn" class="btn-horiz" name="present" type="image" src="images/presentation.svg" /> 
     </div>
     <noscript>[REQUIRED] JavaScript must be enabled on this browser to use this application.</noscript>
 </body>
