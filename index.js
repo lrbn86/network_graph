@@ -22,6 +22,7 @@ function initialize() {
   toggleMousePanning();
   createNode(svgWidth / 2 + 650, svgHeight / 2 + 350);
   nodeDrag();
+  buttonEvents();
 }
 
 
@@ -99,12 +100,6 @@ function createNode(x, y) {
   svg.appendChild(node);
 }
 
-const createNodeBtn = document.querySelector('#create-node-btn');
-createNodeBtn.addEventListener('click', nodeBtnClick);
-function nodeBtnClick() {
-  createNodeBtn.disabled = true;
-}
-
 function nodeDrag() {
   let selected = null;
   function dragStart(event) {
@@ -134,6 +129,19 @@ function nodeDrag() {
   window.addEventListener('mousedown', dragStart);
   window.addEventListener('mouseup', dragEnd);
   window.addEventListener('mousemove', drag);
+}
+
+function buttonEvents() {
+  // The pointer button will be the default select.
+  document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
+  document.querySelectorAll('.btn-function').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-function').forEach((btn) => {
+        btn.classList.remove('btn-selected');
+      });
+      btn.classList.add('btn-selected');
+    });
+  })
 }
 
 //TODO: Study SVG paths to connect the nodes
