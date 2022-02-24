@@ -24,6 +24,7 @@ svg {
   background-color: #fff;
   border-radius: 15px;
   padding: 1rem;
+  z-index: 1;
 }
 
 #left-sidebar, #bottom-left-sidebar {

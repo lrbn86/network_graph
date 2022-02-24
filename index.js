@@ -7,20 +7,24 @@ const gridBoxSize = 50;
 const nodeRadius = 50;
 let numNodes = 0;
 
+const zoomSlider = document.querySelector('#zoom-slider');
 function startApp() {
   initialize();
 }
 startApp();
 
+var zoomLevel = 1.43;
 function initialize() {
   svg.setAttribute('width', svgWidth);
   svg.setAttribute('height', svgHeight);
   main.appendChild(svg);
+  zoomSlider.value = 50;
+  main.style.transform = `scale(${zoomLevel})`;
   window.scrollTo(svgWidth / 2, svgHeight / 2); // Center document.body
   createGrid();
   toggleMousePanning();
+  toggleDrag();
   createNode(svgWidth / 2 + 650, svgHeight / 2 + 350);
-  nodeDrag();
   buttonEvents();
 }
 
@@ -97,10 +101,12 @@ function createNode(x, y) {
   svg.appendChild(node);
 }
 
-function nodeDrag() {
+let toggleDragFlag = true;
+function toggleDrag() {
   let selected = null;
   function dragStart(event) {
     let target = event.target.parentNode;
+    // If we click on the scroll bars, we get error here.
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
@@ -111,7 +117,7 @@ function nodeDrag() {
   function drag(event) {
     let x = event.pageX;
     let y = event.pageY; 
-    if (selected) {
+    if (selected && toggleDragFlag) {
       // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
       // TODO: Toggle gridlike movements
       let gridX = round(Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, x)), gridBoxSize);
@@ -140,27 +146,41 @@ function buttonEvents() {
 
       switch (btn.id) {
         case 'pointer-btn':
+          toggleDragFlag = true;
           toggleMousePanningFlag = false;
           break;
         case 'pan-btn':
+          toggleDragFlag = false;
           toggleMousePanningFlag = true;
           break;
         case 'create-node-btn':
+          toggleDragFlag = false;
           toggleMousePanningFlag = false;
           break;
         case 'create-line-btn':
+          toggleDragFlag = false;
           toggleMousePanningFlag = false;
           break;
         case 'create-text-btn':
+          toggleDragFlag = false;
           toggleMousePanningFlag = false;
           break;
         case 'create-comment-btn':
+          toggleNodeDragFlag = false;
           toggleMousePanningFlag = false;
           break;
       }
     });
   })
 }
+
+zoomSlider.addEventListener('input', (event) => {
+  console.log(event.target.value);
+  let value = event.target.value;
+  zoomLevel = value - (48.57-(.99*(50-value)));
+  console.log(zoomLevel)
+  main.style.transform = `scale(${zoomLevel})`;
+})
 
 //TODO: Study SVG paths to connect the nodes
 
