@@ -1,11 +1,12 @@
 const main = document.querySelector('#main');
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('id', 'svg')
-const svgWidth = 10000;
-const svgHeight = 10000;
+const svgWidth = 500;
+const svgHeight = 500;
 const gridBoxSize = 50;
 const nodeRadius = 50;
 let numNodes = 0;
+let zoomLevel = 6000;
 
 const zoomSlider = document.querySelector('#zoom-slider');
 function startApp() {
@@ -14,16 +15,15 @@ function startApp() {
 startApp();
 
 function initialize() {
-  svg.setAttribute('width', svgWidth);
-  svg.setAttribute('height', svgHeight);
+  // svg.setAttribute('width', svgWidth);
+  // svg.setAttribute('height', svgHeight);
+  svg.setAttribute('viewBox', `0 0 500 500`)
   main.appendChild(svg);
   zoomSlider.value = 5;
-  window.scrollTo(svgWidth / 2, svgHeight / 2); // Center document.body
-  main.firstChild.setAttribute('viewBox', `0 0 ${10 * 1000} ${10 * 1000}`)
-  createGrid();
+  // main.firstChild.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`)
   toggleMousePanning();
   toggleDrag();
-  createNode(svgWidth / 2 + 650, svgHeight / 2 + 350);
+  createNode(150, 150);
   buttonEvents();
 }
 
@@ -40,45 +40,9 @@ function toggleMousePanning() {
   });
   main.addEventListener('mousemove', (event) => {
     if (drag && toggleMousePanningFlag) {
-      window.scrollBy(-event.movementX, -event.movementY);
+      // window.scrollBy(-event.movementX, -event.movementY);
     }
   });
-}
-
-function createGrid() {
-  let lineColor = 'black'
-  let lineOpacity = .5;
-  let num = gridBoxSize;
-  let increment = gridBoxSize;
-  const verticalLineGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  verticalLineGroup.setAttribute('class', 'vertical-line-group');
-  for (let i = 0; i < svgWidth; i++) {
-    const verticalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    verticalLine.setAttribute('x1', num);
-    verticalLine.setAttribute('x2', num);
-    verticalLine.setAttribute('y1', 0);
-    verticalLine.setAttribute('y2', svgHeight);
-    verticalLine.setAttribute('stroke', lineColor);
-    verticalLine.setAttribute('opacity', lineOpacity);
-    verticalLineGroup.appendChild(verticalLine);
-    num += increment;
-  }
-  svg.appendChild(verticalLineGroup);
-  num = gridBoxSize;
-  const horizontalLineGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  horizontalLineGroup.setAttribute('class', 'horizontal-line-group');
-  for (let i = 0; i < svgHeight; i++) {
-    const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    horizontalLine.setAttribute('x1', 0);
-    horizontalLine.setAttribute('x2', svgWidth);
-    horizontalLine.setAttribute('y1', num);
-    horizontalLine.setAttribute('y2', num);
-    horizontalLine.setAttribute('stroke', lineColor);
-    horizontalLine.setAttribute('opacity', lineOpacity);
-    horizontalLineGroup.appendChild(horizontalLine);
-    num += increment;
-  }
-  svg.appendChild(horizontalLineGroup);
 }
 
 function createNode(x, y) {
@@ -87,7 +51,7 @@ function createNode(x, y) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   node.setAttribute('class', 'node');
   node.setAttribute('transform', `translate(${x},${y})`);
-  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  const rcle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   circle.setAttribute('r', nodeRadius);
   circle.setAttribute('fill', 'transparent');
   circle.setAttribute('stroke', 'black');
@@ -113,14 +77,16 @@ function toggleDrag() {
     selected = null;
   }
   function drag(event) {
-    let x = event.pageX;
-    let y = event.pageY; 
+    let x = event.x;
+    let y = event.y; 
     if (selected && toggleDragFlag) {
       // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
       // TODO: Toggle gridlike movements
-      let gridX = round(Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, x)), gridBoxSize);
-      let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
-      selected.setAttribute('transform', `translate(${gridX}, ${gridY})`);
+      // let gridX = round(Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, x)), gridBoxSize);
+      // let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
+      // selected.setAttribute('transform', `translate(${gridX}, ${gridY})`);
+      // selected.setAttribute('transform', `translate(${x}, ${y})`);
+      console.log(x, y);
     }
   }
   // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
@@ -169,12 +135,12 @@ function buttonEvents() {
           break;
       }
     });
-  })
+  });
 }
 
+// TODO: Work on this more to have a smoother zoom...
 zoomSlider.addEventListener('input', (event) => {
   let value = event.target.value;
-  console.log(value)
   // 1 = 60%
   // 2 = 70%
   // 3 = 80%
@@ -185,7 +151,33 @@ zoomSlider.addEventListener('input', (event) => {
   // 8 = 130%
   // 9 = 140%
   // 10 = 150%
-  main.firstChild.setAttribute('viewBox', `0 0 ${10000 / value} ${10000 / value}`)
+  switch(value) {
+    case '1':
+      zoomLevel = 10000;
+      break;
+    case '2':
+      zoomLevel = 9000;
+      break;
+    case '3':
+      zoomLevel = 8000;
+      break;
+    case '4':
+      zoomLevel = 7000;
+      break;
+    case '5':
+      zoomLevel = 6000;
+      break;
+    case '6':
+      zoomLevel = 5000;
+      break;
+    case '7':
+      zoomLevel = 4000;
+      break;
+    case '8':
+      zoomLevel = 3000;
+      break;
+  }
+  main.firstChild.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
 });
 
 //TODO: Study SVG paths to connect the nodes
