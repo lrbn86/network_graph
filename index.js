@@ -13,14 +13,13 @@ function startApp() {
 }
 startApp();
 
-var zoomLevel = 1.43;
 function initialize() {
   svg.setAttribute('width', svgWidth);
   svg.setAttribute('height', svgHeight);
   main.appendChild(svg);
-  zoomSlider.value = 50;
-  main.style.transform = `scale(${zoomLevel})`;
+  zoomSlider.value = 5;
   window.scrollTo(svgWidth / 2, svgHeight / 2); // Center document.body
+  main.firstChild.setAttribute('viewBox', `0 0 ${10 * 1000} ${10 * 1000}`)
   createGrid();
   toggleMousePanning();
   toggleDrag();
@@ -46,7 +45,6 @@ function toggleMousePanning() {
   });
 }
 
-// Let the browser handle scroll and zoom
 function createGrid() {
   let lineColor = 'black'
   let lineOpacity = .5;
@@ -175,12 +173,20 @@ function buttonEvents() {
 }
 
 zoomSlider.addEventListener('input', (event) => {
-  console.log(event.target.value);
   let value = event.target.value;
-  zoomLevel = value - (48.57-(.99*(50-value)));
-  console.log(zoomLevel)
-  main.style.transform = `scale(${zoomLevel})`;
-})
+  console.log(value)
+  // 1 = 60%
+  // 2 = 70%
+  // 3 = 80%
+  // 4 = 90%
+  // 5 = 100%
+  // 6 = 110%
+  // 7 = 120%
+  // 8 = 130%
+  // 9 = 140%
+  // 10 = 150%
+  main.firstChild.setAttribute('viewBox', `0 0 ${10000 / value} ${10000 / value}`)
+});
 
 //TODO: Study SVG paths to connect the nodes
 
