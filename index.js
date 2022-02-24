@@ -7,7 +7,6 @@ const gridBoxSize = 50;
 const nodeRadius = 50;
 let numNodes = 0;
 
-
 function startApp() {
   initialize();
 }
@@ -26,7 +25,8 @@ function initialize() {
 }
 
 
-// TODO: If the mouse leaves the window, it still scrolls...
+// TODO: If the mouse leaves the window while scrolling, it still scrolls...
+let toggleMousePanningFlag = false;
 function toggleMousePanning() {
   let drag = false;
   main.addEventListener('mousedown', (event) => {
@@ -35,11 +35,8 @@ function toggleMousePanning() {
   main.addEventListener('mouseup', (event) => {
     drag = false;
   });
-  document.body.addEventListener('mouseleave', (event) => {
-    drag = false;
-  });
   main.addEventListener('mousemove', (event) => {
-    if (drag) {
+    if (drag && toggleMousePanningFlag) {
       window.scrollBy(-event.movementX, -event.movementY);
     }
   });
@@ -140,6 +137,27 @@ function buttonEvents() {
         btn.classList.remove('btn-selected');
       });
       btn.classList.add('btn-selected');
+
+      switch (btn.id) {
+        case 'pointer-btn':
+          toggleMousePanningFlag = false;
+          break;
+        case 'pan-btn':
+          toggleMousePanningFlag = true;
+          break;
+        case 'create-node-btn':
+          toggleMousePanningFlag = false;
+          break;
+        case 'create-line-btn':
+          toggleMousePanningFlag = false;
+          break;
+        case 'create-text-btn':
+          toggleMousePanningFlag = false;
+          break;
+        case 'create-comment-btn':
+          toggleMousePanningFlag = false;
+          break;
+      }
     });
   })
 }
