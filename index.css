@@ -68,6 +68,10 @@ svg {
   /* Different browsers can affect the appearance.. deciding whether or not to bother changing the appearance */
 }
 
+.zoom-btn {
+  user-select: none;
+}
+
 .zoom-btn:hover {
   cursor: pointer;
 }
@@ -76,6 +80,7 @@ svg {
   width: 30px;
   height: 30px;
   padding: 1rem;
+  user-select: none;
 }
 
 .btn:hover {
