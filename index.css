@@ -43,6 +43,35 @@ svg {
   right: 210px;
 }
 
+#zoom-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  top: 820px;
+  right: 20px;
+}
+
+#zoom-sidebar > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+#zoom-in, #zoom-out {
+  font-size: 2rem;
+  border: none;
+  background-color: #fff;
+}
+
+#zoom-slider {
+  /* Different browsers can affect the appearance.. deciding whether or not to bother changing the appearance */
+}
+
+.zoom-btn:hover {
+  cursor: pointer;
+}
+
 .btn {
   width: 30px;
   height: 30px;
