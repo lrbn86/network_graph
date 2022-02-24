@@ -1,60 +1,57 @@
 * {
   font-family: sans-serif;
+  user-select: none;
 }
 
 body {
   background-color: #181818;
   margin: 0;
-}
-
-#main {
+  overflow: hidden;
 }
 
 #svg {
   background-color: #e5e5e5;
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  overflow: scroll;
 }
 
 .sidebar {
   display: flex;
   gap: 10px;
   position: fixed;
-  top: 20px;
+  top: 1rem;
   outline: 1px solid black;
   background-color: #fff;
-  border-radius: 15px;
+  border-radius: 5px;
   padding: 1rem;
   z-index: 1;
 }
 
-#left-sidebar, #bottom-left-sidebar {
+#left-sidebar,
+#bottom-left-sidebar {
   flex-direction: column;
-  left: 20px;
+  left: 1rem;
 }
 
 #bottom-left-sidebar {
-  top: 490px;
+  top: 30rem;
 }
 
 #far-right-sidebar {
-  right: 20px;
+  right: 1rem;
 }
 
 #close-right-sidebar {
-  right: 210px;
+  right: 12rem;
 }
 
 #zoom-sidebar {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  top: 820px;
-  right: 20px;
+  top: 40rem;
+  right: 1rem;
 }
 
 #zoom-sidebar > div {
@@ -64,7 +61,8 @@ body {
   gap: 20px;
 }
 
-#zoom-in, #zoom-out {
+#zoom-in,
+#zoom-out {
   font-size: 2rem;
   border: none;
   background-color: #fff;
@@ -72,10 +70,6 @@ body {
 
 #zoom-slider {
   /* Different browsers can affect the appearance.. deciding whether or not to bother changing the appearance */
-}
-
-.zoom-btn {
-  user-select: none;
 }
 
 .zoom-btn:hover {
@@ -86,7 +80,6 @@ body {
   width: 30px;
   height: 30px;
   padding: 1rem;
-  user-select: none;
 }
 
 .btn:hover {

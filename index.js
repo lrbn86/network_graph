@@ -9,58 +9,49 @@ let numNodes = 0;
 let zoomLevel = 6000;
 
 const zoomSlider = document.querySelector('#zoom-slider');
+
 function startApp() {
   initialize();
 }
 startApp();
 
 function initialize() {
-  // svg.setAttribute('width', svgWidth);
-  // svg.setAttribute('height', svgHeight);
-  svg.setAttribute('viewBox', `0 0 500 500`)
   main.appendChild(svg);
-  zoomSlider.value = 5;
-  // main.firstChild.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`)
   toggleMousePanning();
   toggleDrag();
   createNode(150, 150);
   buttonEvents();
 }
 
+function createNode(x, y) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  node.setAttribute('class', 'node');
+  node.setAttribute('r', nodeRadius);
+  node.setAttribute('fill', 'transparent');
+  node.setAttribute('stroke', 'black');
+  node.setAttribute('stroke-width', 5);
+  node.setAttribute('cx', x);
+  node.setAttribute('cy', y);
+  svg.appendChild(node);
+}
 
 // TODO: If the mouse leaves the window while scrolling, it still scrolls...
 let toggleMousePanningFlag = false;
 function toggleMousePanning() {
   let drag = false;
-  main.addEventListener('mousedown', (event) => {
+  svg.addEventListener('mousedown', (event) => {
     drag = true;
   });
-  main.addEventListener('mouseup', (event) => {
+  svg.addEventListener('mouseup', (event) => {
     drag = false;
   });
-  main.addEventListener('mousemove', (event) => {
+  svg.addEventListener('mousemove', (event) => {
     if (drag && toggleMousePanningFlag) {
       // window.scrollBy(-event.movementX, -event.movementY);
+      console.log(event.movementX, event.movementY)
+      svg.setAttribute('viewBox', `${-event.movementX} ${-event.movementY} 1000 1000`);
     }
   });
-}
-
-function createNode(x, y) {
-  // TODO: Probably won't use <g>, will use classes instead to manage moving multiple elements
-  // since <g> is entirely useless in mouseevents and we do unnecessary calculations
-  const node = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  node.setAttribute('class', 'node');
-  node.setAttribute('transform', `translate(${x},${y})`);
-  const rcle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  circle.setAttribute('r', nodeRadius);
-  circle.setAttribute('fill', 'transparent');
-  circle.setAttribute('stroke', 'black');
-  circle.setAttribute('stroke-width', 5);
-  circle.setAttribute('cx', 0);
-  circle.setAttribute('cy', 0);
-
-  node.appendChild(circle);
-  svg.appendChild(node);
 }
 
 let toggleDragFlag = true;
@@ -100,6 +91,7 @@ function toggleDrag() {
 
 function buttonEvents() {
   // The pointer button will be the default select.
+  // TODO: There's def a better way to do this...
   document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
   document.querySelectorAll('.btn-function').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -179,32 +171,3 @@ zoomSlider.addEventListener('input', (event) => {
   }
   main.firstChild.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
 });
-
-//TODO: Study SVG paths to connect the nodes
-
-//TODO: See how to add/create text 
-
-//TODO: Firebase will need to keep track of all of the node's positions using translate(x,y)
-
-
-
-// TODO: Select multiple elements with drag selection
-// Use a div and detect whether the svgs are overlapping with it
-
-// TODO: The unit of time is days
-
-// TODO: CSS Desktop only display, if it was on mobile then just view only
-
-// TODO: Calculate expected duration: E = (O + (4*M) + P) / 6 
-//       where O is optimistic time - the least amount of time to accomplish
-//       where P is the max time to accomplish, worst case
-//       where M is the most likely time, best estimate, assume no problems
-//       where E is the expected time, realistic duration
-function calculateExpectedDuration(O, P, M) {
-  return (O + (4 * M) + P) / 6;
-}
-
-// The larger this result, the less confidence you have in estimate, vice versa
-function calculateStandardDeviationDuration(P, O) {
-  return (P- O) / 6;
-}
