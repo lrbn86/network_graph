@@ -41,17 +41,27 @@ function createNode(x, y) {
 let toggleMousePanningFlag = false;
 function toggleMousePanning() {
   let drag = false;
+  let pointerOrigin = {
+    x: 0,
+    y: 0
+  };
   svg.addEventListener('mousedown', (event) => {
     drag = true;
+    // TODO: Need to figure out the math on being able to pan properly.
+    // right now, when we click, it resets
+    console.log(svg.getAttribute('viewBox'))
+    pointerOrigin.x = event.x;
+    pointerOrigin.y = event.y;
+    console.log(event.x, event.y);
   });
   svg.addEventListener('mouseup', (event) => {
     drag = false;
   });
   svg.addEventListener('mousemove', (event) => {
     if (drag && toggleMousePanningFlag) {
-      // window.scrollBy(-event.movementX, -event.movementY);
-      console.log(event.movementX, event.movementY)
-      svg.setAttribute('viewBox', `${-event.movementX} ${-event.movementY} 1000 1000`);
+      let x = event.x - pointerOrigin.x;
+      let y = event.y - pointerOrigin.y;
+      svg.setAttribute('viewBox', `${-x} ${-y} ${zoomLevel} ${zoomLevel}`);
     }
   });
 }
