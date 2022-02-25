@@ -69,7 +69,23 @@ body {
 }
 
 #zoom-slider {
-  /* Different browsers can affect the appearance.. deciding whether or not to bother changing the appearance */
+  -webkit-appearance: none;
+  appearance: none;
+  direction: rtl;
+}
+
+#zoom-slider::-webkit-slider-thumb,
+#zoom-slider::-moz-range-thumb {
+  width: 10px;
+  height: 30px;
+  border: 1px solid #000;
+  border-radius: 1px;
+}
+
+#zoom-slider::-webkit-slider-runnable-track,
+#zoom-slider::-moz-range-track {
+  background: #000;
+  border: 1px solid #000;
 }
 
 .zoom-btn:hover {

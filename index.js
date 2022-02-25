@@ -6,7 +6,7 @@ const svgHeight = 500;
 const gridBoxSize = 50;
 const nodeRadius = 50;
 let numNodes = 0;
-let zoomLevel = 6000;
+let zoomLevel = 1250;
 
 const zoomSlider = document.querySelector('#zoom-slider');
 
@@ -16,6 +16,8 @@ function startApp() {
 startApp();
 
 function initialize() {
+  zoomSlider.value = zoomLevel;
+  svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
   main.appendChild(svg);
   toggleMousePanning();
   toggleDrag();
@@ -130,44 +132,8 @@ function buttonEvents() {
   });
 }
 
-// TODO: Work on this more to have a smoother zoom...
 zoomSlider.addEventListener('input', (event) => {
   let value = event.target.value;
-  // 1 = 60%
-  // 2 = 70%
-  // 3 = 80%
-  // 4 = 90%
-  // 5 = 100%
-  // 6 = 110%
-  // 7 = 120%
-  // 8 = 130%
-  // 9 = 140%
-  // 10 = 150%
-  switch(value) {
-    case '1':
-      zoomLevel = 10000;
-      break;
-    case '2':
-      zoomLevel = 9000;
-      break;
-    case '3':
-      zoomLevel = 8000;
-      break;
-    case '4':
-      zoomLevel = 7000;
-      break;
-    case '5':
-      zoomLevel = 6000;
-      break;
-    case '6':
-      zoomLevel = 5000;
-      break;
-    case '7':
-      zoomLevel = 4000;
-      break;
-    case '8':
-      zoomLevel = 3000;
-      break;
-  }
+  zoomLevel = value;
   main.firstChild.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
 });
