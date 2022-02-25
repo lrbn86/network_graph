@@ -40,29 +40,43 @@ function createNode(x, y) {
 // TODO: If the mouse leaves the window while scrolling, it still scrolls...
 let toggleMousePanningFlag = false;
 function toggleMousePanning() {
+  // source: https://css-tricks.com/creating-a-panning-effect-for-svg/
   let drag = false;
   let pointerOrigin = {
     x: 0,
     y: 0
   };
+  let viewBox = {
+    x: 0,
+    y: 0,
+    width: zoomLevel,
+    height: zoomLevel
+  };
+  let newViewBox = {
+    x: 0,
+    y: 0
+  };
   svg.addEventListener('mousedown', (event) => {
     drag = true;
-    // TODO: Need to figure out the math on being able to pan properly.
-    // right now, when we click, it resets
-    console.log(svg.getAttribute('viewBox'))
     pointerOrigin.x = event.x;
     pointerOrigin.y = event.y;
-    console.log(event.x, event.y);
   });
   svg.addEventListener('mouseup', (event) => {
     drag = false;
+    viewBox.x = newViewBox.x;
+    viewBox.y = newViewBox.y;
   });
   svg.addEventListener('mousemove', (event) => {
     if (drag && toggleMousePanningFlag) {
-      let x = event.x - pointerOrigin.x;
-      let y = event.y - pointerOrigin.y;
-      svg.setAttribute('viewBox', `${-x} ${-y} ${zoomLevel} ${zoomLevel}`);
+      newViewBox.x = viewBox.x - (event.x - pointerOrigin.x);
+      newViewBox.y = viewBox.y - (event.y - pointerOrigin.y);
+      svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
+  });
+  zoomSlider.addEventListener('input', (event) => {
+    let value = event.target.value;
+    zoomLevel = value;
+    main.firstChild.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
 }
 
@@ -70,7 +84,7 @@ let toggleDragFlag = true;
 function toggleDrag() {
   let selected = null;
   function dragStart(event) {
-    let target = event.target.parentNode;
+    let target = event.target;
     // If we click on the scroll bars, we get error here.
     if (target.getAttribute('class') === 'node') {
       selected = target;
@@ -89,7 +103,10 @@ function toggleDrag() {
       // let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
       // selected.setAttribute('transform', `translate(${gridX}, ${gridY})`);
       // selected.setAttribute('transform', `translate(${x}, ${y})`);
-      console.log(x, y);
+      let cx = selected.getAttribute('cx') - (event.x - nodeRadius);
+      // console.log(cx);
+      selected.setAttribute('cx', cx);
+      // selected.setAttribute('cy', y - selected.getAttribute('r'));
     }
   }
   // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
@@ -142,8 +159,3 @@ function buttonEvents() {
   });
 }
 
-zoomSlider.addEventListener('input', (event) => {
-  let value = event.target.value;
-  zoomLevel = value;
-  main.firstChild.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
-});
