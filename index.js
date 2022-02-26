@@ -67,6 +67,9 @@ function toggleMousePanning() {
     viewBox.x = newViewBox.x;
     viewBox.y = newViewBox.y;
   });
+  svg.addEventListener('mouseleave', (event) => {
+    drag = false;
+  });
   svg.addEventListener('mousemove', (event) => {
     if (drag && toggleMousePanningFlag) {
       newViewBox.x = viewBox.x - (event.x - pointerOrigin.x);
@@ -97,7 +100,6 @@ function toggleDrag() {
   function dragEnd(event) {
     selected = null;
   }
-
   const svgPoint = svg.createSVGPoint();
   function drag(event) {
     let x = event.x;
@@ -115,7 +117,6 @@ function toggleDrag() {
       selected.setAttribute('cy', matrix.y);
     }
   }
-
   // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
   function round(p, n) {
     return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
@@ -135,7 +136,6 @@ function buttonEvents() {
         btn.classList.remove('btn-selected');
       });
       btn.classList.add('btn-selected');
-
       switch (btn.id) {
         case 'pointer-btn':
           toggleDragFlag = true;
