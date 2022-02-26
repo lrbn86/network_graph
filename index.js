@@ -22,6 +22,8 @@ function initialize() {
   toggleMousePanning();
   toggleDrag();
   createNode(150, 150);
+  createNode(450, 450);
+  createNode(550, 550);
   buttonEvents();
 }
 
@@ -37,7 +39,6 @@ function createNode(x, y) {
   svg.appendChild(node);
 }
 
-// TODO: If the mouse leaves the window while scrolling, it still scrolls...
 let toggleMousePanningFlag = false;
 function toggleMousePanning() {
   // source: https://css-tricks.com/creating-a-panning-effect-for-svg/
@@ -73,9 +74,12 @@ function toggleMousePanning() {
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
   });
+  const zoomLevelLabel = document.querySelector('#zoom-level');
   zoomSlider.addEventListener('input', (event) => {
     let value = event.target.value;
     zoomLevel = value;
+    // TODO: Calculate zoom percentage
+    zoomLevelLabel.textContent = zoomLevel + '%';
     main.firstChild.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
 }
@@ -93,22 +97,25 @@ function toggleDrag() {
   function dragEnd(event) {
     selected = null;
   }
+
+  const svgPoint = svg.createSVGPoint();
   function drag(event) {
     let x = event.x;
     let y = event.y; 
+    svgPoint.x = x;
+    svgPoint.y = y;
     if (selected && toggleDragFlag) {
       // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
       // TODO: Toggle gridlike movements
       // let gridX = round(Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, x)), gridBoxSize);
       // let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
-      // selected.setAttribute('transform', `translate(${gridX}, ${gridY})`);
-      // selected.setAttribute('transform', `translate(${x}, ${y})`);
-      let cx = selected.getAttribute('cx') - (event.x - nodeRadius);
-      // console.log(cx);
-      selected.setAttribute('cx', cx);
-      // selected.setAttribute('cy', y - selected.getAttribute('r'));
+      // Convert screen coordinates to SVG coordinates
+      const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+      selected.setAttribute('cx', matrix.x);
+      selected.setAttribute('cy', matrix.y);
     }
   }
+
   // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
   function round(p, n) {
     return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
