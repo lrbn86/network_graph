@@ -21,13 +21,14 @@ function initialize() {
   main.appendChild(svg);
   toggleMousePanning();
   toggleDrag();
-  createNode(150, 150);
-  createNode(450, 450);
-  createNode(550, 550);
+  drawNode(150, 150);
+  drawNode(450, 450);
+  drawNode(550, 550);
+  drawGrid();
   buttonEvents();
 }
 
-function createNode(x, y) {
+function drawNode(x, y) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   node.setAttribute('class', 'node');
   node.setAttribute('r', nodeRadius);
@@ -37,6 +38,39 @@ function createNode(x, y) {
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
   svg.appendChild(node);
+}
+
+function drawGrid() {
+  // TODO: Make this better.
+  const grid = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  grid.setAttribute('id', 'grid');
+  const maxSize = 50;
+  const boxSize = 50; 
+  let inc = -boxSize;
+  for (let i = 0; i < 50; i++) {
+    const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    horizontalLine.setAttribute('x1', '-1000');
+    horizontalLine.setAttribute('x2', '1000');
+    horizontalLine.setAttribute('y1', inc)
+    horizontalLine.setAttribute('y2', inc);
+    horizontalLine.setAttribute('stroke', 'black');
+    horizontalLine.setAttribute('stroke-width', '5');
+    inc += boxSize;
+    grid.appendChild(horizontalLine);
+  }
+  inc = -boxSize;
+  for (let i = 0; i < 50; i++) {
+    const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    horizontalLine.setAttribute('x1', inc);
+    horizontalLine.setAttribute('x2', inc);
+    horizontalLine.setAttribute('y1', '-1000')
+    horizontalLine.setAttribute('y2', '1000');
+    horizontalLine.setAttribute('stroke', 'black');
+    horizontalLine.setAttribute('stroke-width', '5');
+    inc += boxSize;
+    grid.appendChild(horizontalLine);
+  }
+  svg.appendChild(grid);
 }
 
 let toggleMousePanningFlag = false;
@@ -83,7 +117,7 @@ function toggleMousePanning() {
     zoomLevel = value;
     // TODO: Calculate zoom percentage
     zoomLevelLabel.textContent = zoomLevel + '%';
-    main.firstChild.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${zoomLevel} ${zoomLevel}`);
+    svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
 }
 
@@ -96,6 +130,7 @@ function toggleDrag() {
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
+    console.log(target);
   }
   function dragEnd(event) {
     selected = null;
@@ -113,8 +148,10 @@ function toggleDrag() {
       // let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
       // Convert screen coordinates to SVG coordinates
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-      selected.setAttribute('cx', matrix.x);
-      selected.setAttribute('cy', matrix.y);
+      let cx = matrix.x;
+      let cy = matrix.y;
+      selected.setAttribute('cx', cx);
+      selected.setAttribute('cy', cy);
     }
   }
   // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
@@ -165,4 +202,3 @@ function buttonEvents() {
     });
   });
 }
-
