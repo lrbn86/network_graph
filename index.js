@@ -3,7 +3,7 @@ const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('id', 'svg')
 
 const nodeRadius = 50;
-let numNodes = 0;
+let numNodes = 1;
 let zoomLevel = 1250;
 
 const zoomSlider = document.querySelector('#zoom-slider');
@@ -22,10 +22,10 @@ function initialize() {
   main.appendChild(svg);
   toggleMousePanningZooming();
   toggleDrag();
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < numNodes; i++) {
     drawNode(150, 150);
   }
-  // drawGrid();
+  drawGrid();
   buttonEvents();
 }
 
@@ -45,35 +45,31 @@ function drawNode(x, y) {
 // Draw a grid
 function drawGrid() {
   // TODO: Make this better.
-  const grid = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  grid.setAttribute('id', 'grid');
-  const maxSize = 50;
-  const boxSize = 50; 
-  let inc = -boxSize;
-  for (let i = 0; i < 50; i++) {
-    const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    horizontalLine.setAttribute('x1', '-1000');
-    horizontalLine.setAttribute('x2', '1000');
-    horizontalLine.setAttribute('y1', inc)
-    horizontalLine.setAttribute('y2', inc);
-    horizontalLine.setAttribute('stroke', 'black');
-    horizontalLine.setAttribute('stroke-width', '5');
-    inc += boxSize;
-    grid.appendChild(horizontalLine);
-  }
-  inc = -boxSize;
-  for (let i = 0; i < 50; i++) {
-    const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    horizontalLine.setAttribute('x1', inc);
-    horizontalLine.setAttribute('x2', inc);
-    horizontalLine.setAttribute('y1', '-1000')
-    horizontalLine.setAttribute('y2', '1000');
-    horizontalLine.setAttribute('stroke', 'black');
-    horizontalLine.setAttribute('stroke-width', '5');
-    inc += boxSize;
-    grid.appendChild(horizontalLine);
-  }
-  svg.appendChild(grid);
+  const boxSize = 50;
+  const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  box.setAttribute('width', boxSize);
+  box.setAttribute('height', boxSize);
+  box.setAttribute('x', '0');
+  box.setAttribute('y', '0');
+  box.setAttribute('fill', 'transparent');
+  box.setAttribute('stroke', 'black');
+  box.setAttribute('stroke-width', '5');
+  const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+  pattern.setAttribute('id', 'pattern');
+  pattern.setAttribute('x', '0');
+  pattern.setAttribute('y', '0');
+  pattern.setAttribute('width', boxSize);
+  pattern.setAttribute('height', boxSize);
+  pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+  pattern.appendChild(box);
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('fill', 'url(#pattern)');
+  rect.setAttribute('x', '150');
+  rect.setAttribute('y', '150');
+  rect.setAttribute('width', '5000');
+  rect.setAttribute('height', '5000');
+  svg.appendChild(pattern);
+  svg.appendChild(rect);
 }
 
 // This function controls the panning and zooming functionalities.
@@ -115,6 +111,7 @@ function toggleMousePanningZooming() {
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
   });
+  // Control zoom
   const zoomLevelLabel = document.querySelector('#zoom-level');
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
