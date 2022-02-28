@@ -179,14 +179,18 @@ function toggleDrag() {
 // This function handles all buttons interactivity on the UI.
 function buttonEvents() {
   // The pointer button will be the default select.
-  // TODO: There's def a better way to do this...
   document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
+
   document.querySelectorAll('.btn-function').forEach((btn) => {
+    // Add an click event listener for each button
     btn.addEventListener('click', () => {
+      // Deselect all buttons, reset
       document.querySelectorAll('.btn-function').forEach((btn) => {
         btn.classList.remove('btn-selected');
       });
+      // The button that was clicked will be selected
       btn.classList.add('btn-selected');
+      // Determine which button was actually clicked and toggle the appropriate functionality
       switch (btn.id) {
         case 'pointer-btn':
           toggleDragFlag = true;
@@ -216,4 +220,3 @@ function buttonEvents() {
     });
   });
 }
-//
