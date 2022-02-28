@@ -154,6 +154,27 @@ function zoom() {
 }
 zoom();
 
+function createLine() {
+    const node = document.querySelector("circle");
+    var count = 2;
+    var nodeX = [];
+    var nodeY = [];
+
+    for (var i = 1; i < count; i++) {
+        node.addEventListener('click', function () {
+            debugger;
+            var node1x = node.getAttribute("cx");
+            var node1y = node.getAttribute("cy");
+        });
+        nodeX.push(node1x);
+        nodeY.push(node1y);
+    }
+}
+
+const createLineBtn = document.querySelector('#create-line-btn');
+createLineBtn.addEventListener('click', createLine);
+
+
 //TODO: Study SVG paths to connect the nodes
 
 //TODO: See how to add/create text 
