@@ -19,12 +19,12 @@ function initialize() {
   zoomSlider.value = zoomLevel;
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
   main.appendChild(svg);
-  toggleMousePanning();
+  toggleMousePanningZooming();
   toggleDrag();
-  drawNode(150, 150);
-  drawNode(450, 450);
-  drawNode(550, 550);
-  drawGrid();
+  for (let i = 0; i < 100; i++) {
+    drawNode(150, 150);
+  }
+  // drawGrid();
   buttonEvents();
 }
 
@@ -73,15 +73,15 @@ function drawGrid() {
   svg.appendChild(grid);
 }
 
-let toggleMousePanningFlag = false;
-function toggleMousePanning() {
+let toggleMousePanningZoomingFlag = false;
+function toggleMousePanningZooming() {
   // source: https://css-tricks.com/creating-a-panning-effect-for-svg/
   let drag = false;
   let pointerOrigin = {
     x: 0,
     y: 0
   };
-  let viewBox = {
+  let currentViewBox = {
     x: 0,
     y: 0,
     width: zoomLevel,
@@ -98,26 +98,36 @@ function toggleMousePanning() {
   });
   svg.addEventListener('mouseup', (event) => {
     drag = false;
-    viewBox.x = newViewBox.x;
-    viewBox.y = newViewBox.y;
+    currentViewBox.x = newViewBox.x;
+    currentViewBox.y = newViewBox.y;
   });
   svg.addEventListener('mouseleave', (event) => {
     drag = false;
   });
   svg.addEventListener('mousemove', (event) => {
-    if (drag && toggleMousePanningFlag) {
-      newViewBox.x = viewBox.x - (event.x - pointerOrigin.x);
-      newViewBox.y = viewBox.y - (event.y - pointerOrigin.y);
+    if (drag && toggleMousePanningZoomingFlag) {
+      newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
+      newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
   });
   const zoomLevelLabel = document.querySelector('#zoom-level');
   zoomSlider.addEventListener('input', (event) => {
-    let value = event.target.value;
+    const value = event.target.value;
     zoomLevel = value;
     // TODO: Calculate zoom percentage
     zoomLevelLabel.textContent = zoomLevel + '%';
-    svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${zoomLevel} ${zoomLevel}`);
+    svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
+  });
+  // Detect mouse wheel for zooming
+  svg.addEventListener('wheel', (event) => {
+    const deltaY = event.deltaY;
+    if (deltaY < 0) {
+      zoomSlider.value = parseInt(zoomSlider.value) - 10;
+    } else if (deltaY > 0) {
+      zoomSlider.value = parseInt(zoomSlider.value) + 10; 
+    }
+    zoomSlider.dispatchEvent(new Event('input'));
   });
 }
 
@@ -129,7 +139,6 @@ function toggleDrag() {
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
-    console.log(target);
   }
   function dragEnd(event) {
     selected = null;
@@ -157,9 +166,9 @@ function toggleDrag() {
   function round(p, n) {
     return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
   }
-  window.addEventListener('mousedown', dragStart);
-  window.addEventListener('mouseup', dragEnd);
-  window.addEventListener('mousemove', drag);
+  svg.addEventListener('mousedown', dragStart);
+  svg.addEventListener('mouseup', dragEnd);
+  svg.addEventListener('mousemove', drag);
 }
 
 function buttonEvents() {
@@ -175,27 +184,27 @@ function buttonEvents() {
       switch (btn.id) {
         case 'pointer-btn':
           toggleDragFlag = true;
-          toggleMousePanningFlag = false;
+          toggleMousePanningZoomingFlag = false;
           break;
         case 'pan-btn':
           toggleDragFlag = false;
-          toggleMousePanningFlag = true;
+          toggleMousePanningZoomingFlag = true;
           break;
         case 'create-node-btn':
           toggleDragFlag = false;
-          toggleMousePanningFlag = false;
+          toggleMousePanningZoomingFlag = false;
           break;
         case 'create-line-btn':
           toggleDragFlag = false;
-          toggleMousePanningFlag = false;
+          toggleMousePanningZoomingFlag = false;
           break;
         case 'create-text-btn':
           toggleDragFlag = false;
-          toggleMousePanningFlag = false;
+          toggleMousePanningZoomingFlag = false;
           break;
         case 'create-comment-btn':
           toggleNodeDragFlag = false;
-          toggleMousePanningFlag = false;
+          toggleMousePanningZoomingFlag = false;
           break;
       }
     });
