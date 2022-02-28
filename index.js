@@ -1,20 +1,21 @@
 const main = document.querySelector('#main');
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('id', 'svg')
-const svgWidth = 500;
-const svgHeight = 500;
-const gridBoxSize = 50;
+
 const nodeRadius = 50;
 let numNodes = 0;
 let zoomLevel = 1250;
 
 const zoomSlider = document.querySelector('#zoom-slider');
 
+// Everything begins here.
 function startApp() {
   initialize();
 }
 startApp();
+///////////////////////////
 
+// Initialization
 function initialize() {
   zoomSlider.value = zoomLevel;
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
@@ -28,6 +29,7 @@ function initialize() {
   buttonEvents();
 }
 
+// Draw a node at a point 
 function drawNode(x, y) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   node.setAttribute('class', 'node');
@@ -40,6 +42,7 @@ function drawNode(x, y) {
   svg.appendChild(node);
 }
 
+// Draw a grid
 function drawGrid() {
   // TODO: Make this better.
   const grid = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -73,6 +76,7 @@ function drawGrid() {
   svg.appendChild(grid);
 }
 
+// This function controls the panning and zooming functionalities.
 let toggleMousePanningZoomingFlag = false;
 function toggleMousePanningZooming() {
   // source: https://css-tricks.com/creating-a-panning-effect-for-svg/
@@ -131,6 +135,7 @@ function toggleMousePanningZooming() {
   });
 }
 
+// This function controls the dragging functionality.
 let toggleDragFlag = true;
 function toggleDrag() {
   let selected = null;
@@ -171,6 +176,7 @@ function toggleDrag() {
   svg.addEventListener('mousemove', drag);
 }
 
+// This function handles all buttons interactivity on the UI.
 function buttonEvents() {
   // The pointer button will be the default select.
   // TODO: There's def a better way to do this...
