@@ -126,7 +126,6 @@ function toggleDrag() {
   let selected = null;
   function dragStart(event) {
     let target = event.target;
-    // If we click on the scroll bars, we get error here.
     if (target.getAttribute('class') === 'node') {
       selected = target;
     }
