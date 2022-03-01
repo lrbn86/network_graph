@@ -22,6 +22,7 @@ function initialize() {
   main.appendChild(svg);
   toggleMousePanningZooming();
   toggleDrag();
+  toggleDrawNode();
   drawGrid();
   let inc = 350;
   for (let i = 0; i < numNodes; i++) {
@@ -83,7 +84,10 @@ function drawGrid() {
   svg.appendChild(rect);
 }
 
+// TODO: The toggleMousePanningZooming() and toggleDrag() both share the same eventlisteners.
+//       we may consider combining them...or just seperate..? 
 // This function controls the panning and zooming functionalities.
+// The zooming is always active.
 let toggleMousePanningZoomingFlag = false;
 function toggleMousePanningZooming() {
   // source: https://css-tricks.com/creating-a-panning-effect-for-svg/
@@ -178,6 +182,7 @@ function toggleDrag() {
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
       const cx = matrix.x; // The SVG-coordinate mouse X position
       const cy = matrix.y; // The SVG-coordinate mouse Y position
+      console.log('Drag: ', x, y, cx, cy);
       const currentCX = parseInt(selected.getAttribute('cx')); // Grab the object's current X position
       const currentCY = parseInt(selected.getAttribute('cy')); // Grab the object's current Y position
 
@@ -187,6 +192,8 @@ function toggleDrag() {
       // If the mouse is moved too fast, it may take a while to 'calculate'. 
       // If that's the case, the user would need to continue 'wiggling' the mouse at the desired desination 
       // and it will eventually snap to the appropriate point/destination.
+      // TODO: Need to rethink about the movement again...
+      // if the user places a node, it won't correct to the right position.
       const moveThreshold = 15;
       const inc = 50;
       const roundedMoveX = (cx - currentCX) / 2;
@@ -209,6 +216,21 @@ function toggleDrag() {
   svg.addEventListener('mousemove', drag);
 }
 
+// This function controls the create node functionality
+// TODO:
+let toggleDrawNodeFlag = false;
+function toggleDrawNode() {
+  const svgPoint = svg.createSVGPoint();
+  svg.addEventListener('mousedown', (event) => {
+    if (toggleDrawNodeFlag) {
+      svgPoint.x = event.x;
+      svgPoint.y = event.y;
+      const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+      drawNode(matrix.x, matrix.y);
+    }
+  });
+}
+
 // This function handles all buttons interactivity on the UI.
 function buttonEvents() {
   // The pointer button will be the default select.
@@ -228,26 +250,32 @@ function buttonEvents() {
         case 'pointer-btn':
           toggleDragFlag = true;
           toggleMousePanningZoomingFlag = false;
+          toggleDrawNodeFlag = false;
           break;
         case 'pan-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = true;
+          toggleDrawNodeFlag = false;
           break;
         case 'create-node-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleDrawNodeFlag = true;
           break;
         case 'create-line-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleDrawNodeFlag = false;
           break;
         case 'create-text-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleDrawNodeFlag = false;
           break;
         case 'create-comment-btn':
           toggleNodeDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleDrawNodeFlag = false;
           break;
       }
     });
