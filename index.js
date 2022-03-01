@@ -22,10 +22,10 @@ function initialize() {
   main.appendChild(svg);
   toggleMousePanningZooming();
   toggleDrag();
-  for (let i = 0; i < numNodes; i++) {
-    drawNode(150, 150);
-  }
   drawGrid();
+  for (let i = 0; i < numNodes; i++) {
+    drawNode(350, 350);
+  }
   buttonEvents();
 }
 
@@ -44,16 +44,19 @@ function drawNode(x, y) {
 
 // Draw a grid
 function drawGrid() {
-  // TODO: Make this better.
   const boxSize = 50;
+  const opacity = .5;
+  const strokeWidth = 4;
+  const strokeColor = 'black';
   const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   box.setAttribute('width', boxSize);
   box.setAttribute('height', boxSize);
   box.setAttribute('x', '0');
   box.setAttribute('y', '0');
   box.setAttribute('fill', 'transparent');
-  box.setAttribute('stroke', 'black');
-  box.setAttribute('stroke-width', '5');
+  box.setAttribute('stroke', strokeColor);
+  box.setAttribute('stroke-width', strokeWidth);
+  box.setAttribute('opacity', opacity);
   const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
   pattern.setAttribute('id', 'pattern');
   pattern.setAttribute('x', '0');
@@ -64,10 +67,10 @@ function drawGrid() {
   pattern.appendChild(box);
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('fill', 'url(#pattern)');
-  rect.setAttribute('x', '150');
-  rect.setAttribute('y', '150');
-  rect.setAttribute('width', '5000');
-  rect.setAttribute('height', '5000');
+  rect.setAttribute('x', '-10000');
+  rect.setAttribute('y', '-10000');
+  rect.setAttribute('width', '100000');
+  rect.setAttribute('height', '100000');
   svg.appendChild(pattern);
   svg.appendChild(rect);
 }
@@ -147,26 +150,30 @@ function toggleDrag() {
   }
   const svgPoint = svg.createSVGPoint();
   function drag(event) {
-    let x = event.x;
-    let y = event.y; 
+    const x = event.x;
+    const y = event.y; 
     svgPoint.x = x;
     svgPoint.y = y;
     if (selected && toggleDragFlag) {
-      // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
-      // TODO: Toggle gridlike movements
-      // let gridX = round(Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, x)), gridBoxSize);
-      // let gridY = round(Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, y)), gridBoxSize);
       // Convert screen coordinates to SVG coordinates
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-      let cx = matrix.x;
-      let cy = matrix.y;
-      selected.setAttribute('cx', cx);
-      selected.setAttribute('cy', cy);
+      const cx = matrix.x;
+      const cy = matrix.y;
+      const currentCX = parseInt(selected.getAttribute('cx'));
+      const currentCY = parseInt(selected.getAttribute('cy'));
+      const roundedMoveX = (cx - currentCX) / 2;
+      const roundedMoveY = (cy - currentCY) / 2;
+      if (roundedMoveX >= 15) {
+        selected.setAttribute('cx', currentCX + 50);
+      } else if (roundedMoveX <= -15) {
+        selected.setAttribute('cx', currentCX - 50);
+      }
+      if (roundedMoveY >= 15) {
+        selected.setAttribute('cy', currentCY + 50);
+      } else if (roundedMoveY <= -15) {
+        selected.setAttribute('cy', currentCY - 50);
+      }
     }
-  }
-  // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
-  function round(p, n) {
-    return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
   }
   svg.addEventListener('mousedown', dragStart);
   svg.addEventListener('mouseup', dragEnd);
