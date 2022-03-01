@@ -3,6 +3,7 @@ const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('id', 'svg')
 
 const nodeRadius = 50;
+const svgSize = 100000;
 let numNodes = 5;
 let zoomLevel = 1250;
 
@@ -78,8 +79,8 @@ function drawGrid() {
   rect.setAttribute('y', '-10000');
 
   // The grid will span by a large width/height.
-  rect.setAttribute('width', '100000');
-  rect.setAttribute('height', '100000');
+  rect.setAttribute('width', svgSize);
+  rect.setAttribute('height', svgSize);
   svg.appendChild(pattern);
   svg.appendChild(rect);
 }
@@ -182,32 +183,16 @@ function toggleDrag() {
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
       const cx = matrix.x; // The SVG-coordinate mouse X position
       const cy = matrix.y; // The SVG-coordinate mouse Y position
-      console.log('Drag: ', x, y, cx, cy);
-      const currentCX = parseInt(selected.getAttribute('cx')); // Grab the object's current X position
-      const currentCY = parseInt(selected.getAttribute('cy')); // Grab the object's current Y position
 
-      // If the converted coordinate approaches somewhat halfway to the next point then move/snap to that point.
-      // For example, the current (X, Y) = (350, 350). The next point will require X and/or Y to be incremented by 50.
-      // The halfway point is 50 / 2 = 25. But we want a quicker response, so we reduce the required threshold to be 15.
-      // If the mouse is moved too fast, it may take a while to 'calculate'. 
-      // If that's the case, the user would need to continue 'wiggling' the mouse at the desired desination 
-      // and it will eventually snap to the appropriate point/destination.
-      // TODO: Need to rethink about the movement again...
-      // if the user places a node, it won't correct to the right position.
-      const moveThreshold = 15;
-      const inc = 50;
-      const roundedMoveX = (cx - currentCX) / 2;
-      const roundedMoveY = (cy - currentCY) / 2;
-      if (roundedMoveX >= moveThreshold) {
-        selected.setAttribute('cx', currentCX + inc);
-      } else if (roundedMoveX <= -moveThreshold) {
-        selected.setAttribute('cx', currentCX - inc);
+      // Use this to calculate grid movement
+      // source inspiration: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
+      function round(p, n) {
+        return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
       }
-      if (roundedMoveY >= moveThreshold) {
-        selected.setAttribute('cy', currentCY + inc);
-      } else if (roundedMoveY <= -moveThreshold) {
-        selected.setAttribute('cy', currentCY - inc);
-      }
+      let gridX = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cx)), 50);
+      let gridY = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cy)), 50);
+      selected.setAttribute('cx', gridX);
+      selected.setAttribute('cy', gridY);
     }
   }
   // The SVG object will be listening to the following mouse events
@@ -217,12 +202,12 @@ function toggleDrag() {
 }
 
 // This function controls the create node functionality
-// TODO:
 let toggleDrawNodeFlag = false;
 function toggleDrawNode() {
   const svgPoint = svg.createSVGPoint();
   svg.addEventListener('mousedown', (event) => {
     if (toggleDrawNodeFlag) {
+      // Convert screen coordinates to SVG coordinate
       svgPoint.x = event.x;
       svgPoint.y = event.y;
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
