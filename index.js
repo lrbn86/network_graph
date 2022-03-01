@@ -3,7 +3,7 @@ const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('id', 'svg')
 
 const nodeRadius = 50;
-let numNodes = 1;
+let numNodes = 5;
 let zoomLevel = 1250;
 
 const zoomSlider = document.querySelector('#zoom-slider');
@@ -23,8 +23,10 @@ function initialize() {
   toggleMousePanningZooming();
   toggleDrag();
   drawGrid();
+  let inc = 350;
   for (let i = 0; i < numNodes; i++) {
-    drawNode(350, 350);
+    drawNode(inc, 350);
+    inc += 150;
   }
   buttonEvents();
 }
