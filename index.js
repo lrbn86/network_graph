@@ -186,13 +186,16 @@ function toggleDrag() {
 
       // Use this to calculate grid movement
       // source inspiration: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
+      // TODO: This rounding does that account for negative values possibly because of the max/min functions
       function round(p, n) {
         return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
       }
+
       let gridX = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cx)), 50);
       let gridY = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cy)), 50);
       selected.setAttribute('cx', gridX);
       selected.setAttribute('cy', gridY);
+      console.log(cx, cy, gridX, gridY);
     }
   }
   // The SVG object will be listening to the following mouse events
