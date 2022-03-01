@@ -57,6 +57,8 @@ function drawGrid() {
   box.setAttribute('stroke', strokeColor);
   box.setAttribute('stroke-width', strokeWidth);
   box.setAttribute('opacity', opacity);
+
+  // Create a pattern using the one box created above with SVG Pattern.
   const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
   pattern.setAttribute('id', 'pattern');
   pattern.setAttribute('x', '0');
@@ -67,8 +69,12 @@ function drawGrid() {
   pattern.appendChild(box);
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('fill', 'url(#pattern)');
+
+  // The origin point (at the top-left corner of the grid) will be very far to the top-left
   rect.setAttribute('x', '-10000');
   rect.setAttribute('y', '-10000');
+
+  // The grid will span by a large width/height.
   rect.setAttribute('width', '100000');
   rect.setAttribute('height', '100000');
   svg.appendChild(pattern);
@@ -96,19 +102,25 @@ function toggleMousePanningZooming() {
   };
   svg.addEventListener('mousedown', (event) => {
     drag = true;
+    // Set the current mouse position in pointerOrigin
     pointerOrigin.x = event.x;
     pointerOrigin.y = event.y;
   });
   svg.addEventListener('mouseup', (event) => {
     drag = false;
+    // If the user is no longer holding the mouse down,
+    // set the current view to the new view
     currentViewBox.x = newViewBox.x;
     currentViewBox.y = newViewBox.y;
   });
   svg.addEventListener('mouseleave', (event) => {
+    // The user can no longer pan if the mouse is not in the SVG view
     drag = false;
   });
   svg.addEventListener('mousemove', (event) => {
     if (drag && toggleMousePanningZoomingFlag) {
+      // If we are in panning/dragging mode, then calculate the new view position
+      // the zoom level will remain consistent with the zoom slider
       newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
       newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
@@ -126,11 +138,15 @@ function toggleMousePanningZooming() {
   // Detect mouse wheel for zooming
   svg.addEventListener('wheel', (event) => {
     const deltaY = event.deltaY;
-    if (deltaY < 0) {
-      zoomSlider.value = parseInt(zoomSlider.value) - 10;
-    } else if (deltaY > 0) {
-      zoomSlider.value = parseInt(zoomSlider.value) + 10; 
+    const inc = 10;
+    if (deltaY < 0) { // Zooming in
+      zoomSlider.value = parseInt(zoomSlider.value) - inc;
+    } else if (deltaY > 0) { // Zooming out
+      zoomSlider.value = parseInt(zoomSlider.value) + inc; 
     }
+
+    // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
+    // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
   });
 }
@@ -146,35 +162,46 @@ function toggleDrag() {
     }
   }
   function dragEnd(event) {
-    selected = null;
+    selected = null; // Deselect object
   }
   const svgPoint = svg.createSVGPoint();
   function drag(event) {
-    const x = event.x;
-    const y = event.y; 
-    svgPoint.x = x;
-    svgPoint.y = y;
     if (selected && toggleDragFlag) {
       // Convert screen coordinates to SVG coordinates
+      const x = event.x; // The screen mouse X position
+      const y = event.y; // The screen mouse Y position
+      // Store the screen mouse's x and y and convert them using matrixTransform
+      svgPoint.x = x;
+      svgPoint.y = y;
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-      const cx = matrix.x;
-      const cy = matrix.y;
-      const currentCX = parseInt(selected.getAttribute('cx'));
-      const currentCY = parseInt(selected.getAttribute('cy'));
+      const cx = matrix.x; // The SVG-coordinate mouse X position
+      const cy = matrix.y; // The SVG-coordinate mouse Y position
+      const currentCX = parseInt(selected.getAttribute('cx')); // Grab the object's current X position
+      const currentCY = parseInt(selected.getAttribute('cy')); // Grab the object's current Y position
+
+      // If the converted coordinate approaches somewhat halfway to the next point then move/snap to that point.
+      // For example, the current (X, Y) = (350, 350). The next point will require X and/or Y to be incremented by 50.
+      // The halfway point is 50 / 2 = 25. But we want a quicker response, so we reduce the required threshold to be 15.
+      // If the mouse is moved too fast, it may take a while to 'calculate'. 
+      // If that's the case, the user would need to continue 'wiggling' the mouse at the desired desination 
+      // and it will eventually snap to the appropriate point/destination.
+      const moveThreshold = 15;
+      const inc = 50;
       const roundedMoveX = (cx - currentCX) / 2;
       const roundedMoveY = (cy - currentCY) / 2;
-      if (roundedMoveX >= 15) {
-        selected.setAttribute('cx', currentCX + 50);
-      } else if (roundedMoveX <= -15) {
-        selected.setAttribute('cx', currentCX - 50);
+      if (roundedMoveX >= moveThreshold) {
+        selected.setAttribute('cx', currentCX + inc);
+      } else if (roundedMoveX <= -moveThreshold) {
+        selected.setAttribute('cx', currentCX - inc);
       }
-      if (roundedMoveY >= 15) {
-        selected.setAttribute('cy', currentCY + 50);
-      } else if (roundedMoveY <= -15) {
-        selected.setAttribute('cy', currentCY - 50);
+      if (roundedMoveY >= moveThreshold) {
+        selected.setAttribute('cy', currentCY + inc);
+      } else if (roundedMoveY <= -moveThreshold) {
+        selected.setAttribute('cy', currentCY - inc);
       }
     }
   }
+  // The SVG object will be listening to the following mouse events
   svg.addEventListener('mousedown', dragStart);
   svg.addEventListener('mouseup', dragEnd);
   svg.addEventListener('mousemove', drag);
