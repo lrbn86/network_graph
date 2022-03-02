@@ -3,7 +3,7 @@ const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('id', 'svg')
 
 const nodeRadius = 50;
-const svgSize = 100000;
+const svgSize = 1000;
 let numNodes = 5;
 let zoomLevel = 1250;
 
@@ -74,9 +74,8 @@ function drawGrid() {
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('fill', 'url(#pattern)');
 
-  // The origin point (at the top-left corner of the grid) will be very far to the top-left
-  rect.setAttribute('x', '-10000');
-  rect.setAttribute('y', '-10000');
+  rect.setAttribute('x', '0');
+  rect.setAttribute('y', '0');
 
   // The grid will span by a large width/height.
   rect.setAttribute('width', svgSize);
@@ -130,6 +129,7 @@ function toggleMousePanningZooming() {
       // the zoom level will remain consistent with the zoom slider
       newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
       newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
+      console.log(newViewBox.x, newViewBox.y)
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
   });
@@ -186,13 +186,16 @@ function toggleDrag() {
 
       // Use this to calculate grid movement
       // source inspiration: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
+      // TODO: This rounding does that account for negative values possibly because of the max/min functions
       function round(p, n) {
         return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
       }
+
       let gridX = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cx)), 50);
       let gridY = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cy)), 50);
       selected.setAttribute('cx', gridX);
       selected.setAttribute('cy', gridY);
+      console.log(cx, cy, gridX, gridY);
     }
   }
   // The SVG object will be listening to the following mouse events
