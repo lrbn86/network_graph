@@ -24,7 +24,6 @@ function initialize() {
   toggleMousePanningZooming();
   toggleDrag();
   toggleDrawNode();
-  drawGrid();
   let inc = 350;
   for (let i = 0; i < numNodes; i++) {
     drawNode(inc, 350);
@@ -44,44 +43,6 @@ function drawNode(x, y) {
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
   svg.appendChild(node);
-}
-
-// Draw a grid
-function drawGrid() {
-  const boxSize = 50;
-  const opacity = .5;
-  const strokeWidth = 4;
-  const strokeColor = 'black';
-  const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  box.setAttribute('width', boxSize);
-  box.setAttribute('height', boxSize);
-  box.setAttribute('x', '0');
-  box.setAttribute('y', '0');
-  box.setAttribute('fill', 'transparent');
-  box.setAttribute('stroke', strokeColor);
-  box.setAttribute('stroke-width', strokeWidth);
-  box.setAttribute('opacity', opacity);
-
-  // Create a pattern using the one box created above with SVG Pattern.
-  const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-  pattern.setAttribute('id', 'pattern');
-  pattern.setAttribute('x', '0');
-  pattern.setAttribute('y', '0');
-  pattern.setAttribute('width', boxSize);
-  pattern.setAttribute('height', boxSize);
-  pattern.setAttribute('patternUnits', 'userSpaceOnUse');
-  pattern.appendChild(box);
-  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  rect.setAttribute('fill', 'url(#pattern)');
-
-  rect.setAttribute('x', '0');
-  rect.setAttribute('y', '0');
-
-  // The grid will span by a large width/height.
-  rect.setAttribute('width', svgSize);
-  rect.setAttribute('height', svgSize);
-  svg.appendChild(pattern);
-  svg.appendChild(rect);
 }
 
 // TODO: The toggleMousePanningZooming() and toggleDrag() both share the same eventlisteners.
@@ -183,19 +144,8 @@ function toggleDrag() {
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
       const cx = matrix.x; // The SVG-coordinate mouse X position
       const cy = matrix.y; // The SVG-coordinate mouse Y position
-
-      // Use this to calculate grid movement
-      // source inspiration: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
-      // TODO: This rounding does that account for negative values possibly because of the max/min functions
-      function round(p, n) {
-        return p % n < n / 2 ? p - (p % n) : p + n - (p % n);
-      }
-
-      let gridX = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cx)), 50);
-      let gridY = round(Math.max(nodeRadius, Math.min(svgSize - nodeRadius, cy)), 50);
-      selected.setAttribute('cx', gridX);
-      selected.setAttribute('cy', gridY);
-      console.log(cx, cy, gridX, gridY);
+      selected.setAttribute('cx', cx);
+      selected.setAttribute('cy', cy);
     }
   }
   // The SVG object will be listening to the following mouse events
