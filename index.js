@@ -44,15 +44,29 @@ function drawNode(x, y) {
 }
 
 // Draw a text at a point
-function drawText(x, y) {
-  const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-  const text = document.createElementNS('http://www.w3.org/1999/xhtml', 'textarea');
-  foreignObject.setAttribute('width', '900');
-  foreignObject.setAttribute('height', '900');
-  foreignObject.setAttribute('x', x);
-  foreignObject.setAttribute('y', y);
-  foreignObject.appendChild(text);
-  svg.appendChild(foreignObject);
+function drawText(x, y, matrixX, matrixY) {
+
+  const textContainer = document.createElement('div');
+  textContainer.setAttribute('id', 'textContainer');
+  const textArea = document.createElement('textarea');
+  const submit = document.createElement('button');
+  submit.innerHTML = 'Submit';
+  textContainer.style.top = `${y}px`;
+  textContainer.style.left =`${x}px`;
+  textContainer.appendChild(textArea);
+  textContainer.appendChild(submit);
+  main.appendChild(textContainer);
+
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('x', matrixX);
+  text.setAttribute('y', matrixY);
+  submit.addEventListener('click', (event) => {
+    if (textArea.value) {
+      text.innerHTML = textArea.value;
+      svg.appendChild(text);
+    }
+    document.querySelector('#textContainer').remove();
+  });
 }
 
 const svgPoint = svg.createSVGPoint();
@@ -111,7 +125,7 @@ function EventListeners() {
     // Handle text creation
     if (toggleDrawTextFlag) {
       console.log("Creating text")
-      drawText(matrix.x, matrix.y);
+      drawText(event.x, event.y, matrix.x, matrix.y);
     }
   });
   

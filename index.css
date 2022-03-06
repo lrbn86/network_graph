@@ -1,20 +1,22 @@
 * {
   font-family: sans-serif;
-  /* user-select: none; */
 }
 
 body {
   background-color: #181818;
   margin: 0;
   overflow: hidden;
+  user-select: none;
 }
 
-textarea {
+textarea, text {
   font-size: 30pt;
-  background-color: transparent;
-  border: none;
-  outline: 1px solid black;
-  margin-left: 5px;
+}
+
+#textContainer {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
 }
 
 #svg {
