@@ -75,7 +75,6 @@ let togglePanningFlag = false;
 let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
-let isTextSelected = true;
 
 function EventListeners() {
   
@@ -164,18 +163,16 @@ function EventListeners() {
   
   // Handle zooming with the mouse
   svg.addEventListener('wheel', (event) => {
-    if (!isTextSelected) {
-      const deltaY = event.deltaY;
-      const inc = 10;
-      if (deltaY < 0) { // Zooming in
-        zoomSlider.value = parseInt(zoomSlider.value) - inc;
-      } else if (deltaY > 0) { // Zooming out
-        zoomSlider.value = parseInt(zoomSlider.value) + inc; 
-      }
-      // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
-      // to change accordingly. Without this, the slider will not be in the appropriate position.
-      zoomSlider.dispatchEvent(new Event('input'));
+    const deltaY = event.deltaY;
+    const inc = 10;
+    if (deltaY < 0) { // Zooming in
+      zoomSlider.value = parseInt(zoomSlider.value) - inc;
+    } else if (deltaY > 0) { // Zooming out
+      zoomSlider.value = parseInt(zoomSlider.value) + inc; 
     }
+    // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
+    // to change accordingly. Without this, the slider will not be in the appropriate position.
+    zoomSlider.dispatchEvent(new Event('input'));
   });
 
   // Handle zooming on the UI
