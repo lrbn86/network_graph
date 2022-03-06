@@ -1,12 +1,20 @@
 * {
   font-family: sans-serif;
-  user-select: none;
+  /* user-select: none; */
 }
 
 body {
   background-color: #181818;
   margin: 0;
   overflow: hidden;
+}
+
+textarea {
+  font-size: 30pt;
+  background-color: transparent;
+  border: none;
+  outline: 1px solid black;
+  margin-left: 5px;
 }
 
 #svg {

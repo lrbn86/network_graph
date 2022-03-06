@@ -43,12 +43,25 @@ function drawNode(x, y) {
   svg.appendChild(node);
 }
 
+// Draw a text at a point
+function drawText(x, y) {
+  const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+  const text = document.createElementNS('http://www.w3.org/1999/xhtml', 'textarea');
+  foreignObject.setAttribute('width', '900');
+  foreignObject.setAttribute('height', '900');
+  foreignObject.setAttribute('x', x);
+  foreignObject.setAttribute('y', y);
+  foreignObject.appendChild(text);
+  svg.appendChild(foreignObject);
+}
+
 const svgPoint = svg.createSVGPoint();
 const svgSize = 1000;
 let togglePanningFlag = false;
 let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
+let isTextSelected = true;
 
 function EventListeners() {
   
@@ -80,20 +93,25 @@ function EventListeners() {
     
     // Handle object dragging
     // Objects will be identified by their class name
-    if (event.target.getAttribute('class') === 'node') {
+    if (event.target.getAttribute('class') === 'node' ||
+        event.target.getAttribute('class') === 'text') {
       selectedObject = event.target;
     }
 
+    // Convert screen coordinates to SVG coordinate
+    svgPoint.x = event.x;
+    svgPoint.y = event.y;
+    const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      // Convert screen coordinates to SVG coordinate
-      svgPoint.x = event.x;
-      svgPoint.y = event.y;
-      const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
       drawNode(matrix.x, matrix.y);
     }
 
+    // Handle text creation
     if (toggleDrawTextFlag) {
+      console.log("Creating text")
+      drawText(matrix.x, matrix.y);
     }
   });
   
@@ -132,16 +150,18 @@ function EventListeners() {
   
   // Handle zooming with the mouse
   svg.addEventListener('wheel', (event) => {
-    const deltaY = event.deltaY;
-    const inc = 10;
-    if (deltaY < 0) { // Zooming in
-      zoomSlider.value = parseInt(zoomSlider.value) - inc;
-    } else if (deltaY > 0) { // Zooming out
-      zoomSlider.value = parseInt(zoomSlider.value) + inc; 
+    if (!isTextSelected) {
+      const deltaY = event.deltaY;
+      const inc = 10;
+      if (deltaY < 0) { // Zooming in
+        zoomSlider.value = parseInt(zoomSlider.value) - inc;
+      } else if (deltaY > 0) { // Zooming out
+        zoomSlider.value = parseInt(zoomSlider.value) + inc; 
+      }
+      // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
+      // to change accordingly. Without this, the slider will not be in the appropriate position.
+      zoomSlider.dispatchEvent(new Event('input'));
     }
-    // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
-    // to change accordingly. Without this, the slider will not be in the appropriate position.
-    zoomSlider.dispatchEvent(new Event('input'));
   });
 
   // Handle zooming on the UI
