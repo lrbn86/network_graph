@@ -179,7 +179,7 @@ function buttonEvents() {
       switch (btn.id) {
         case 'pointer-btn':
           offFlag();
-          toggleDragFlag = true;
+          toggleDragObjectFlag = true;
           break;
         case 'pan-btn':
           offFlag();
