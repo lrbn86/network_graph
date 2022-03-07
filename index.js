@@ -5,6 +5,7 @@ svg.setAttribute('id', 'svg')
 const nodeRadius = 50;
 let numNodes = 0;
 let zoomLevel = 1250;
+let lines = [];
 
 const zoomSlider = document.querySelector('#zoom-slider');
 
@@ -141,17 +142,18 @@ function toggleMousePanningZooming() {
 let toggleDragFlag = true;
 function toggleDrag() {
   let selected = null;
-  function dragStart(event) {
-    let target = event.target;
-    if (target.getAttribute('class') === 'node') {
-      selected = target;
-    }
+    function dragStart(event) {          
+        let target = event.target;
+        if (target.getAttribute('class') === 'node') {
+          selected = target;
+        }
   }
   function dragEnd(event) {
     selected = null;
   }
   const svgPoint = svg.createSVGPoint();
   function drag(event) {
+
     let x = event.x;
     let y = event.y; 
     svgPoint.x = x;
@@ -165,8 +167,21 @@ function toggleDrag() {
       const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
       let cx = matrix.x;
       let cy = matrix.y;
-      selected.setAttribute('cx', cx);
-      selected.setAttribute('cy', cy);
+    
+        if (lines) {
+            for (var i = 0; i < lines.length; i++) {
+                var thisline = lines[i];
+                if (thisline.getAttribute('x1') == parseInt(selected.getAttribute('cx')) + 50 && thisline.getAttribute('y1') == parseInt(selected.getAttribute('cy'))) {
+                    thisline.setAttribute('x1', cx + 50);
+                    thisline.setAttribute('y1', cy);
+                    console.log(thisline);
+                    
+                }
+            }
+        }
+        selected.setAttribute('cx', cx);
+        selected.setAttribute('cy', cy);
+        console.log(cx, cy)
     }
   }
   // source: https://bl.ocks.org/danasilver/cc5f33a5ba9f90be77d96897768802ca
@@ -198,14 +213,17 @@ function buttonEvents() {
         case 'pointer-btn':
           toggleDragFlag = true;
           toggleMousePanningZoomingFlag = false;
+          toggleLineFlag = false;
           break;
         case 'pan-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = true;
+          toggleLineFlag = true;
           break;
         case 'create-node-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleLineFlag = false;
           break;
         case 'create-line-btn':
           toggleDragFlag = false;
@@ -215,10 +233,12 @@ function buttonEvents() {
         case 'create-text-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleLineFlag = false;
           break;
         case 'create-comment-btn':
           toggleNodeDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleLineFlag = false;
           break;
       }
     });
@@ -226,6 +246,7 @@ function buttonEvents() {
 }
 
 // this function handles the drawing of the lines between nodes
+let toggleLineFlag = false;
 function toggleLine() {
     let selected = [];
     function lineStart(event) {
@@ -253,7 +274,10 @@ function toggleLine() {
             line.setAttribute('y2', y2);
             line.setAttribute('stroke', 'black');
             line.setAttribute('stroke-width', 5);
+            line.setAttribute('class', 'line');
             svg.appendChild(line);
+
+            lines.push(line);
         }
         selected = [];
     }
