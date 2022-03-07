@@ -21,7 +21,7 @@ text {
 }
 
 #svg {
-  background-color: #e5e5e5;
+  background-color: #fff;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -31,8 +31,8 @@ text {
   display: flex;
   gap: 10px;
   position: fixed;
-  outline: 1px solid black;
-  background-color: #fff;
+  background-color: #e5e5e5;
+  box-shadow: 4px 4px 8px rgba(114, 113, 113, 0.2);
   border-radius: 5px;
   padding: 1rem;
   z-index: 1;
@@ -86,6 +86,7 @@ text {
   -webkit-appearance: none;
   appearance: none;
   direction: rtl;
+  background: inherit;
 }
 
 #zoom-slider::-webkit-slider-thumb,
@@ -116,6 +117,8 @@ text {
 .btn:hover {
   outline: 1px solid black;
 }
+
+/* TODO: Decide what the selected button's color should be, rn it is lightblue */
 
 .btn-selected {
   outline: 1px solid black;
