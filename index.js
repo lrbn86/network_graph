@@ -45,32 +45,9 @@ function drawNode(x, y) {
 
 // Draw a text at a point
 function drawText(x, y, matrixX, matrixY) {
-
-  const textContainer = document.createElement('div');
-  textContainer.setAttribute('id', 'textContainer');
-  const textArea = document.createElement('textarea');
-  const submit = document.createElement('button');
-  submit.innerHTML = 'Submit';
-  textContainer.style.top = `${y}px`;
-  textContainer.style.left =`${x}px`;
-  textContainer.appendChild(textArea);
-  textContainer.appendChild(submit);
-  main.appendChild(textContainer);
-
-  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  text.setAttribute('x', matrixX);
-  text.setAttribute('y', matrixY);
-  submit.addEventListener('click', (event) => {
-    if (textArea.value) {
-      text.innerHTML = textArea.value;
-      svg.appendChild(text);
-    }
-    document.querySelector('#textContainer').remove();
-  });
 }
 
 const svgPoint = svg.createSVGPoint();
-const svgSize = 1000;
 let togglePanningFlag = false;
 let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
@@ -123,7 +100,6 @@ function EventListeners() {
 
     // Handle text creation
     if (toggleDrawTextFlag) {
-      console.log("Creating text")
       drawText(event.x, event.y, matrix.x, matrix.y);
     }
   });
@@ -183,7 +159,6 @@ function EventListeners() {
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`)
   })
 }
-
 
 function offFlag() {
   togglePanningFlag = false;

@@ -9,17 +9,6 @@ body {
   user-select: none;
 }
 
-textarea,
-text {
-  font-size: 30pt;
-}
-
-#textContainer {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-}
-
 #svg {
   background-color: #fff;
   position: absolute;
