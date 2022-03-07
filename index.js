@@ -22,8 +22,9 @@ function initialize() {
   main.appendChild(svg);
   toggleMousePanningZooming();
   toggleDrag();
-  for (let i = 0; i < 100; i++) {
-    drawNode(150, 150);
+  toggleLine();
+  for (let i = 0; i < 4; i++) {
+      drawNode(150, 150);
   }
   // drawGrid();
   buttonEvents();
@@ -33,6 +34,7 @@ function initialize() {
 function drawNode(x, y) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   node.setAttribute('class', 'node');
+  node.setAttribute('id', 'circle0');
   node.setAttribute('r', nodeRadius);
   node.setAttribute('fill', 'transparent');
   node.setAttribute('stroke', 'black');
@@ -191,7 +193,8 @@ function buttonEvents() {
       // The button that was clicked will be selected
       btn.classList.add('btn-selected');
       // Determine which button was actually clicked and toggle the appropriate functionality
-      switch (btn.id) {
+
+        switch (btn.id) {
         case 'pointer-btn':
           toggleDragFlag = true;
           toggleMousePanningZoomingFlag = false;
@@ -207,6 +210,7 @@ function buttonEvents() {
         case 'create-line-btn':
           toggleDragFlag = false;
           toggleMousePanningZoomingFlag = false;
+          toggleLineFlag = true;
           break;
         case 'create-text-btn':
           toggleDragFlag = false;
@@ -219,4 +223,41 @@ function buttonEvents() {
       }
     });
   });
+}
+
+// this function handles the drawing of the lines between nodes
+function toggleLine() {
+    let selected = [];
+    function lineStart(event) {
+        if (toggleLineFlag) {
+            let target = event.target;
+            if (target.getAttribute('class') === 'node') {
+                selected.push(target);
+            }
+            if (selected.length > 1) {
+                draw(selected);
+            }
+        }
+        
+    }
+    function draw(node) {
+        let x1 = parseInt(node[0].getAttribute('cx'));
+        let y1 = parseInt(node[0].getAttribute('cy'));
+        let x2 = parseInt(node[1].getAttribute('cx'));
+        let y2 = parseInt(node[1].getAttribute('cy'));
+        if (selected && toggleLineFlag) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+            line.setAttribute('x1', x1 + 50);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2 - 50);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', 'black');
+            line.setAttribute('stroke-width', 5);
+            svg.appendChild(line);
+        }
+        selected = [];
+    }
+    
+    svg.addEventListener('mousedown', lineStart);
+    
 }
