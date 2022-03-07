@@ -9,7 +9,8 @@ body {
   user-select: none;
 }
 
-textarea, text {
+textarea,
+text {
   font-size: 30pt;
 }
 
@@ -89,10 +90,11 @@ textarea, text {
 
 #zoom-slider::-webkit-slider-thumb,
 #zoom-slider::-moz-range-thumb {
-  width: 10px;
-  height: 30px;
+  width: 5px;
+  height: 20px;
   border: 1px solid #000;
   border-radius: 1px;
+  background: #000;
 }
 
 #zoom-slider::-webkit-slider-runnable-track,
