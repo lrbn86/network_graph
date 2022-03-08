@@ -135,6 +135,7 @@ function EventListeners() {
           } else {
             // TODO: Need to rethink on how to structure the relationship between nodes and their connected lines
             // We can directly relate them or use the IDs.
+            // We will need to refer to the lines that are connecting the nodes when changing it to a critical path, etc.
             connectedNodes[nodeA_ID] = [[line_ID, nodeB_ID]];
           }
           if (connectedNodes[nodeB_ID]) {
