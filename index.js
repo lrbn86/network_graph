@@ -101,11 +101,10 @@ function EventListeners() {
   polyLine.setAttribute('stroke-width', '5');
   svg.appendChild(polyLine);
 
-  const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  visualLine.setAttribute('stroke', normalColor);
-  visualLine.setAttribute('stroke-width', '5');
-  svg.appendChild(visualLine);
-
+  const visualHorizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  visualHorizontalLine.setAttribute('stroke', normalColor);
+  visualHorizontalLine.setAttribute('stroke-width', '5');
+  
   svg.addEventListener('mousedown', (event) => {
     // Handle panning
     isDragging = true;
@@ -122,18 +121,18 @@ function EventListeners() {
         selectedObject.setAttribute('stroke-opacity', '.2');
       }
     }
-
+    
     // Convert screen coordinates to SVG coordinate
     svgPoint.x = event.x;
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-
+    
     // Handle node creation
     if (toggleDrawNodeFlag) {
       drawNode(matrix.x, matrix.y, currentNumNodes);
       currentNumNodes++;
     }
-
+    
     // Handle text creation
     if (toggleDrawTextFlag) {
       drawText(event.x, event.y, matrix.x, matrix.y);
@@ -148,10 +147,11 @@ function EventListeners() {
       // mousePoint.x = targetCX;
       // mousePoint.y = targetCY;
       // polyLine.points.appendItem(mousePoint);
-      visualLine.setAttribute('x1', targetCX);
-      visualLine.setAttribute('y1', targetCY);
-      visualLine.setAttribute('x2', targetCX);
-      visualLine.setAttribute('y2', targetCY);
+      visualHorizontalLine.setAttribute('x1', targetCX);
+      visualHorizontalLine.setAttribute('y1', targetCY);
+      visualHorizontalLine.setAttribute('x2', targetCX);
+      visualHorizontalLine.setAttribute('y2', targetCY);
+      svg.appendChild(visualHorizontalLine);
     }
 
   });
@@ -160,7 +160,7 @@ function EventListeners() {
     isDragging = false;
     currentViewBox.x = newViewBox.x;
     currentViewBox.y = newViewBox.y;
-    if (toggleDragObjectFlag) {
+    if (selectedObject && toggleDragObjectFlag) {
       selectedObject.setAttribute('stroke', 'none');
       selectedObject = null;
     }
@@ -182,21 +182,18 @@ function EventListeners() {
     }
     
     if (selectedObject) {
+      // Convert screen coordinates to SVG coordinate
+      svgPoint.x = event.x;
+      svgPoint.y = event.y;
+      const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
       // Handle object dragging
       if (toggleDragObjectFlag) {
-        // Convert screen coordinates to SVG coordinate
-        svgPoint.x = event.x;
-        svgPoint.y = event.y;
-        const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
       }
       if (toggleDrawLineFlag) {
-        svgPoint.x = event.x;
-        svgPoint.y = event.y;
-        const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-        visualLine.setAttribute('x2', matrix.x);
-        visualLine.setAttribute('y2', selectedObject.getAttribute('cy'));
+        visualHorizontalLine.setAttribute('x2', matrix.x);
+        visualHorizontalLine.setAttribute('y2', selectedObject.getAttribute('cy'));
       }
     }
   });
@@ -213,6 +210,16 @@ function EventListeners() {
     // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
     // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    // TODO: Do we want to implement hotkey shortcuts?
+    const key = event.code;
+    if (key === 'Escape' && toggleDrawLineFlag) {
+      svg.removeChild(visualHorizontalLine);
+      selectedObject.setAttribute('stroke', 'none');
+      selectedObject = null;
+    }
   });
 
   // Handle zooming on the UI
