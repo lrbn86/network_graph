@@ -69,9 +69,6 @@ let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
 let toggleDrawLineFlag = false;
-let connectedNodes = {};
-let selectedNode = null;
-let numSelectedNodes = 0;
 
 function EventListeners() {
   
@@ -104,7 +101,7 @@ function EventListeners() {
   const visualHorizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
   visualHorizontalLine.setAttribute('stroke', normalColor);
   visualHorizontalLine.setAttribute('stroke-width', '5');
-  
+
   svg.addEventListener('mousedown', (event) => {
     // Handle panning
     isDragging = true;
@@ -115,7 +112,7 @@ function EventListeners() {
     // Objects will be identified by their class name
     if (event.target.getAttribute('class') === 'node') {
       selectedObject = event.target;
-      if (!togglePanningFlag) {
+      if (toggleDragObjectFlag || toggleDrawLineFlag) {
         selectedObject.setAttribute('stroke', normalColor);
         selectedObject.setAttribute('stroke-width', '45');
         selectedObject.setAttribute('stroke-opacity', '.2');
@@ -137,7 +134,7 @@ function EventListeners() {
     if (toggleDrawTextFlag) {
       drawText(event.x, event.y, matrix.x, matrix.y);
     }
-
+    
     // Handle connecting nodes with line
     if (toggleDrawLineFlag) {
       // TODO:
@@ -152,6 +149,7 @@ function EventListeners() {
       visualHorizontalLine.setAttribute('x2', targetCX);
       visualHorizontalLine.setAttribute('y2', targetCY);
       svg.appendChild(visualHorizontalLine);
+
     }
 
   });
