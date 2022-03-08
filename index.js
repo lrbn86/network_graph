@@ -1,8 +1,10 @@
 const main = document.querySelector('#main');
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-svg.setAttribute('id', 'svg')
+svg.setAttribute('id', 'svg');
 
-const nodeRadius = 50;
+const nodeRadius = 45;
+const nodeNormalColor = '#2F3B47';
+const nodeCriticalColor = '#FF7353';
 let currentNumNodes = 0;
 
 const zoomSlider = document.querySelector('#zoom-slider');
@@ -12,9 +14,18 @@ let zoomLevel = 1250;
 // Everything begins here.
 function startApp() {
   initialize();
+
+
+  const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  poly.setAttribute('points', '0,40 20,50');
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', 'black');
+  poly.setAttribute('stroke-width', '10');
+  console.log(poly.points);
+  svg.appendChild(poly);
+
 }
 startApp();
-///////////////////////////
 
 // Initialization
 function initialize() {
@@ -34,12 +45,10 @@ function initialize() {
 // Draw a node at a point 
 function drawNode(x, y, nodeID) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  node.setAttribute('id', `node${nodeID}`)
+  node.setAttribute('id', `node${nodeID}`);
   node.setAttribute('class', 'node');
   node.setAttribute('r', nodeRadius);
-  node.setAttribute('fill', 'transparent');
-  node.setAttribute('stroke', 'black');
-  node.setAttribute('stroke-width', '5');
+  node.setAttribute('fill', nodeNormalColor);
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
   svg.appendChild(node);
@@ -58,6 +67,10 @@ function drawLineBetweenNodes(nodeA, nodeB) {
   line.setAttribute('x2', nodeB.getAttribute('cx'));
   line.setAttribute('y2', nodeB.getAttribute('cy'));
   svg.appendChild(line);
+}
+
+function drawLineBetweenNodeAndMouse(node, mouseX, mouseY) {
+  const line = document.c
 }
 
 const svgPoint = svg.createSVGPoint();
@@ -102,6 +115,11 @@ function EventListeners() {
     // Objects will be identified by their class name
     if (event.target.getAttribute('class') === 'node') {
       selectedObject = event.target;
+      if (!togglePanningFlag) {
+        selectedObject.setAttribute('stroke', nodeNormalColor);
+        selectedObject.setAttribute('stroke-width', '45');
+        selectedObject.setAttribute('stroke-opacity', '.2');
+      }
     }
 
     // Convert screen coordinates to SVG coordinate
@@ -122,37 +140,6 @@ function EventListeners() {
 
     // Handle connecting nodes with line
     if (toggleDrawLineFlag) {
-      // Check whether we are selecting a node and we can only select up to two (2) nodes at a time.
-      if (event.target.getAttribute('class') === 'node') {
-        if (numSelectedNodes === 1 && selectedNode) {
-          // draw line
-          const nodeA = selectedNode;
-          const nodeA_ID = nodeA.getAttribute('id');
-          const nodeB = event.target;
-          const nodeB_ID = nodeB.getAttribute('id');
-          if (connectedNodes[nodeA_ID]) {
-            connectedNodes[nodeA_ID].push(nodeB_ID);
-          } else {
-            // TODO: Need to rethink on how to structure the relationship between nodes and their connected lines
-            // We can directly relate them or use the IDs.
-            // We will need to refer to the lines that are connecting the nodes when changing it to a critical path, etc.
-            connectedNodes[nodeA_ID] = [[line_ID, nodeB_ID]];
-          }
-          if (connectedNodes[nodeB_ID]) {
-            connectedNodes[nodeB_ID].push(nodeA_ID);
-          } else {
-            connectedNodes[nodeB_ID] = [nodeA_ID];
-          }
-          connectedNodes[nodeA_ID] = Array.from(new Set(connectedNodes[nodeA_ID]));
-          connectedNodes[nodeB_ID] = Array.from(new Set(connectedNodes[nodeB_ID]));
-          console.log(connectedNodes);
-          selectedNode = null;
-          numSelectedNodes = 0;
-        } else {
-          selectedNode = event.target;
-          numSelectedNodes++;
-        }
-      } 
     }
 
   });
@@ -161,6 +148,9 @@ function EventListeners() {
     isDragging = false;
     currentViewBox.x = newViewBox.x;
     currentViewBox.y = newViewBox.y;
+    if (!toggleDrawLineFlag) {
+      selectedObject.setAttribute('stroke', 'none');
+    }
 
     selectedObject = null;
   });
@@ -169,13 +159,12 @@ function EventListeners() {
     isDragging = false;
   });
 
-
   svg.addEventListener('mousemove', (event) => {
     // Handle panning
     if (isDragging && togglePanningFlag) {
       newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
       newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
-      svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`)
+      svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
     
     // Handle object dragging
@@ -209,8 +198,8 @@ function EventListeners() {
     const value = event.target.value;
     zoomLevel = value;
     zoomLevelLabel.textContent = zoomLevel + '%';
-    svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`)
-  })
+    svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
+  });
 }
 
 function offFlag() {
@@ -225,7 +214,6 @@ function offFlag() {
 function buttonEvents() {
   // The pointer button will be the default select.
   document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
-
   document.querySelectorAll('.btn-function').forEach((btn) => {
     // Add an click event listener for each button
     btn.addEventListener('click', () => {
