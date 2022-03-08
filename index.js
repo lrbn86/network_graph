@@ -3,8 +3,8 @@ const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('id', 'svg');
 
 const nodeRadius = 45;
-const nodeNormalColor = '#2F3B47';
-const nodeCriticalColor = '#FF7353';
+const normalColor = '#2F3B47';
+const criticalColor = '#FF7353';
 let currentNumNodes = 0;
 
 const zoomSlider = document.querySelector('#zoom-slider');
@@ -14,16 +14,6 @@ let zoomLevel = 1250;
 // Everything begins here.
 function startApp() {
   initialize();
-
-
-  const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-  poly.setAttribute('points', '0,40 20,50');
-  poly.setAttribute('fill', 'none');
-  poly.setAttribute('stroke', 'black');
-  poly.setAttribute('stroke-width', '10');
-  console.log(poly.points);
-  svg.appendChild(poly);
-
 }
 startApp();
 
@@ -33,11 +23,11 @@ function initialize() {
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
   main.appendChild(svg);
   EventListeners();
-  let inc = 350;
-  for (let i = 0; i < 3; i++) {
+  let inc = 50;
+  for (let i = 0; i < 2; i++) {
     drawNode(inc, 350, currentNumNodes);
     currentNumNodes++;
-    inc += 250;
+    inc += 750;
   }
   buttonEvents();
 }
@@ -48,7 +38,7 @@ function drawNode(x, y, nodeID) {
   node.setAttribute('id', `node${nodeID}`);
   node.setAttribute('class', 'node');
   node.setAttribute('r', nodeRadius);
-  node.setAttribute('fill', nodeNormalColor);
+  node.setAttribute('fill', normalColor);
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
   svg.appendChild(node);
@@ -105,6 +95,17 @@ function EventListeners() {
     y: 0
   };
 
+  const polyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  polyLine.setAttribute('fill', 'none');
+  polyLine.setAttribute('stroke', normalColor);
+  polyLine.setAttribute('stroke-width', '5');
+  svg.appendChild(polyLine);
+
+  const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  visualLine.setAttribute('stroke', normalColor);
+  visualLine.setAttribute('stroke-width', '5');
+  svg.appendChild(visualLine);
+
   svg.addEventListener('mousedown', (event) => {
     // Handle panning
     isDragging = true;
@@ -116,7 +117,7 @@ function EventListeners() {
     if (event.target.getAttribute('class') === 'node') {
       selectedObject = event.target;
       if (!togglePanningFlag) {
-        selectedObject.setAttribute('stroke', nodeNormalColor);
+        selectedObject.setAttribute('stroke', normalColor);
         selectedObject.setAttribute('stroke-width', '45');
         selectedObject.setAttribute('stroke-opacity', '.2');
       }
@@ -140,6 +141,17 @@ function EventListeners() {
 
     // Handle connecting nodes with line
     if (toggleDrawLineFlag) {
+      // TODO:
+      const targetCX = selectedObject.getAttribute('cx');
+      const targetCY = selectedObject.getAttribute('cy');
+      // const mousePoint = svg.createSVGPoint();
+      // mousePoint.x = targetCX;
+      // mousePoint.y = targetCY;
+      // polyLine.points.appendItem(mousePoint);
+      visualLine.setAttribute('x1', targetCX);
+      visualLine.setAttribute('y1', targetCY);
+      visualLine.setAttribute('x2', targetCX);
+      visualLine.setAttribute('y2', targetCY);
     }
 
   });
@@ -148,11 +160,13 @@ function EventListeners() {
     isDragging = false;
     currentViewBox.x = newViewBox.x;
     currentViewBox.y = newViewBox.y;
-    if (!toggleDrawLineFlag) {
+    if (toggleDragObjectFlag) {
       selectedObject.setAttribute('stroke', 'none');
+      selectedObject = null;
     }
 
-    selectedObject = null;
+    // console.log(selectedObject);
+
   });
   
   svg.addEventListener('mouseleave', (event) => {
@@ -167,16 +181,24 @@ function EventListeners() {
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
     
-    // Handle object dragging
-    if (selectedObject && toggleDragObjectFlag) {
-      // Convert screen coordinates to SVG coordinate
-      svgPoint.x = event.x;
-      svgPoint.y = event.y;
-      const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-      selectedObject.setAttribute('cx', matrix.x);
-      selectedObject.setAttribute('cy', matrix.y);
+    if (selectedObject) {
+      // Handle object dragging
+      if (toggleDragObjectFlag) {
+        // Convert screen coordinates to SVG coordinate
+        svgPoint.x = event.x;
+        svgPoint.y = event.y;
+        const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+        selectedObject.setAttribute('cx', matrix.x);
+        selectedObject.setAttribute('cy', matrix.y);
+      }
+      if (toggleDrawLineFlag) {
+        svgPoint.x = event.x;
+        svgPoint.y = event.y;
+        const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+        visualLine.setAttribute('x2', matrix.x);
+        visualLine.setAttribute('y2', selectedObject.getAttribute('cy'));
+      }
     }
-
   });
   
   // Handle zooming with the mouse
