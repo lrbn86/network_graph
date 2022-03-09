@@ -74,7 +74,7 @@ body {
 #zoom-slider {
   -webkit-appearance: none;
   appearance: none;
-  /* direction: rtl; */
+  direction: rtl;
   background: inherit;
 }
 
