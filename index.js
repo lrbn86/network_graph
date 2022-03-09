@@ -10,8 +10,8 @@ let currentNumNodes = 0;
 const zoomSlider = document.querySelector('#zoom-slider');
 const zoomLevelLabel = document.querySelector('#zoom-level');
 let zoomLevel = 1250;
+let zoomPercentage = 100;
 
-// Everything begins here.
 function startApp() {
   initialize();
 }
@@ -48,32 +48,17 @@ function drawNode(x, y, nodeID) {
 function drawText(x, y, matrixX, matrixY) {
 }
 
-function drawLineBetweenNodes(nodeA, nodeB) {
-  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  line.setAttribute('stroke', 'black');
-  line.setAttribute('stroke-width', '5');
-  line.setAttribute('x1', nodeA.getAttribute('cx'));
-  line.setAttribute('y1', nodeA.getAttribute('cy'));
-  line.setAttribute('x2', nodeB.getAttribute('cx'));
-  line.setAttribute('y2', nodeB.getAttribute('cy'));
-  svg.appendChild(line);
-}
-
-function drawLineBetweenNodeAndMouse(node, mouseX, mouseY) {
-  const line = document.c
-}
-
 const svgPoint = svg.createSVGPoint();
 let togglePanningFlag = false;
 let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
-let toggleDrawLineFlag = false;
+let selectedObject = null;
+const polyLines = [];
 
 function EventListeners() {
   
   let isDragging = false;
-  let selectedObject = null;
   
   let pointerOrigin = {
     x: 0,
@@ -98,9 +83,8 @@ function EventListeners() {
   polyLine.setAttribute('stroke-width', '5');
   svg.appendChild(polyLine);
 
-  const visualHorizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  visualHorizontalLine.setAttribute('stroke', normalColor);
-  visualHorizontalLine.setAttribute('stroke-width', '5');
+  // TODO: Create a hover effect so that the user can know where they are placing the node.
+  const nodeHover = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
   svg.addEventListener('mousedown', (event) => {
     // Handle panning
@@ -112,7 +96,7 @@ function EventListeners() {
     // Objects will be identified by their class name
     if (event.target.getAttribute('class') === 'node') {
       selectedObject = event.target;
-      if (toggleDragObjectFlag || toggleDrawLineFlag) {
+      if (toggleDragObjectFlag) {
         selectedObject.setAttribute('stroke', normalColor);
         selectedObject.setAttribute('stroke-width', '45');
         selectedObject.setAttribute('stroke-opacity', '.2');
@@ -132,26 +116,8 @@ function EventListeners() {
     
     // Handle text creation
     if (toggleDrawTextFlag) {
-      drawText(event.x, event.y, matrix.x, matrix.y);
-    }
-    
-    // Handle connecting nodes with line
-    if (toggleDrawLineFlag) {
       // TODO:
-      const targetCX = selectedObject.getAttribute('cx');
-      const targetCY = selectedObject.getAttribute('cy');
-      // const mousePoint = svg.createSVGPoint();
-      // mousePoint.x = targetCX;
-      // mousePoint.y = targetCY;
-      // polyLine.points.appendItem(mousePoint);
-      visualHorizontalLine.setAttribute('x1', targetCX);
-      visualHorizontalLine.setAttribute('y1', targetCY);
-      visualHorizontalLine.setAttribute('x2', targetCX);
-      visualHorizontalLine.setAttribute('y2', targetCY);
-      svg.appendChild(visualHorizontalLine);
-
     }
-
   });
   
   svg.addEventListener('mouseup', (event) => {
@@ -162,15 +128,12 @@ function EventListeners() {
       selectedObject.setAttribute('stroke', 'none');
       selectedObject = null;
     }
-
-    // console.log(selectedObject);
-
   });
   
   svg.addEventListener('mouseleave', (event) => {
     isDragging = false;
   });
-
+  
   svg.addEventListener('mousemove', (event) => {
     // Handle panning
     if (isDragging && togglePanningFlag) {
@@ -178,7 +141,12 @@ function EventListeners() {
       newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
+
+    if (toggleDrawNodeFlag) {
+      drawNodeHover(event.x, event.y);
+    }
     
+    // Check if we are currently holding an object
     if (selectedObject) {
       // Convert screen coordinates to SVG coordinate
       svgPoint.x = event.x;
@@ -189,9 +157,11 @@ function EventListeners() {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
       }
-      if (toggleDrawLineFlag) {
-        visualHorizontalLine.setAttribute('x2', matrix.x);
-        visualHorizontalLine.setAttribute('y2', selectedObject.getAttribute('cy'));
+      // If we are holding down Ctrl while dragging the object
+      // While we are creating the node, if we hold down CTRL, it will create a diagonal line
+      // If that's the case, we wouldn't need a create a line functionality
+      if (event.getModifierState('Control')) {
+        console.log('CTRL is held.');
       }
     }
   });
@@ -199,12 +169,13 @@ function EventListeners() {
   // Handle zooming with the mouse
   svg.addEventListener('wheel', (event) => {
     const deltaY = event.deltaY;
-    const inc = 10;
+    const zoomIncrement = 10;
     if (deltaY < 0) { // Zooming in
-      zoomSlider.value = parseInt(zoomSlider.value) - inc;
+      zoomSlider.value = parseInt(zoomSlider.value) - zoomIncrement;
     } else if (deltaY > 0) { // Zooming out
-      zoomSlider.value = parseInt(zoomSlider.value) + inc; 
+      zoomSlider.value = parseInt(zoomSlider.value) + zoomIncrement; 
     }
+    console.log(zoomSlider.value);
     // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
     // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
@@ -213,18 +184,16 @@ function EventListeners() {
   document.addEventListener('keydown', (event) => {
     // TODO: Do we want to implement hotkey shortcuts?
     const key = event.code;
-    if (key === 'Escape' && toggleDrawLineFlag) {
-      svg.removeChild(visualHorizontalLine);
-      selectedObject.setAttribute('stroke', 'none');
-      selectedObject = null;
+    if (key === 'Escape') {
     }
   });
 
   // Handle zooming on the UI
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
+    console.log(value);
     zoomLevel = value;
-    zoomLevelLabel.textContent = zoomLevel + '%';
+    // zoomLevelLabel.textContent = zoomLevel + '%';
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
 }
@@ -234,7 +203,7 @@ function offFlag() {
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
   toggleDrawTextFlag = false;
-  toggleDrawLineFlag = false;
+  selectedObject = null;
 }
 
 // This function handles all buttons interactivity on the UI.
@@ -263,10 +232,6 @@ function buttonEvents() {
         case 'create-node-btn':
           offFlag();
           toggleDrawNodeFlag = true;
-          break;
-        case 'create-line-btn':
-          offFlag();
-          toggleDrawLineFlag = true;
           break;
         case 'create-text-btn':
           offFlag();
