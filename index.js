@@ -75,6 +75,8 @@ horizontalLine.setAttribute('stroke-width', '5');
 horizontalLine.setAttribute('opacity', '.5');
 svg.appendChild(horizontalLine);
 
+let isPlacingNodes = false;
+
 function EventListeners() {
   let isDragging = false;
   let pointerOrigin = {
@@ -118,6 +120,7 @@ function EventListeners() {
 
     // Handle node creation
     if (toggleDrawNodeFlag) {
+      isPlacingNodes = true;
       drawNode(matrix.x, matrix.y, currentNumNodes);
       currentNumNodes++;
 
@@ -167,12 +170,11 @@ function EventListeners() {
     nodeBackdrop.setAttribute('cx', matrix.x);
     nodeBackdrop.setAttribute('cy', matrix.y);
 
-    if (toggleDrawNodeFlag) {
-      // TODO: The line initially
+    if (toggleDrawNodeFlag && isPlacingNodes) {
       horizontalLine.setAttribute('x2', matrix.x);
       horizontalLine.setAttribute('y2', matrix.y);
-      // If we are holding down CTRL while dragging the object
-      // While we are creating the node, if we hold down CTRL, it will create a diagonal line
+      // If we are holding down ALT while dragging the object
+      // While we are creating the node, if we hold down ALT, it will create a diagonal line
       // If that's the case, we wouldn't need a create a line functionality
       if (event.getModifierState('Alt')) {
         // Check to see if the polyline.points only have one point 
@@ -227,6 +229,9 @@ function EventListeners() {
     // TODO: Do we want to implement hotkey shortcuts?
     const key = event.code;
     if (key === 'Escape') {
+      if (toggleDrawNodeFlag) {
+        isPlacingNodes = false;
+      }
     }
   });
 }
