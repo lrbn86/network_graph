@@ -17,11 +17,6 @@ let stepRange = parseInt(zoomSlider.getAttribute('step'));
 let zoomLevel = (maxRange + minRange) / 2; // Get the middle number
 let zoomPercentage = 100; // Default percentage is 100%
 
-const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-nodeBackdrop.setAttribute('r', nodeRadius);
-nodeBackdrop.setAttribute('fill', normalColor);
-nodeBackdrop.setAttribute('opacity', '0');
-svg.appendChild(nodeBackdrop);
 
 function startApp() {
   initialize();
@@ -35,12 +30,6 @@ function initialize() {
   main.appendChild(svg);
   EventListeners();
   UIButtonEvents();
-  let inc = 50;
-  for (let i = 0; i < 2; i++) {
-    drawNode(inc, 350, currentNumNodes);
-    currentNumNodes++;
-    inc += 750;
-  }
 }
 
 // Draw a node at a point 
@@ -67,6 +56,24 @@ let toggleDrawTextFlag = false;
 let selectedObject = null;
 
 const polyLines = [];
+const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+nodeBackdrop.setAttribute('r', nodeRadius);
+nodeBackdrop.setAttribute('fill', normalColor);
+nodeBackdrop.setAttribute('opacity', '0');
+svg.appendChild(nodeBackdrop);
+
+const lineBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+lineBackdrop.setAttribute('class', 'line-backdrop');
+lineBackdrop.setAttribute('stroke', normalColor);
+lineBackdrop.setAttribute('stroke-width', '5');
+lineBackdrop.setAttribute('fill', 'none');
+svg.appendChild(lineBackdrop);
+
+const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+horizontalLine.setAttribute('stroke', normalColor);
+horizontalLine.setAttribute('stroke-width', '5');
+horizontalLine.setAttribute('opacity', '.5');
+svg.appendChild(horizontalLine);
 
 function EventListeners() {
   let isDragging = false;
@@ -106,11 +113,23 @@ function EventListeners() {
     svgPoint.x = event.x;
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-    
+
+    let constantY = 0;
+
     // Handle node creation
     if (toggleDrawNodeFlag) {
       drawNode(matrix.x, matrix.y, currentNumNodes);
       currentNumNodes++;
+
+      horizontalLine.setAttribute('x1', matrix.x);
+      horizontalLine.setAttribute('y1', matrix.y);
+      horizontalLine.setAttribute('x2', matrix.x);
+      horizontalLine.setAttribute('y2', matrix.y);
+
+      let points = lineBackdrop.getAttribute('points') || '';
+      points += `${matrix.x},${matrix.y} `;
+      // TODO:
+      lineBackdrop.setAttribute('points', points);
     }
     
     // Handle text creation
@@ -149,6 +168,16 @@ function EventListeners() {
     nodeBackdrop.setAttribute('cy', matrix.y);
 
     if (toggleDrawNodeFlag) {
+      // TODO: The line initially
+      horizontalLine.setAttribute('x2', matrix.x);
+      horizontalLine.setAttribute('y2', matrix.y);
+      // If we are holding down CTRL while dragging the object
+      // While we are creating the node, if we hold down CTRL, it will create a diagonal line
+      // If that's the case, we wouldn't need a create a line functionality
+      if (event.getModifierState('Alt')) {
+        // Check to see if the polyline.points only have one point 
+        console.log('Dragging diagonally');
+      }
     }
     
     // Check if we are currently holding an object
@@ -157,12 +186,6 @@ function EventListeners() {
       if (toggleDragObjectFlag) {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
-      }
-      // If we are holding down CTRL while dragging the object
-      // While we are creating the node, if we hold down CTRL, it will create a diagonal line
-      // If that's the case, we wouldn't need a create a line functionality
-      if (event.getModifierState('Control')) {
-        console.log('CTRL is held.');
       }
     }
   });
@@ -210,6 +233,8 @@ function EventListeners() {
 
 // This function handles all buttons interactivity on the UI.
 function UIButtonEvents() {
+  // TODO: The 'Present' button will clear all the UI, the user can only pan the SVG.
+
   // The pointer button will be the default select.
   document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
   document.querySelectorAll('.btn-function').forEach((btn) => {
