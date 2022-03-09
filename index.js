@@ -171,7 +171,7 @@ function EventListeners() {
     }
   });
   
-  // TODO: Handle zooming with the mouse
+  // Handle zooming with the mouse
   svg.addEventListener('wheel', (event) => {
     const deltaY = event.deltaY;
     if (deltaY < 0) { // Zooming in
@@ -206,7 +206,7 @@ function EventListeners() {
     percent += 1;
   }
 
-  // TODO: Handle zooming on the UI
+  // Handle zooming on the UI
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
     zoomLevel = value;
