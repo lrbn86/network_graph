@@ -59,37 +59,25 @@ let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
 let selectedObject = null;
+
 const polyLines = [];
 
 function EventListeners() {
-  
   let isDragging = false;
-  
   let pointerOrigin = {
     x: 0,
     y: 0
   };
-  
   let currentViewBox = {
     x: 0,
     y: 0,
     width: zoomLevel,
     height: zoomLevel
   };
-  
   let newViewBox = {
     x: 0,
     y: 0
   };
-
-  const polyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-  polyLine.setAttribute('fill', 'none');
-  polyLine.setAttribute('stroke', normalColor);
-  polyLine.setAttribute('stroke-width', '5');
-  svg.appendChild(polyLine);
-
-  // TODO: Create a hover effect so that the user can know where they are placing the node.
-  const nodeHover = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
   svg.addEventListener('mousedown', (event) => {
     // Handle panning
@@ -148,7 +136,6 @@ function EventListeners() {
     }
 
     if (toggleDrawNodeFlag) {
-      drawNodeHover(event.x, event.y);
     }
     
     // Check if we are currently holding an object
@@ -162,7 +149,7 @@ function EventListeners() {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
       }
-      // If we are holding down Ctrl while dragging the object
+      // If we are holding down CTRL while dragging the object
       // While we are creating the node, if we hold down CTRL, it will create a diagonal line
       // If that's the case, we wouldn't need a create a line functionality
       if (event.getModifierState('Control')) {
@@ -189,23 +176,15 @@ function EventListeners() {
     // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
   });
-
-  document.addEventListener('keydown', (event) => {
-    // TODO: Do we want to implement hotkey shortcuts?
-    const key = event.code;
-    if (key === 'Escape') {
-    }
-  });
-
+  
   // Hacky way of keeping zoom percentages consistent with UI and mouse wheel control
   let zoomLevelsPercentageMap = {};
   let percent = 25;
-
   for (let i = maxRange; i >= minRange; i -= stepRange) {
     zoomLevelsPercentageMap[i] = percent;
     percent += 1;
   }
-
+  
   // Handle zooming on the UI
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
@@ -213,14 +192,13 @@ function EventListeners() {
     zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
-}
 
-function offFlag() {
-  togglePanningFlag = false;
-  toggleDragObjectFlag = false;
-  toggleDrawNodeFlag = false;
-  toggleDrawTextFlag = false;
-  selectedObject = null;
+  document.addEventListener('keydown', (event) => {
+    // TODO: Do we want to implement hotkey shortcuts?
+    const key = event.code;
+    if (key === 'Escape') {
+    }
+  });
 }
 
 // This function handles all buttons interactivity on the UI.
@@ -257,7 +235,15 @@ function buttonEvents() {
         case 'create-comment-btn':
           offFlag();
           break;
-      }
+        }
     });
   });
+}
+
+function offFlag() {
+  togglePanningFlag = false;
+  toggleDragObjectFlag = false;
+  toggleDrawNodeFlag = false;
+  toggleDrawTextFlag = false;
+  selectedObject = null;
 }
