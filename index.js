@@ -17,6 +17,12 @@ let stepRange = parseInt(zoomSlider.getAttribute('step'));
 let zoomLevel = (maxRange + minRange) / 2; // Get the middle number
 let zoomPercentage = 100; // Default percentage is 100%
 
+const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+nodeBackdrop.setAttribute('r', nodeRadius);
+nodeBackdrop.setAttribute('fill', normalColor);
+nodeBackdrop.setAttribute('opacity', '0');
+svg.appendChild(nodeBackdrop);
+
 function startApp() {
   initialize();
 }
@@ -28,13 +34,13 @@ function initialize() {
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
   main.appendChild(svg);
   EventListeners();
+  UIButtonEvents();
   let inc = 50;
   for (let i = 0; i < 2; i++) {
     drawNode(inc, 350, currentNumNodes);
     currentNumNodes++;
     inc += 750;
   }
-  buttonEvents();
 }
 
 // Draw a node at a point 
@@ -135,15 +141,18 @@ function EventListeners() {
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
 
+    // Convert screen coordinates to SVG coordinate
+    svgPoint.x = event.x;
+    svgPoint.y = event.y;
+    const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+    nodeBackdrop.setAttribute('cx', matrix.x);
+    nodeBackdrop.setAttribute('cy', matrix.y);
+
     if (toggleDrawNodeFlag) {
     }
     
     // Check if we are currently holding an object
     if (selectedObject) {
-      // Convert screen coordinates to SVG coordinate
-      svgPoint.x = event.x;
-      svgPoint.y = event.y;
-      const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
       // Handle object dragging
       if (toggleDragObjectFlag) {
         selectedObject.setAttribute('cx', matrix.x);
@@ -176,7 +185,6 @@ function EventListeners() {
     // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
   });
-  
   // Hacky way of keeping zoom percentages consistent with UI and mouse wheel control
   let zoomLevelsPercentageMap = {};
   let percent = 25;
@@ -184,7 +192,6 @@ function EventListeners() {
     zoomLevelsPercentageMap[i] = percent;
     percent += 1;
   }
-  
   // Handle zooming on the UI
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
@@ -202,7 +209,7 @@ function EventListeners() {
 }
 
 // This function handles all buttons interactivity on the UI.
-function buttonEvents() {
+function UIButtonEvents() {
   // The pointer button will be the default select.
   document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
   document.querySelectorAll('.btn-function').forEach((btn) => {
@@ -227,6 +234,7 @@ function buttonEvents() {
         case 'create-node-btn':
           offFlag();
           toggleDrawNodeFlag = true;
+          nodeBackdrop.setAttribute('opacity', '.5');
           break;
         case 'create-text-btn':
           offFlag();
@@ -246,4 +254,5 @@ function offFlag() {
   toggleDrawNodeFlag = false;
   toggleDrawTextFlag = false;
   selectedObject = null;
+  nodeBackdrop.setAttribute('opacity', '0');
 }
