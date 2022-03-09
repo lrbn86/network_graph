@@ -9,8 +9,13 @@ let currentNumNodes = 0;
 
 const zoomSlider = document.querySelector('#zoom-slider');
 const zoomLevelLabel = document.querySelector('#zoom-level');
-let zoomLevel = 1250;
-let zoomPercentage = 100;
+// Get attributes from the zoomSlider element
+// Purpose: If the html attributes are changed, there's no need to update this JS file.
+let maxRange = parseInt(zoomSlider.getAttribute('max'));
+let minRange = parseInt(zoomSlider.getAttribute('min'));
+let stepRange = parseInt(zoomSlider.getAttribute('step'));
+let zoomLevel = (maxRange + minRange) / 2; // Get the middle number
+let zoomPercentage = 100; // Default percentage is 100%
 
 function startApp() {
   initialize();
@@ -169,15 +174,14 @@ function EventListeners() {
   // TODO: Handle zooming with the mouse
   svg.addEventListener('wheel', (event) => {
     const deltaY = event.deltaY;
-    const zoomIncrement = 10;
     if (deltaY < 0) { // Zooming in
-      zoomSlider.value = parseInt(zoomSlider.value) - zoomIncrement;
-      if (zoomLevel > 500) {
+      zoomSlider.value = parseInt(zoomSlider.value) - stepRange;
+      if (zoomLevel > minRange) {
         zoomPercentage += 1;
       }
     } else if (deltaY > 0) { // Zooming out
-      zoomSlider.value = parseInt(zoomSlider.value) + zoomIncrement;
-      if (zoomLevel < 2000) {
+      zoomSlider.value = parseInt(zoomSlider.value) + stepRange;
+      if (zoomLevel < maxRange) {
         zoomPercentage -=1;
       }
     }
@@ -197,7 +201,7 @@ function EventListeners() {
   let zoomLevelsPercentageMap = {};
   let percent = 25;
 
-  for (let i = 2000; i >= 500; i-=10) {
+  for (let i = maxRange; i >= minRange; i -= stepRange) {
     zoomLevelsPercentageMap[i] = percent;
     percent += 1;
   }
