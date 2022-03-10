@@ -128,6 +128,9 @@ function EventListeners() {
     
     // Handle node creation
     if (toggleDrawNodeFlag) {
+      console.log(selectedObject);
+      // TODO: If we select an object that already exists, we don't have to place a node, but just a line towards that selected node
+
       isPlacingNodes = true;
       const node = drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
       nodes.push(node);
