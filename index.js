@@ -55,25 +55,26 @@ let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
 let selectedObject = null;
 
-const polyLines = [];
 const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+nodeBackdrop.setAttribute('id', 'node-backdrop');
 nodeBackdrop.setAttribute('r', nodeRadius);
 nodeBackdrop.setAttribute('fill', normalColor);
 nodeBackdrop.setAttribute('opacity', '0');
 svg.appendChild(nodeBackdrop);
 
-const lineBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-lineBackdrop.setAttribute('class', 'line-backdrop');
-lineBackdrop.setAttribute('stroke', normalColor);
-lineBackdrop.setAttribute('stroke-width', '5');
-lineBackdrop.setAttribute('fill', 'none');
-svg.appendChild(lineBackdrop);
+const polyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+polyLine.setAttribute('class', 'polyline');
+polyLine.setAttribute('stroke', normalColor);
+polyLine.setAttribute('stroke-width', '10');
+polyLine.setAttribute('fill', 'none');
+svg.appendChild(polyLine);
 
-const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-horizontalLine.setAttribute('stroke', normalColor);
-horizontalLine.setAttribute('stroke-width', '5');
-horizontalLine.setAttribute('opacity', '.5');
-svg.appendChild(horizontalLine);
+const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+visualLine.setAttribute('id', 'visual-line')
+visualLine.setAttribute('stroke', normalColor);
+visualLine.setAttribute('stroke-width', '10');
+visualLine.setAttribute('opacity', '.5');
+svg.appendChild(visualLine);
 
 let isPlacingNodes = false;
 
@@ -94,6 +95,7 @@ function EventListeners() {
     y: 0
   };
 
+  // Handle MOUSE DOWN event
   svg.addEventListener('mousedown', (event) => {
     // Handle panning
     isDragging = true;
@@ -116,8 +118,6 @@ function EventListeners() {
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
 
-    let constantY = 0;
-
     // Handle node creation
     if (toggleDrawNodeFlag) {
       // We want to keep Y to be the same as the first when placing continuous nodes
@@ -125,15 +125,11 @@ function EventListeners() {
       drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
       currentNumNodes++;
       
-      horizontalLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
-      horizontalLine.setAttribute('y1', nodeBackdrop.getAttribute('cy'));
-      horizontalLine.setAttribute('x2', nodeBackdrop.getAttribute('cx'));
-      horizontalLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
+      setVisualLineToNodeBackdrop();
 
-      let points = lineBackdrop.getAttribute('points') || '';
+      let points = polyLine.getAttribute('points') || '';
       points += `${nodeBackdrop.getAttribute('cx')},${nodeBackdrop.getAttribute('cy')} `;
-      // TODO:
-      lineBackdrop.setAttribute('points', points);
+      polyLine.setAttribute('points', points);
     }
     
     // Handle text creation
@@ -142,6 +138,7 @@ function EventListeners() {
     }
   });
   
+  // Handle MOUSE UP event
   svg.addEventListener('mouseup', (event) => {
     isDragging = false;
     currentViewBox.x = newViewBox.x;
@@ -152,6 +149,7 @@ function EventListeners() {
     }
   });
   
+  // Handle MOUSE MOVE event
   svg.addEventListener('mousemove', (event) => {
     // Handle panning
     if (isDragging && togglePanningFlag) {
@@ -165,22 +163,11 @@ function EventListeners() {
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
     nodeBackdrop.setAttribute('cx', matrix.x);
-    
-    if (!isPlacingNodes) {
-      nodeBackdrop.setAttribute('cy', matrix.y);
-    }
+    nodeBackdrop.setAttribute('cy', matrix.y);
     
     if (toggleDrawNodeFlag && isPlacingNodes) {
-      horizontalLine.setAttribute('x2', matrix.x);
-      nodeBackdrop.setAttribute('cy', horizontalLine.getAttribute('y1'));
-      // horizontalLine.setAttribute('y2', matrix.y);
-      // If we are holding down ALT while dragging the object
-      // While we are creating the node, if we hold down ALT, it will create a diagonal line
-      // If that's the case, we wouldn't need a create a line functionality
-      if (event.getModifierState('Alt')) {
-        // Check to see if the polyline.points only have one point 
-        console.log('Dragging diagonally');
-      }
+      visualLine.setAttribute('x2', matrix.x);
+      visualLine.setAttribute('y2', matrix.y);
     }
     
     // Check if we are currently holding an object
@@ -192,6 +179,7 @@ function EventListeners() {
       }
     }
 
+    // Handle MOUSE LEAVE event
     svg.addEventListener('mouseleave', (event) => {
       isDragging = false;
     });
@@ -230,12 +218,14 @@ function EventListeners() {
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
 
+  // Listen for any key presses
   document.addEventListener('keydown', (event) => {
     // TODO: Do we want to implement hotkey shortcuts?
     const key = event.code;
     if (key === 'Escape') {
       if (toggleDrawNodeFlag) {
-        isPlacingNodes = false;
+        // We are no longer placing nodes/lines
+        removeVisualLine();
       }
     }
   });
@@ -283,6 +273,21 @@ function UIButtonEvents() {
   });
 }
 
+function removeVisualLine() {
+  isPlacingNodes = false;
+  visualLine.removeAttribute('x1');
+  visualLine.removeAttribute('y1');
+  visualLine.removeAttribute('x2');
+  visualLine.removeAttribute('y2');
+}
+
+function setVisualLineToNodeBackdrop() {
+  visualLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
+  visualLine.setAttribute('y1', nodeBackdrop.getAttribute('cy'));
+  visualLine.setAttribute('x2', nodeBackdrop.getAttribute('cx'));
+  visualLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
+}
+
 function offFlag() {
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
@@ -290,4 +295,6 @@ function offFlag() {
   toggleDrawTextFlag = false;
   selectedObject = null;
   nodeBackdrop.setAttribute('opacity', '0');
+  removeVisualLine();
+  
 }
