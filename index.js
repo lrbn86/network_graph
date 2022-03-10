@@ -65,7 +65,7 @@ nodeBackdrop.setAttribute('opacity', '0');
 svg.appendChild(nodeBackdrop);
 
 const visualPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-visualPolyLine.setAttribute('id', 'polyline');
+visualPolyLine.setAttribute('id', 'visual-polyline');
 visualPolyLine.setAttribute('stroke', normalColor);
 visualPolyLine.setAttribute('stroke-width', lineStrokeWidth);
 visualPolyLine.setAttribute('fill', 'none');
@@ -84,7 +84,8 @@ svg.appendChild(visualLine);
 let isPlacingNodes = false;
 
 let nodes = [];
-let groups = [];
+
+let nodesPointsMap = {};
 
 function EventListeners() {
   let isDragging = false;
@@ -128,17 +129,16 @@ function EventListeners() {
     
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      console.log(selectedObject);
-      // TODO: If we select an object that already exists, we don't have to place a node, but just a line towards that selected node
 
       isPlacingNodes = true;
       const node = drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
       nodes.push(node);
+      nodesPointsMap[node.getAttribute('id')] = `${node.getAttribute('cx')},${node.getAttribute('cy')}`;
       currentNumNodes++;
-      
+
       setVisualLineToNodeBackdrop();
       
-      polyLinePoints += `${nodeBackdrop.getAttribute('cx')},${nodeBackdrop.getAttribute('cy')} `;
+      polyLinePoints += `${node.getAttribute('cx')},${node.getAttribute('cy')} `;
       visualPolyLine.setAttribute('points', polyLinePoints);
     }
     
@@ -186,6 +186,15 @@ function EventListeners() {
       if (toggleDragObjectFlag) {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
+
+        // Update the points on the polyline
+        const selectedObjectID = selectedObject.getAttribute('id');
+        nodesPointsMap[selectedObjectID] = `${selectedObject.getAttribute('cx')},${selectedObject.getAttribute('cy')}`;
+
+        // TODO: We need to get information on the specific polyline that is currently connecting the nodes
+        let newPoints = Object.values(nodesPointsMap).join(' ');
+        visualPolyLine.setAttribute('points', newPoints);
+
       }
     }
 
@@ -235,22 +244,10 @@ function EventListeners() {
     if (key === 'Escape') {
       // If we are currently in drawing nodes/line mode when we press ESC
       if (toggleDrawNodeFlag) {
+        // We want to append the newly created polyline
+        createNewPolyLine();
         // We are no longer placing nodes/lines
         removeVisualLines();
-        
-        // We want to append the newly created polyline
-        const newPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-        newPolyLine.setAttribute('class', 'polyline');
-        newPolyLine.setAttribute('stroke', normalColor);
-        newPolyLine.setAttribute('stroke-width', lineStrokeWidth);
-        newPolyLine.setAttribute('fill', 'none');
-        newPolyLine.setAttribute('points', polyLinePoints);
-        svg.appendChild(newPolyLine);
-        groups.push(nodes);
-        
-        // Reset
-        polyLinePoints = '';
-        nodes = [];
       }
     }
   });
@@ -312,6 +309,19 @@ function removeVisualLines() {
   visualLine.removeAttribute('x2');
   visualLine.removeAttribute('y2');
   visualPolyLine.setAttribute('points', '');
+  polyLinePoints = '';
+}
+
+function createNewPolyLine() {
+  if (nodes.length > 0) {
+    const newPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    newPolyLine.setAttribute('class', 'polyline');
+    newPolyLine.setAttribute('stroke', normalColor);
+    newPolyLine.setAttribute('stroke-width', lineStrokeWidth);
+    newPolyLine.setAttribute('fill', 'none');
+    newPolyLine.setAttribute('points', polyLinePoints);
+    svg.appendChild(newPolyLine);
+  }
 }
 
 function offFlag() {
@@ -321,5 +331,6 @@ function offFlag() {
   toggleDrawTextFlag = false;
   selectedObject = null;
   nodeBackdrop.setAttribute('opacity', '0');
+  createNewPolyLine();
   removeVisualLines();
 }
