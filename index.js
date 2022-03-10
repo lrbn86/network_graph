@@ -5,6 +5,7 @@ svg.setAttribute('id', 'svg');
 const nodeRadius = 45;
 const normalColor = '#2F3B47';
 const criticalColor = '#FF7353';
+const lineStrokeWidth = 10;
 let currentNumNodes = 0;
 
 const zoomSlider = document.querySelector('#zoom-slider');
@@ -42,6 +43,7 @@ function drawNode(x, y, nodeID) {
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
   svg.appendChild(node);
+  return node;
 }
 
 // Draw a text at a point
@@ -62,21 +64,27 @@ nodeBackdrop.setAttribute('fill', normalColor);
 nodeBackdrop.setAttribute('opacity', '0');
 svg.appendChild(nodeBackdrop);
 
-const polyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-polyLine.setAttribute('class', 'polyline');
-polyLine.setAttribute('stroke', normalColor);
-polyLine.setAttribute('stroke-width', '10');
-polyLine.setAttribute('fill', 'none');
-svg.appendChild(polyLine);
+const visualPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+visualPolyLine.setAttribute('id', 'polyline');
+visualPolyLine.setAttribute('stroke', normalColor);
+visualPolyLine.setAttribute('stroke-width', lineStrokeWidth);
+visualPolyLine.setAttribute('fill', 'none');
+visualPolyLine.setAttribute('points', '');
+svg.appendChild(visualPolyLine);
+
+let polyLinePoints = '';
 
 const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 visualLine.setAttribute('id', 'visual-line')
 visualLine.setAttribute('stroke', normalColor);
-visualLine.setAttribute('stroke-width', '10');
+visualLine.setAttribute('stroke-width', lineStrokeWidth);
 visualLine.setAttribute('opacity', '.5');
 svg.appendChild(visualLine);
 
 let isPlacingNodes = false;
+
+let nodes = [];
+let groups = [];
 
 function EventListeners() {
   let isDragging = false;
@@ -94,7 +102,7 @@ function EventListeners() {
     x: 0,
     y: 0
   };
-
+  
   // Handle MOUSE DOWN event
   svg.addEventListener('mousedown', (event) => {
     // Handle panning
@@ -117,19 +125,18 @@ function EventListeners() {
     svgPoint.x = event.x;
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-
+    
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      // We want to keep Y to be the same as the first when placing continuous nodes
       isPlacingNodes = true;
-      drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
+      const node = drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
+      nodes.push(node);
       currentNumNodes++;
       
       setVisualLineToNodeBackdrop();
-
-      let points = polyLine.getAttribute('points') || '';
-      points += `${nodeBackdrop.getAttribute('cx')},${nodeBackdrop.getAttribute('cy')} `;
-      polyLine.setAttribute('points', points);
+      
+      polyLinePoints += `${nodeBackdrop.getAttribute('cx')},${nodeBackdrop.getAttribute('cy')} `;
+      visualPolyLine.setAttribute('points', polyLinePoints);
     }
     
     // Handle text creation
@@ -157,7 +164,7 @@ function EventListeners() {
       newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
     }
-
+    
     // Convert screen coordinates to SVG coordinate
     svgPoint.x = event.x;
     svgPoint.y = event.y;
@@ -217,15 +224,30 @@ function EventListeners() {
     zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
-
+  
   // Listen for any key presses
   document.addEventListener('keydown', (event) => {
     // TODO: Do we want to implement hotkey shortcuts?
     const key = event.code;
     if (key === 'Escape') {
+      // If we are currently in drawing nodes/line mode when we press ESC
       if (toggleDrawNodeFlag) {
         // We are no longer placing nodes/lines
-        removeVisualLine();
+        removeVisualLines();
+        
+        // We want to append the newly created polyline
+        const newPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        newPolyLine.setAttribute('class', 'polyline');
+        newPolyLine.setAttribute('stroke', normalColor);
+        newPolyLine.setAttribute('stroke-width', lineStrokeWidth);
+        newPolyLine.setAttribute('fill', 'none');
+        newPolyLine.setAttribute('points', polyLinePoints);
+        svg.appendChild(newPolyLine);
+        groups.push(nodes);
+        
+        // Reset
+        polyLinePoints = '';
+        nodes = [];
       }
     }
   });
@@ -234,7 +256,7 @@ function EventListeners() {
 // This function handles all buttons interactivity on the UI.
 function UIButtonEvents() {
   // TODO: The 'Present' button will clear all the UI, the user can only pan the SVG.
-
+  
   // The pointer button will be the default select.
   document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
   document.querySelectorAll('.btn-function').forEach((btn) => {
@@ -252,14 +274,14 @@ function UIButtonEvents() {
           offFlag();
           toggleDragObjectFlag = true;
           break;
-        case 'pan-btn':
-          offFlag();
-          togglePanningFlag = true;
-          break;
-        case 'create-node-btn':
-          offFlag();
-          toggleDrawNodeFlag = true;
-          nodeBackdrop.setAttribute('opacity', '.5');
+          case 'pan-btn':
+            offFlag();
+            togglePanningFlag = true;
+            break;
+            case 'create-node-btn':
+              offFlag();
+              toggleDrawNodeFlag = true;
+              nodeBackdrop.setAttribute('opacity', '.5');
           break;
         case 'create-text-btn':
           offFlag();
@@ -273,19 +295,20 @@ function UIButtonEvents() {
   });
 }
 
-function removeVisualLine() {
-  isPlacingNodes = false;
-  visualLine.removeAttribute('x1');
-  visualLine.removeAttribute('y1');
-  visualLine.removeAttribute('x2');
-  visualLine.removeAttribute('y2');
-}
-
 function setVisualLineToNodeBackdrop() {
   visualLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
   visualLine.setAttribute('y1', nodeBackdrop.getAttribute('cy'));
   visualLine.setAttribute('x2', nodeBackdrop.getAttribute('cx'));
   visualLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
+}
+
+function removeVisualLines() {
+  isPlacingNodes = false;
+  visualLine.removeAttribute('x1');
+  visualLine.removeAttribute('y1');
+  visualLine.removeAttribute('x2');
+  visualLine.removeAttribute('y2');
+  visualPolyLine.setAttribute('points', '');
 }
 
 function offFlag() {
@@ -295,6 +318,5 @@ function offFlag() {
   toggleDrawTextFlag = false;
   selectedObject = null;
   nodeBackdrop.setAttribute('opacity', '0');
-  removeVisualLine();
-  
+  removeVisualLines();
 }
