@@ -120,17 +120,18 @@ function EventListeners() {
 
     // Handle node creation
     if (toggleDrawNodeFlag) {
+      // We want to keep Y to be the same as the first when placing continuous nodes
       isPlacingNodes = true;
-      drawNode(matrix.x, matrix.y, currentNumNodes);
+      drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
       currentNumNodes++;
-
-      horizontalLine.setAttribute('x1', matrix.x);
-      horizontalLine.setAttribute('y1', matrix.y);
-      horizontalLine.setAttribute('x2', matrix.x);
-      horizontalLine.setAttribute('y2', matrix.y);
+      
+      horizontalLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
+      horizontalLine.setAttribute('y1', nodeBackdrop.getAttribute('cy'));
+      horizontalLine.setAttribute('x2', nodeBackdrop.getAttribute('cx'));
+      horizontalLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
 
       let points = lineBackdrop.getAttribute('points') || '';
-      points += `${matrix.x},${matrix.y} `;
+      points += `${nodeBackdrop.getAttribute('cx')},${nodeBackdrop.getAttribute('cy')} `;
       // TODO:
       lineBackdrop.setAttribute('points', points);
     }
@@ -151,10 +152,6 @@ function EventListeners() {
     }
   });
   
-  svg.addEventListener('mouseleave', (event) => {
-    isDragging = false;
-  });
-  
   svg.addEventListener('mousemove', (event) => {
     // Handle panning
     if (isDragging && togglePanningFlag) {
@@ -168,11 +165,15 @@ function EventListeners() {
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
     nodeBackdrop.setAttribute('cx', matrix.x);
-    nodeBackdrop.setAttribute('cy', matrix.y);
-
+    
+    if (!isPlacingNodes) {
+      nodeBackdrop.setAttribute('cy', matrix.y);
+    }
+    
     if (toggleDrawNodeFlag && isPlacingNodes) {
       horizontalLine.setAttribute('x2', matrix.x);
-      horizontalLine.setAttribute('y2', matrix.y);
+      nodeBackdrop.setAttribute('cy', horizontalLine.getAttribute('y1'));
+      // horizontalLine.setAttribute('y2', matrix.y);
       // If we are holding down ALT while dragging the object
       // While we are creating the node, if we hold down ALT, it will create a diagonal line
       // If that's the case, we wouldn't need a create a line functionality
@@ -190,6 +191,10 @@ function EventListeners() {
         selectedObject.setAttribute('cy', matrix.y);
       }
     }
+
+    svg.addEventListener('mouseleave', (event) => {
+      isDragging = false;
+    });
   });
   
   // Handle zooming with the mouse
