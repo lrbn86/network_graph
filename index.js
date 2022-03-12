@@ -57,6 +57,7 @@ let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
 let selectedObject = null;
 
+
 // This element appears when placing a node
 const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 nodeBackdrop.setAttribute('id', 'node-backdrop');
@@ -99,6 +100,10 @@ let isPlacingNodes = false;
 let nodes = [];
 let nodesGroups = [];
 
+// TODO: We can relate the poly points with the nodes, by keeping track of all the nodes' cx/cy in its own array
+//       we would loop thru each polylines on mousemove and update according to all of the nodes' cx/cy
+//       since we can assume that nodesPositions[0] = 'points of the first polyline' and the loop thru polylinesContainer to get each polyline
+//       and update accordingly
 let nodesPointsMap = {};
 
 function EventListeners() {
