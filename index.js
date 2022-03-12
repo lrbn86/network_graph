@@ -268,18 +268,7 @@ function EventListeners() {
     if (key === 'Escape') {
       // If we are currently in drawing nodes/line mode when we press ESC
       if (toggleDrawNodeFlag) {
-        // We want to append the newly created polyline
-        if (nodes.length === 1) {
-          alert('Warning: Must create at least two nodes connected by a line.')
-          nodesContainer.removeChild(nodesContainer.lastChild);
-        }
-        createNewPolyLine(polyLinePoints);
-        polyLinePoints = '';
-        nodesGroups.push(nodes);
-        nodes = [];
-        // We are no longer placing nodes/lines
-        isPlacingNodes = false;
-        hideVisualLines();
+        reset();
       }
     }
   });
@@ -314,18 +303,29 @@ function hideVisualLines() {
   visualLine.setAttribute('visibility', 'hidden');
 }
 
+// This function is called if the user changes mode or presses ESC while placing a node
+function reset() {
+  // A  node by itself cannot exist without being connected to another node
+  if (nodes.length === 1) {
+    nodesContainer.removeChild(nodesContainer.lastChild);
+  }
+  createNewPolyLine(polyLinePoints);
+  polyLinePoints = '';
+  nodesGroups.push(nodes);
+  nodes = [];
+  // We are no longer placing nodes/lines
+  isPlacingNodes = false;
+  hideVisualLines();
+}
+
 
 function offFlag() {
-  if (isPlacingNodes) {
-    alert('Warning: Cancel placing nodes by pressing ESC before changing modes');
-    return;
-  }
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
   toggleDrawTextFlag = false;
   selectedObject = null;
-  hideVisualLines();
+  reset();
   nodeBackdrop.setAttribute('visibility', 'hidden');
 }
 
