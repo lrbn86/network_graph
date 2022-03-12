@@ -32,6 +32,52 @@ function initialize() {
   UIButtonEvents();
 }
 
+// This element appears when placing a node
+const visualNode = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+visualNode.setAttribute('id', 'node-backdrop');
+visualNode.setAttribute('r', nodeRadius);
+visualNode.setAttribute('fill', normalColor);
+visualNode.setAttribute('opacity', '.5');
+visualNode.setAttribute('visibility', 'hidden');
+svg.appendChild(visualNode);
+
+// This element appears when placing a polyline visual effect
+const visualPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+visualPolyLine.setAttribute('id', 'visual-polyline');
+visualPolyLine.setAttribute('stroke', 'red');
+visualPolyLine.setAttribute('stroke-width', lineStrokeWidth);
+visualPolyLine.setAttribute('fill', 'none');
+visualPolyLine.setAttribute('points', '');
+svg.appendChild(visualPolyLine);
+
+// This element appears when placing a line for visual effect
+const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+visualLine.setAttribute('id', 'visual-line')
+visualLine.setAttribute('stroke', normalColor);
+visualLine.setAttribute('stroke-width', lineStrokeWidth);
+visualLine.setAttribute('opacity', '.5');
+visualLine.setAttribute('visibility', 'hidden');
+svg.appendChild(visualLine);
+
+const polylinesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+polylinesContainer.setAttribute('id', 'polylines-container')
+svg.appendChild(polylinesContainer);
+
+const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+nodesContainer.setAttribute('id', 'nodes-container')
+svg.appendChild(nodesContainer);
+
+let isPlacingNodes = false;
+let nodes = [];
+let nodesGroups = [];
+let polyLinePoints = '';
+
+// TODO: We can relate the poly points with the nodes, by keeping track of all the nodes' cx/cy in its own array
+//       we would loop thru each polylines on mousemove and update according to all of the nodes' cx/cy
+//       since we can assume that nodesPositions[0] = 'points of the first polyline' and the loop thru polylinesContainer to get each polyline
+//       and update accordingly
+let nodesPointsMap = {};
+
 // Draw a node at a point 
 function drawNode(x, y, nodeID) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -55,55 +101,6 @@ let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
 let selectedObject = null;
-
-
-// This element appears when placing a node
-const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-nodeBackdrop.setAttribute('id', 'node-backdrop');
-nodeBackdrop.setAttribute('r', nodeRadius);
-nodeBackdrop.setAttribute('fill', normalColor);
-nodeBackdrop.setAttribute('opacity', '.5');
-nodeBackdrop.setAttribute('visibility', 'hidden');
-svg.appendChild(nodeBackdrop);
-
-// This element appears when placing a line
-const visualPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-visualPolyLine.setAttribute('id', 'visual-polyline');
-visualPolyLine.setAttribute('stroke', criticalColor);
-visualPolyLine.setAttribute('stroke-width', lineStrokeWidth);
-visualPolyLine.setAttribute('fill', 'none');
-visualPolyLine.setAttribute('points', '');
-svg.appendChild(visualPolyLine);
-
-let polyLinePoints = '';
-
-// This element appears when placing a line
-const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-visualLine.setAttribute('id', 'visual-line')
-visualLine.setAttribute('stroke', normalColor);
-visualLine.setAttribute('stroke-width', lineStrokeWidth);
-visualLine.setAttribute('opacity', '.5');
-visualLine.setAttribute('visibility', 'hidden');
-svg.appendChild(visualLine);
-
-const polylinesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-polylinesContainer.setAttribute('id', 'polylines-container')
-svg.appendChild(polylinesContainer);
-
-const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-nodesContainer.setAttribute('id', 'nodes-container')
-svg.appendChild(nodesContainer);
-
-let isPlacingNodes = false;
-
-let nodes = [];
-let nodesGroups = [];
-
-// TODO: We can relate the poly points with the nodes, by keeping track of all the nodes' cx/cy in its own array
-//       we would loop thru each polylines on mousemove and update according to all of the nodes' cx/cy
-//       since we can assume that nodesPositions[0] = 'points of the first polyline' and the loop thru polylinesContainer to get each polyline
-//       and update accordingly
-let nodesPointsMap = {};
 
 function EventListeners() {
   let isDragging = false;
@@ -150,7 +147,7 @@ function EventListeners() {
       showVisualLines();
 
       isPlacingNodes = true;
-      const node = drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
+      const node = drawNode(visualNode.getAttribute('cx'), visualNode.getAttribute('cy'), currentNumNodes);
       nodes.push(node);
       nodesPointsMap[node.getAttribute('id')] = `${node.getAttribute('cx')},${node.getAttribute('cy')}`;
       currentNumNodes++;
@@ -191,8 +188,8 @@ function EventListeners() {
     svgPoint.x = event.x;
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-    nodeBackdrop.setAttribute('cx', matrix.x);
-    nodeBackdrop.setAttribute('cy', matrix.y);
+    visualNode.setAttribute('cx', matrix.x);
+    visualNode.setAttribute('cy', matrix.y);
     
     if (toggleDrawNodeFlag) {
       visualLine.setAttribute('x2', matrix.x);
@@ -289,10 +286,10 @@ function createNewPolyLine(points) {
 }
 
 function setVisualLineToNodeBackdrop() {
-  visualLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
-  visualLine.setAttribute('y1', nodeBackdrop.getAttribute('cy'));
-  visualLine.setAttribute('x2', nodeBackdrop.getAttribute('cx'));
-  visualLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
+  visualLine.setAttribute('x1', visualNode.getAttribute('cx'));
+  visualLine.setAttribute('y1', visualNode.getAttribute('cy'));
+  visualLine.setAttribute('x2', visualNode.getAttribute('cx'));
+  visualLine.setAttribute('y2', visualNode.getAttribute('cy'));
 }
 
 function showVisualLines() {
@@ -326,7 +323,7 @@ function offFlag() {
   toggleDrawTextFlag = false;
   selectedObject = null;
   reset();
-  nodeBackdrop.setAttribute('visibility', 'hidden');
+  visualNode.setAttribute('visibility', 'hidden');
 }
 
 // This function handles all buttons interactivity on the UI.
@@ -357,7 +354,7 @@ function UIButtonEvents() {
             case 'create-node-btn':
               offFlag();
               toggleDrawNodeFlag = true;
-              nodeBackdrop.setAttribute('visibility', 'visible');
+              visualNode.setAttribute('visibility', 'visible');
               break;
               case 'create-text-btn':
                 offFlag();
