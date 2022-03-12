@@ -42,7 +42,7 @@ function drawNode(x, y, nodeID) {
   node.setAttribute('fill', normalColor);
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
-  svg.appendChild(node);
+  nodesContainer.appendChild(node);
   return node;
 }
 
@@ -57,6 +57,7 @@ let toggleDrawNodeFlag = false;
 let toggleDrawTextFlag = false;
 let selectedObject = null;
 
+// This element appears when placing a node
 const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 nodeBackdrop.setAttribute('id', 'node-backdrop');
 nodeBackdrop.setAttribute('r', nodeRadius);
@@ -65,6 +66,7 @@ nodeBackdrop.setAttribute('opacity', '.5');
 nodeBackdrop.setAttribute('visibility', 'hidden');
 svg.appendChild(nodeBackdrop);
 
+// This element appears when placing a line
 const visualPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
 visualPolyLine.setAttribute('id', 'visual-polyline');
 visualPolyLine.setAttribute('stroke', criticalColor);
@@ -75,6 +77,7 @@ svg.appendChild(visualPolyLine);
 
 let polyLinePoints = '';
 
+// This element appears when placing a line
 const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 visualLine.setAttribute('id', 'visual-line')
 visualLine.setAttribute('stroke', normalColor);
@@ -83,9 +86,18 @@ visualLine.setAttribute('opacity', '.5');
 visualLine.setAttribute('visibility', 'hidden');
 svg.appendChild(visualLine);
 
+const polylinesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+polylinesContainer.setAttribute('id', 'polylines-container')
+svg.appendChild(polylinesContainer);
+
+const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+nodesContainer.setAttribute('id', 'nodes-container')
+svg.appendChild(nodesContainer);
+
 let isPlacingNodes = false;
 
 let nodes = [];
+let nodesGroups = [];
 
 let nodesPointsMap = {};
 
@@ -178,7 +190,7 @@ function EventListeners() {
     nodeBackdrop.setAttribute('cx', matrix.x);
     nodeBackdrop.setAttribute('cy', matrix.y);
     
-    if (toggleDrawNodeFlag && isPlacingNodes) {
+    if (toggleDrawNodeFlag) {
       visualLine.setAttribute('x2', matrix.x);
       visualLine.setAttribute('y2', matrix.y);
     }
@@ -196,7 +208,7 @@ function EventListeners() {
 
         // TODO: We need to get information on the specific polyline that is currently connecting the nodes
         let newPoints = Object.values(nodesPointsMap).join(' ');
-        visualPolyLine.setAttribute('points', newPoints);
+        // visualPolyLine.setAttribute('points', newPoints);
 
       }
     }
@@ -243,13 +255,35 @@ function EventListeners() {
       // If we are currently in drawing nodes/line mode when we press ESC
       if (toggleDrawNodeFlag) {
         // We want to append the newly created polyline
+        if (nodes.length === 1) {
+          alert('Warning: Must create at least two nodes connected by a line.')
+          nodesContainer.removeChild(nodesContainer.lastChild);
+        }
+        createNewPolyLine(polyLinePoints);
+        polyLinePoints = '';
+        nodesGroups.push(nodes);
+        nodes = [];
         // We are no longer placing nodes/lines
+        isPlacingNodes = false;
         hideVisualLines();
       }
     }
   });
 }
 
+function createNewPolyLine(points) {
+  if (nodes.length > 1) {
+    const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    polyline.setAttribute('class', 'polyline');
+    polyline.setAttribute('stroke', criticalColor);
+    polyline.setAttribute('stroke-width', lineStrokeWidth);
+    polyline.setAttribute('fill', 'none');
+    polyline.setAttribute('points', points);
+    // svg.insertBefore(polyline, visualLine);
+    polylinesContainer.appendChild(polyline);
+    visualPolyLine.setAttribute('points', '');
+  }
+}
 
 function setVisualLineToNodeBackdrop() {
   visualLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
@@ -258,18 +292,20 @@ function setVisualLineToNodeBackdrop() {
   visualLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
 }
 
-
 function showVisualLines() {
   visualLine.setAttribute('visibility', 'visible');
 }
 
 function hideVisualLines() {
-  isPlacingNodes = false;
   visualLine.setAttribute('visibility', 'hidden');
 }
 
 
 function offFlag() {
+  if (isPlacingNodes) {
+    alert('Warning: Cancel placing nodes by pressing ESC before changing modes');
+    return;
+  }
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
