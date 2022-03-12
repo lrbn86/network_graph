@@ -61,12 +61,13 @@ const nodeBackdrop = document.createElementNS('http://www.w3.org/2000/svg', 'cir
 nodeBackdrop.setAttribute('id', 'node-backdrop');
 nodeBackdrop.setAttribute('r', nodeRadius);
 nodeBackdrop.setAttribute('fill', normalColor);
-nodeBackdrop.setAttribute('opacity', '0');
+nodeBackdrop.setAttribute('opacity', '.5');
+nodeBackdrop.setAttribute('visibility', 'hidden');
 svg.appendChild(nodeBackdrop);
 
 const visualPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
 visualPolyLine.setAttribute('id', 'visual-polyline');
-visualPolyLine.setAttribute('stroke', normalColor);
+visualPolyLine.setAttribute('stroke', criticalColor);
 visualPolyLine.setAttribute('stroke-width', lineStrokeWidth);
 visualPolyLine.setAttribute('fill', 'none');
 visualPolyLine.setAttribute('points', '');
@@ -79,6 +80,7 @@ visualLine.setAttribute('id', 'visual-line')
 visualLine.setAttribute('stroke', normalColor);
 visualLine.setAttribute('stroke-width', lineStrokeWidth);
 visualLine.setAttribute('opacity', '.5');
+visualLine.setAttribute('visibility', 'hidden');
 svg.appendChild(visualLine);
 
 let isPlacingNodes = false;
@@ -129,6 +131,7 @@ function EventListeners() {
     
     // Handle node creation
     if (toggleDrawNodeFlag) {
+      showVisualLines();
 
       isPlacingNodes = true;
       const node = drawNode(nodeBackdrop.getAttribute('cx'), nodeBackdrop.getAttribute('cy'), currentNumNodes);
@@ -197,11 +200,6 @@ function EventListeners() {
 
       }
     }
-
-    // Handle MOUSE LEAVE event
-    svg.addEventListener('mouseleave', (event) => {
-      isDragging = false;
-    });
   });
   
   // Handle zooming with the mouse
@@ -245,12 +243,40 @@ function EventListeners() {
       // If we are currently in drawing nodes/line mode when we press ESC
       if (toggleDrawNodeFlag) {
         // We want to append the newly created polyline
-        createNewPolyLine();
         // We are no longer placing nodes/lines
-        removeVisualLines();
+        hideVisualLines();
       }
     }
   });
+}
+
+
+function setVisualLineToNodeBackdrop() {
+  visualLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
+  visualLine.setAttribute('y1', nodeBackdrop.getAttribute('cy'));
+  visualLine.setAttribute('x2', nodeBackdrop.getAttribute('cx'));
+  visualLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
+}
+
+
+function showVisualLines() {
+  visualLine.setAttribute('visibility', 'visible');
+}
+
+function hideVisualLines() {
+  isPlacingNodes = false;
+  visualLine.setAttribute('visibility', 'hidden');
+}
+
+
+function offFlag() {
+  togglePanningFlag = false;
+  toggleDragObjectFlag = false;
+  toggleDrawNodeFlag = false;
+  toggleDrawTextFlag = false;
+  selectedObject = null;
+  hideVisualLines();
+  nodeBackdrop.setAttribute('visibility', 'hidden');
 }
 
 // This function handles all buttons interactivity on the UI.
@@ -281,10 +307,10 @@ function UIButtonEvents() {
             case 'create-node-btn':
               offFlag();
               toggleDrawNodeFlag = true;
-              nodeBackdrop.setAttribute('opacity', '.5');
-          break;
-        case 'create-text-btn':
-          offFlag();
+              nodeBackdrop.setAttribute('visibility', 'visible');
+              break;
+              case 'create-text-btn':
+                offFlag();
           toggleDrawTextFlag = true;
           break;
         case 'create-comment-btn':
@@ -293,44 +319,4 @@ function UIButtonEvents() {
         }
     });
   });
-}
-
-function setVisualLineToNodeBackdrop() {
-  visualLine.setAttribute('x1', nodeBackdrop.getAttribute('cx'));
-  visualLine.setAttribute('y1', nodeBackdrop.getAttribute('cy'));
-  visualLine.setAttribute('x2', nodeBackdrop.getAttribute('cx'));
-  visualLine.setAttribute('y2', nodeBackdrop.getAttribute('cy'));
-}
-
-function removeVisualLines() {
-  isPlacingNodes = false;
-  visualLine.removeAttribute('x1');
-  visualLine.removeAttribute('y1');
-  visualLine.removeAttribute('x2');
-  visualLine.removeAttribute('y2');
-  visualPolyLine.setAttribute('points', '');
-  polyLinePoints = '';
-}
-
-function createNewPolyLine() {
-  if (nodes.length > 0) {
-    const newPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    newPolyLine.setAttribute('class', 'polyline');
-    newPolyLine.setAttribute('stroke', normalColor);
-    newPolyLine.setAttribute('stroke-width', lineStrokeWidth);
-    newPolyLine.setAttribute('fill', 'none');
-    newPolyLine.setAttribute('points', polyLinePoints);
-    svg.appendChild(newPolyLine);
-  }
-}
-
-function offFlag() {
-  togglePanningFlag = false;
-  toggleDragObjectFlag = false;
-  toggleDrawNodeFlag = false;
-  toggleDrawTextFlag = false;
-  selectedObject = null;
-  nodeBackdrop.setAttribute('opacity', '0');
-  createNewPolyLine();
-  removeVisualLines();
 }
