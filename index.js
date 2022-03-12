@@ -1,6 +1,5 @@
-const main = document.querySelector('#main');
-const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-svg.setAttribute('id', 'svg');
+const root = document.querySelector('#root');
+const svg = document.querySelector('#svg');
 
 const nodeRadius = 45;
 const normalColor = '#2F3B47';
@@ -28,7 +27,7 @@ startApp();
 function initialize() {
   zoomSlider.value = zoomLevel;
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
-  main.appendChild(svg);
+  root.appendChild(svg);
   EventListeners();
   UIButtonEvents();
 }
