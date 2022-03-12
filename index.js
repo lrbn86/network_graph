@@ -213,6 +213,16 @@ function EventListeners() {
       }
     }
   });
+
+  svg.addEventListener('mouseover', (event) => {
+    if (event.target.getAttribute('class', 'node') === 'node') {
+      if (event.getModifierState('Shift')) {
+        console.log('Another node detected.')
+        nodesContainer.removeChild(event.target);
+        // If we hold down shift and mouse over a node, we should ...
+      }
+    }
+  })
   
   // Handle zooming with the mouse
   svg.addEventListener('wheel', (event) => {
