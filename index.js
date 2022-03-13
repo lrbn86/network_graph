@@ -59,9 +59,9 @@ visualLine.setAttribute('opacity', '.5');
 visualLine.setAttribute('visibility', 'hidden');
 svg.appendChild(visualLine);
 
-const polylinesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-polylinesContainer.setAttribute('id', 'polylines-container')
-svg.appendChild(polylinesContainer);
+const linesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+linesContainer.setAttribute('id', 'lines-container')
+svg.appendChild(linesContainer);
 
 const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 nodesContainer.setAttribute('id', 'nodes-container')
@@ -151,6 +151,8 @@ function EventListeners() {
       nodes.push(node);
       nodesPointsMap[node.getAttribute('id')] = `${node.getAttribute('cx')},${node.getAttribute('cy')}`;
       currentNumNodes++;
+
+      createLine(visualLine.getAttribute('x1'), visualLine.getAttribute('y1'), visualLine.getAttribute('x2'), visualLine.getAttribute('y2'));
 
       setVisualLineToNodeBackdrop();
       
@@ -271,17 +273,17 @@ function EventListeners() {
   });
 }
 
-function createNewPolyLine(points) {
+function createLine(x1, y1, x2, y2) {
   if (nodes.length > 1) {
-    const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    polyline.setAttribute('class', 'polyline');
-    polyline.setAttribute('stroke', criticalColor);
-    polyline.setAttribute('stroke-width', lineStrokeWidth);
-    polyline.setAttribute('fill', 'none');
-    polyline.setAttribute('points', points);
-    // svg.insertBefore(polyline, visualLine);
-    polylinesContainer.appendChild(polyline);
-    visualPolyLine.setAttribute('points', '');
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', 'line');
+    line.setAttribute('stroke', criticalColor);
+    line.setAttribute('stroke-width', lineStrokeWidth);
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    linesContainer.appendChild(line);
   }
 }
 
@@ -298,6 +300,7 @@ function showVisualLines() {
 
 function hideVisualLines() {
   visualLine.setAttribute('visibility', 'hidden');
+  visualPolyLine.setAttribute('points', '');
 }
 
 // This function is called if the user changes mode or presses ESC while placing a node
@@ -306,7 +309,6 @@ function reset() {
   if (nodes.length === 1) {
     nodesContainer.removeChild(nodesContainer.lastChild);
   }
-  createNewPolyLine(polyLinePoints);
   polyLinePoints = '';
   nodesGroups.push(nodes);
   nodes = [];
