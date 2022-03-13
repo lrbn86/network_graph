@@ -41,15 +41,6 @@ visualNode.setAttribute('opacity', '.5');
 visualNode.setAttribute('visibility', 'hidden');
 svg.appendChild(visualNode);
 
-// This element appears when placing a polyline visual effect
-const visualPolyLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-visualPolyLine.setAttribute('id', 'visual-polyline');
-visualPolyLine.setAttribute('stroke', 'red');
-visualPolyLine.setAttribute('stroke-width', lineStrokeWidth);
-visualPolyLine.setAttribute('fill', 'none');
-visualPolyLine.setAttribute('points', '');
-svg.appendChild(visualPolyLine);
-
 // This element appears when placing a line for visual effect
 const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 visualLine.setAttribute('id', 'visual-line')
@@ -68,32 +59,13 @@ nodesContainer.setAttribute('id', 'nodes-container')
 svg.appendChild(nodesContainer);
 
 let isPlacingNodes = false;
-let nodes = [];
-let nodesGroups = [];
-let polyLinePoints = '';
+let isConnectingToNode = false;
 
-// TODO: We can relate the poly points with the nodes, by keeping track of all the nodes' cx/cy in its own array
-//       we would loop thru each polylines on mousemove and update according to all of the nodes' cx/cy
-//       since we can assume that nodesPositions[0] = 'points of the first polyline' and the loop thru polylinesContainer to get each polyline
-//       and update accordingly
-let nodesPointsMap = {};
+let nodePoints = [];
+let linePoints = [];
 
-// Draw a node at a point 
-function drawNode(x, y, nodeID) {
-  const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  node.setAttribute('id', `node${nodeID}`);
-  node.setAttribute('class', 'node');
-  node.setAttribute('r', nodeRadius);
-  node.setAttribute('fill', normalColor);
-  node.setAttribute('cx', x);
-  node.setAttribute('cy', y);
-  nodesContainer.appendChild(node);
-  return node;
-}
-
-// Draw a text at a point
-function drawText(x, y, matrixX, matrixY) {
-}
+let graph = {};
+let numNodes = 0;
 
 const svgPoint = svg.createSVGPoint();
 let togglePanningFlag = false;
@@ -118,6 +90,7 @@ function EventListeners() {
     x: 0,
     y: 0
   };
+
   
   // Handle MOUSE DOWN event
   svg.addEventListener('mousedown', (event) => {
@@ -144,20 +117,45 @@ function EventListeners() {
     
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      showVisualLines();
-
+      showVisualLines(); 
       isPlacingNodes = true;
-      const node = drawNode(visualNode.getAttribute('cx'), visualNode.getAttribute('cy'), currentNumNodes);
-      nodes.push(node);
-      nodesPointsMap[node.getAttribute('id')] = `${node.getAttribute('cx')},${node.getAttribute('cy')}`;
-      currentNumNodes++;
-
-      createLine(visualLine.getAttribute('x1'), visualLine.getAttribute('y1'), visualLine.getAttribute('x2'), visualLine.getAttribute('y2'));
-
-      setVisualLineToNodeBackdrop();
       
-      polyLinePoints += `${node.getAttribute('cx')},${node.getAttribute('cy')} `;
-      visualPolyLine.setAttribute('points', polyLinePoints);
+      let x1 = visualLine.getAttribute('x1');
+      let y1 = visualLine.getAttribute('y1');
+      let x2 = visualLine.getAttribute('x2');
+      let y2 = visualLine.getAttribute('y2');
+
+      if (event.target.getAttribute('class') !== 'node') {
+        drawNode(visualNode.getAttribute('cx'), visualNode.getAttribute('cy'), currentNumNodes);
+        numNodes++;
+      }
+      
+      if (numNodes > 1 && event.target.getAttribute('class') !== 'node') {
+        console.log('Not connecting to another node')
+        linePoints.push([x1, y1, x2, y2]);
+      } else if (numNodes < 1 && event.target.getAttribute('class') === 'node') {
+        console.log('Extending');
+        // visualLine.setAttribute('x1', visualNode.getAttribute('cx'));
+        // visualLine.setAttribute('y1', visualNode.getAttribute('cy'));
+        // visualLine.setAttribute('x2', visualNode.getAttribute('cx'));
+        // visualLine.setAttribute('y2', visualNode.getAttribute('cy'));
+        numNodes++;
+      }
+    
+
+      if (numNodes > 1 && event.target.getAttribute('class') === 'node') {
+        isConnectingToNode = true;
+        console.log('Connecting to another node')
+        linePoints.push([x1, y1, event.target.getAttribute('cx') , event.target.getAttribute('cy')]);
+      } else {
+        isConnectingToNode = false;
+      }
+
+      visualLine.setAttribute('x1', visualNode.getAttribute('cx'));
+      visualLine.setAttribute('y1', visualNode.getAttribute('cy'));
+      visualLine.setAttribute('x2', visualNode.getAttribute('cx'));
+      visualLine.setAttribute('y2', visualNode.getAttribute('cy'));
+      renderLines();
     }
     
     // Handle text creation
@@ -193,7 +191,7 @@ function EventListeners() {
     visualNode.setAttribute('cx', matrix.x);
     visualNode.setAttribute('cy', matrix.y);
     
-    if (toggleDrawNodeFlag) {
+    if (toggleDrawNodeFlag && isPlacingNodes) {
       visualLine.setAttribute('x2', matrix.x);
       visualLine.setAttribute('y2', matrix.y);
     }
@@ -204,15 +202,10 @@ function EventListeners() {
       if (toggleDragObjectFlag) {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
-
-        // Update the points on the polyline
-        const selectedObjectID = selectedObject.getAttribute('id');
-        nodesPointsMap[selectedObjectID] = `${selectedObject.getAttribute('cx')},${selectedObject.getAttribute('cy')}`;
-
-        // TODO: We need to get information on the specific polyline that is currently connecting the nodes
-        let newPoints = Object.values(nodesPointsMap).join(' ');
-        // visualPolyLine.setAttribute('points', newPoints);
-
+        
+        // TODO: Update the lines' positions
+        
+        
       }
     }
   });
@@ -273,18 +266,33 @@ function EventListeners() {
   });
 }
 
+// Draw a node at a point 
+function drawNode(x, y, nodeID) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  node.setAttribute('id', `${nodeID}`);
+  node.setAttribute('class', 'node');
+  node.setAttribute('r', nodeRadius);
+  node.setAttribute('fill', normalColor);
+  node.setAttribute('cx', x);
+  node.setAttribute('cy', y);
+  nodesContainer.appendChild(node);
+  currentNumNodes++;
+}
+
 function createLine(x1, y1, x2, y2) {
-  if (nodes.length > 1) {
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('class', 'line');
-    line.setAttribute('stroke', criticalColor);
-    line.setAttribute('stroke-width', lineStrokeWidth);
-    line.setAttribute('x1', x1);
-    line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2);
-    line.setAttribute('y2', y2);
-    linesContainer.appendChild(line);
-  }
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('class', 'line');
+  line.setAttribute('stroke', criticalColor);
+  line.setAttribute('stroke-width', lineStrokeWidth);
+  line.setAttribute('x1', x1);
+  line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2);
+  line.setAttribute('y2', y2);
+  linesContainer.appendChild(line);
+}
+
+// Draw a text at a point
+function drawText(x, y, matrixX, matrixY) {
 }
 
 function setVisualLineToNodeBackdrop() {
@@ -300,21 +308,26 @@ function showVisualLines() {
 
 function hideVisualLines() {
   visualLine.setAttribute('visibility', 'hidden');
-  visualPolyLine.setAttribute('points', '');
 }
 
 // This function is called if the user changes mode or presses ESC while placing a node
 function reset() {
-  // A  node by itself cannot exist without being connected to another node
-  if (nodes.length === 1) {
+  if (numNodes === 1 && !isConnectingToNode) {
     nodesContainer.removeChild(nodesContainer.lastChild);
   }
-  polyLinePoints = '';
-  nodesGroups.push(nodes);
-  nodes = [];
+  renderLines();
   // We are no longer placing nodes/lines
   isPlacingNodes = false;
+  numNodes = 0;
   hideVisualLines();
+}
+
+function renderLines() {
+  linesContainer.innerHTML = '';
+  for (let linepoint of linePoints) {
+    const [x1, y1, x2, y2] = linepoint;
+    createLine(x1, y1, x2, y2);
+  }
 }
 
 
