@@ -103,6 +103,7 @@ function EventListeners() {
       if (event.target.getAttribute('class') === 'line') {
         event.target.setAttribute('stroke-opacity', '.5');
         selectedObject = event.target;
+        isPlacingNodes = false;
       } else if (event.target.getAttribute('class') === 'node') {
         event.target.setAttribute('stroke', normalColor);
         event.target.setAttribute('stroke-width', '45');
@@ -120,14 +121,13 @@ function EventListeners() {
             if (nodeA !== nodeB) {
               if (!graph[nodeA].includes(nodeB)) {
                 graph[nodeA].push(nodeB);
-                const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                edge.setAttribute('class', 'line');
-                edge.setAttribute('stroke', normalColor);
-                edge.setAttribute('stroke-width', '10');
-                edge.setAttribute('x1', document.getElementById(nodeA).getAttribute('cx'));
-                edge.setAttribute('y1', document.getElementById(nodeA).getAttribute('cy'));
-                edge.setAttribute('x2', document.getElementById(nodeB).getAttribute('cx'));
-                edge.setAttribute('y2', document.getElementById(nodeB).getAttribute('cy'));
+                const node1 = document.getElementById(nodeA);
+                const node2 = document.getElementById(nodeB);
+                const nodeAx = node1.getAttribute('cx');
+                const nodeAy = node1.getAttribute('cy');
+                const nodeBx = node2.getAttribute('cx');
+                const nodeBy = node2.getAttribute('cy');
+                const edge = createLine(nodeAx, nodeAy, nodeBx, nodeBy);
                 linesContainer.appendChild(edge);
                 linesSVGGroup.push(edge);
                 nodesLines.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
@@ -148,12 +148,14 @@ function EventListeners() {
           }
         }
       } else {
-        if (selectedNodes.length <= 0) {
+        // Make sure that we are not holding an object before we draw a node
+        if (!selectedObject) {
           isPlacingNodes = true;
           setStatus('Placing nodes');
           nodesSVGGroup.push(drawNode(matrix.x, matrix.y));
           graph[currentNumNodes] = [];
         }
+        // Clear selections
         for (const node of nodesSVGGroup) {
           node.setAttribute('stroke', 'none');
         }
@@ -161,6 +163,7 @@ function EventListeners() {
           line.setAttribute('stroke-opacity', '');
         }
         selectedNodes = [];
+        selectedObject = null;
       }
     }
     // Handle text creation
@@ -273,6 +276,15 @@ function EventListeners() {
     if (key === 'Delete' || key === 'Backspace') {
       if (toggleDrawNodeFlag) {
         console.log('Deleting this object', selectedObject);
+        const className = selectedObject.getAttribute('class');
+        if (className === 'line') {
+          linesContainer.removeChild(selectedObject);
+          setStatus('Deleted an edge');
+        } else if (className === 'node') {
+          nodesContainer.removeChild(selectedObject);
+          setStatus(`Deleted Node ${selectedObject.getAttribute('id')}`);
+        }
+        selectedNodes = [];
         selectedObject = null;
       }
     }
@@ -296,13 +308,14 @@ function drawNode(x, y) {
 function createLine(x1, y1, x2, y2) {
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
   line.setAttribute('class', 'line');
-  line.setAttribute('stroke', criticalColor);
+  line.setAttribute('stroke', normalColor);
   line.setAttribute('stroke-width', lineStrokeWidth);
   line.setAttribute('x1', x1);
   line.setAttribute('y1', y1);
   line.setAttribute('x2', x2);
   line.setAttribute('y2', y2);
   linesContainer.appendChild(line);
+  return line;
 }
 
 // Draw a text at a point
