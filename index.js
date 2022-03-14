@@ -48,7 +48,9 @@ let linePoints = [];
 
 let graph = {};
 let nodesLines = [];
-let nodesEdges = {};
+
+let nodesSVGGroup = [];
+let linesSVGGroup = [];
 
 let selectedNodes = [];
 
@@ -98,12 +100,16 @@ function EventListeners() {
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      if (event.target.getAttribute('class') === 'node') {
+      if (event.target.getAttribute('class') === 'line') {
+        event.target.setAttribute('stroke-opacity', '.5');
+        selectedObject = event.target;
+      } else if (event.target.getAttribute('class') === 'node') {
         event.target.setAttribute('stroke', normalColor);
         event.target.setAttribute('stroke-width', '45');
         event.target.setAttribute('stroke-opacity', '.2');
         isPlacingNodes = false;
         if (!isPlacingNodes) {
+          selectedObject = event.target;
           selectedNodes.push(event.target.getAttribute('id'));
           if (selectedNodes.length > 1) {
             const nodeA = parseInt(selectedNodes[0]);
@@ -115,6 +121,7 @@ function EventListeners() {
               if (!graph[nodeA].includes(nodeB)) {
                 graph[nodeA].push(nodeB);
                 const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                edge.setAttribute('class', 'line');
                 edge.setAttribute('stroke', normalColor);
                 edge.setAttribute('stroke-width', '10');
                 edge.setAttribute('x1', document.getElementById(nodeA).getAttribute('cx'));
@@ -122,8 +129,7 @@ function EventListeners() {
                 edge.setAttribute('x2', document.getElementById(nodeB).getAttribute('cx'));
                 edge.setAttribute('y2', document.getElementById(nodeB).getAttribute('cy'));
                 linesContainer.appendChild(edge);
-                nodesEdges[nodeA].push(edge);
-                nodesEdges[nodeB].push(edge);
+                linesSVGGroup.push(edge);
                 nodesLines.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
                 setStatus(`Node ${nodeA} and Node ${nodeB} are now connected`);
               }
@@ -145,12 +151,14 @@ function EventListeners() {
         if (selectedNodes.length <= 0) {
           isPlacingNodes = true;
           setStatus('Placing nodes');
-          drawNode(matrix.x, matrix.y);
-          nodesEdges[currentNumNodes] = [];
+          nodesSVGGroup.push(drawNode(matrix.x, matrix.y));
           graph[currentNumNodes] = [];
         }
-        for (const node of selectedNodes) {
-          document.getElementById(node).setAttribute('stroke', 'none');
+        for (const node of nodesSVGGroup) {
+          node.setAttribute('stroke', 'none');
+        }
+        for (const line of linesSVGGroup) {
+          line.setAttribute('stroke-opacity', '');
         }
         selectedNodes = [];
       }
@@ -168,8 +176,8 @@ function EventListeners() {
     currentViewBox.y = newViewBox.y;
     if (selectedObject && toggleDragObjectFlag) {
       selectedObject.setAttribute('stroke', 'none');
+      selectedObject = null;
     }
-    selectedObject = null;
   });
   
   // Handle MOUSE MOVE event
@@ -259,21 +267,13 @@ function EventListeners() {
           document.getElementById(node).setAttribute('stroke', 'none');
         }
         selectedNodes = [];
+        isPlacingNodes = false;
       }
     }
-    if (key === 'Delete') {
+    if (key === 'Delete' || key === 'Backspace') {
       if (toggleDrawNodeFlag) {
-        let edges = nodesEdges[selectedNodes[0]];
-        for (const edge of edges) {
-          if (edge) {
-
-            linesContainer.removeChild(edge);
-          }
-        }
-        nodesEdges[selectedNodes[0]] = [];
-        nodesContainer.removeChild(document.getElementById(selectedNodes[0]))
-        // console.log(selectedNodes[0]);
-        selectedNodes = [];
+        console.log('Deleting this object', selectedObject);
+        selectedObject = null;
       }
     }
   });
@@ -290,6 +290,7 @@ function drawNode(x, y) {
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
   nodesContainer.appendChild(node);
+  return node;
 }
 
 function createLine(x1, y1, x2, y2) {
