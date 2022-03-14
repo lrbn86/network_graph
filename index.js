@@ -47,6 +47,7 @@ let nodePoints = [];
 let linePoints = [];
 
 let graph = {};
+let nodesLines = [];
 
 let selectedNodes = [];
 
@@ -120,6 +121,7 @@ function EventListeners() {
                 edge.setAttribute('x2', document.getElementById(nodeB).getAttribute('cx'));
                 edge.setAttribute('y2', document.getElementById(nodeB).getAttribute('cy'));
                 linesContainer.appendChild(edge);
+                nodesLines.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
                 setStatus(`Node ${nodeA} and Node ${nodeB} are now connected`);
               }
               if (!graph[nodeB].includes(nodeA)) {
@@ -162,8 +164,8 @@ function EventListeners() {
     currentViewBox.y = newViewBox.y;
     if (selectedObject && toggleDragObjectFlag) {
       selectedObject.setAttribute('stroke', 'none');
-      selectedObject = null;
     }
+    selectedObject = null;
   });
   
   // Handle MOUSE MOVE event
@@ -180,8 +182,7 @@ function EventListeners() {
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
     
-    if (toggleDrawNodeFlag && isPlacingNodes) {
-      // TODO:
+    if (toggleDrawNodeFlag) {
     }
     
     // Check if we are currently holding an object
@@ -191,9 +192,18 @@ function EventListeners() {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
         
-        // TODO: Update the lines' positions
-        
-        
+        // Update the positions
+        if (nodesLines) {
+          for (let group of nodesLines) {
+            const nodeA = group[0];
+            const nodeB = group[1];
+            const edge = group[2];
+            edge.setAttribute('x1', nodeA.getAttribute('cx'));
+            edge.setAttribute('y1', nodeA.getAttribute('cy'));
+            edge.setAttribute('x2', nodeB.getAttribute('cx'));
+            edge.setAttribute('y2', nodeB.getAttribute('cy'));
+          }
+        }
       }
     }
   });
