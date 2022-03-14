@@ -32,24 +32,6 @@ function initialize() {
   UIButtonEvents();
 }
 
-// This element appears when placing a node
-const visualNode = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-visualNode.setAttribute('id', 'node-backdrop');
-visualNode.setAttribute('r', nodeRadius);
-visualNode.setAttribute('fill', normalColor);
-visualNode.setAttribute('opacity', '.5');
-visualNode.setAttribute('visibility', 'hidden');
-svg.appendChild(visualNode);
-
-// This element appears when placing a line for visual effect
-const visualLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-visualLine.setAttribute('id', 'visual-line')
-visualLine.setAttribute('stroke', normalColor);
-visualLine.setAttribute('stroke-width', lineStrokeWidth);
-visualLine.setAttribute('opacity', '.5');
-visualLine.setAttribute('visibility', 'hidden');
-svg.appendChild(visualLine);
-
 const linesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 linesContainer.setAttribute('id', 'lines-container')
 svg.appendChild(linesContainer);
@@ -65,7 +47,8 @@ let nodePoints = [];
 let linePoints = [];
 
 let graph = {};
-let numNodes = 0;
+
+let selectedNodes = [];
 
 const svgPoint = svg.createSVGPoint();
 let togglePanningFlag = false;
@@ -117,45 +100,28 @@ function EventListeners() {
     
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      showVisualLines(); 
+      // TODO: There's a lot of problems here, let's just go ahead and do graph algos and then we can visualize it here.
+      // showVisualLines(); 
       isPlacingNodes = true;
-      
-      let x1 = visualLine.getAttribute('x1');
-      let y1 = visualLine.getAttribute('y1');
-      let x2 = visualLine.getAttribute('x2');
-      let y2 = visualLine.getAttribute('y2');
-
-      if (event.target.getAttribute('class') !== 'node') {
-        drawNode(visualNode.getAttribute('cx'), visualNode.getAttribute('cy'), currentNumNodes);
-        numNodes++;
-      }
-      
-      if (numNodes > 1 && event.target.getAttribute('class') !== 'node') {
-        console.log('Not connecting to another node')
-        linePoints.push([x1, y1, x2, y2]);
-      } else if (numNodes < 1 && event.target.getAttribute('class') === 'node') {
-        console.log('Extending');
-        // visualLine.setAttribute('x1', visualNode.getAttribute('cx'));
-        // visualLine.setAttribute('y1', visualNode.getAttribute('cy'));
-        // visualLine.setAttribute('x2', visualNode.getAttribute('cx'));
-        // visualLine.setAttribute('y2', visualNode.getAttribute('cy'));
-        numNodes++;
-      }
-    
-
-      if (numNodes > 1 && event.target.getAttribute('class') === 'node') {
-        isConnectingToNode = true;
-        console.log('Connecting to another node')
-        linePoints.push([x1, y1, event.target.getAttribute('cx') , event.target.getAttribute('cy')]);
+      if (event.target.getAttribute('class') === 'node') {
+        console.log('Another node');
+        selectedNodes.push(event.target.getAttribute('id'));
+        if (selectedNodes.length > 1) {
+          const nodeA = parseInt(selectedNodes[0]);
+          const nodeB = parseInt(selectedNodes[1]);
+          if (!graph[nodeA].includes(nodeB)) {
+            graph[nodeA].push(nodeB);
+          }
+          // We are creating a directed graph. Uncomment this if we are doing a undirected graph.
+          // if (!graph[nodeB].includes(nodeA)) {
+          //   graph[nodeB].push(nodeA);
+          // }
+          selectedNodes = [];
+        }
       } else {
-        isConnectingToNode = false;
+        drawNode(matrix.x, matrix.y);
+        graph[currentNumNodes] = [];
       }
-
-      visualLine.setAttribute('x1', visualNode.getAttribute('cx'));
-      visualLine.setAttribute('y1', visualNode.getAttribute('cy'));
-      visualLine.setAttribute('x2', visualNode.getAttribute('cx'));
-      visualLine.setAttribute('y2', visualNode.getAttribute('cy'));
-      renderLines();
     }
     
     // Handle text creation
@@ -188,12 +154,9 @@ function EventListeners() {
     svgPoint.x = event.x;
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-    visualNode.setAttribute('cx', matrix.x);
-    visualNode.setAttribute('cy', matrix.y);
     
     if (toggleDrawNodeFlag && isPlacingNodes) {
-      visualLine.setAttribute('x2', matrix.x);
-      visualLine.setAttribute('y2', matrix.y);
+      // TODO:
     }
     
     // Check if we are currently holding an object
@@ -267,16 +230,17 @@ function EventListeners() {
 }
 
 // Draw a node at a point 
-function drawNode(x, y, nodeID) {
+function drawNode(x, y) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  node.setAttribute('id', `${nodeID}`);
+  currentNumNodes++;
+  node.setAttribute('id', `${currentNumNodes}`);
   node.setAttribute('class', 'node');
   node.setAttribute('r', nodeRadius);
   node.setAttribute('fill', normalColor);
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
+  node.appendChild(text);
   nodesContainer.appendChild(node);
-  currentNumNodes++;
 }
 
 function createLine(x1, y1, x2, y2) {
@@ -295,41 +259,10 @@ function createLine(x1, y1, x2, y2) {
 function drawText(x, y, matrixX, matrixY) {
 }
 
-function setVisualLineToNodeBackdrop() {
-  visualLine.setAttribute('x1', visualNode.getAttribute('cx'));
-  visualLine.setAttribute('y1', visualNode.getAttribute('cy'));
-  visualLine.setAttribute('x2', visualNode.getAttribute('cx'));
-  visualLine.setAttribute('y2', visualNode.getAttribute('cy'));
-}
-
-function showVisualLines() {
-  visualLine.setAttribute('visibility', 'visible');
-}
-
-function hideVisualLines() {
-  visualLine.setAttribute('visibility', 'hidden');
-}
-
 // This function is called if the user changes mode or presses ESC while placing a node
 function reset() {
-  if (numNodes === 1 && !isConnectingToNode) {
-    nodesContainer.removeChild(nodesContainer.lastChild);
-  }
-  renderLines();
-  // We are no longer placing nodes/lines
   isPlacingNodes = false;
-  numNodes = 0;
-  hideVisualLines();
 }
-
-function renderLines() {
-  linesContainer.innerHTML = '';
-  for (let linepoint of linePoints) {
-    const [x1, y1, x2, y2] = linepoint;
-    createLine(x1, y1, x2, y2);
-  }
-}
-
 
 function offFlag() {
   togglePanningFlag = false;
@@ -338,7 +271,10 @@ function offFlag() {
   toggleDrawTextFlag = false;
   selectedObject = null;
   reset();
-  visualNode.setAttribute('visibility', 'hidden');
+}
+
+function getNodeDistance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
 }
 
 // This function handles all buttons interactivity on the UI.
@@ -369,7 +305,6 @@ function UIButtonEvents() {
             case 'create-node-btn':
               offFlag();
               toggleDrawNodeFlag = true;
-              visualNode.setAttribute('visibility', 'visible');
               break;
               case 'create-text-btn':
                 offFlag();
