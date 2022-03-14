@@ -109,7 +109,6 @@ function EventListeners() {
             if (graph[nodeA].includes(nodeB) && graph[nodeB].includes(nodeA)) {
               setStatus(`Node ${nodeA} and Node ${nodeB} are already connected`);
             }
-
             if (nodeA !== nodeB) {
               if (!graph[nodeA].includes(nodeB)) {
                 graph[nodeA].push(nodeB);
@@ -138,10 +137,12 @@ function EventListeners() {
           }
         }
       } else {
-        isPlacingNodes = true;
-        setStatus('Placing nodes');
-        drawNode(matrix.x, matrix.y);
-        graph[currentNumNodes] = [];
+        if (selectedNodes.length <= 0) {
+          isPlacingNodes = true;
+          setStatus('Placing nodes');
+          drawNode(matrix.x, matrix.y);
+          graph[currentNumNodes] = [];
+        }
         for (selected of selectedNodes) {
           document.getElementById(selected).setAttribute('stroke', 'none');
         }
