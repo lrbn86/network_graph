@@ -15,7 +15,7 @@ const zoomLevelLabel = document.querySelector('#zoom-level');
 let maxRange = parseInt(zoomSlider.getAttribute('max'));
 let minRange = parseInt(zoomSlider.getAttribute('min'));
 let stepRange = parseInt(zoomSlider.getAttribute('step'));
-let zoomLevel = (maxRange + minRange) / 2; // Get the middle number
+let zoomLevel = 1250; // Get the middle number
 let zoomPercentage = 100; // Default percentage is 100%
 
 
@@ -48,6 +48,7 @@ let linePoints = [];
 
 let graph = {};
 let nodesLines = [];
+let nodesEdges = {};
 
 let selectedNodes = [];
 
@@ -121,6 +122,8 @@ function EventListeners() {
                 edge.setAttribute('x2', document.getElementById(nodeB).getAttribute('cx'));
                 edge.setAttribute('y2', document.getElementById(nodeB).getAttribute('cy'));
                 linesContainer.appendChild(edge);
+                nodesEdges[nodeA].push(edge);
+                nodesEdges[nodeB].push(edge);
                 nodesLines.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
                 setStatus(`Node ${nodeA} and Node ${nodeB} are now connected`);
               }
@@ -143,10 +146,11 @@ function EventListeners() {
           isPlacingNodes = true;
           setStatus('Placing nodes');
           drawNode(matrix.x, matrix.y);
+          nodesEdges[currentNumNodes] = [];
           graph[currentNumNodes] = [];
         }
-        for (selected of selectedNodes) {
-          document.getElementById(selected).setAttribute('stroke', 'none');
+        for (const node of selectedNodes) {
+          document.getElementById(node).setAttribute('stroke', 'none');
         }
         selectedNodes = [];
       }
@@ -250,9 +254,23 @@ function EventListeners() {
     // TODO: Do we want to implement hotkey shortcuts?
     const key = event.code;
     if (key === 'Escape') {
+      if (toggleDrawNodeFlag) {
+        for (const node of selectedNodes) {
+          document.getElementById(node).setAttribute('stroke', 'none');
+        }
+        selectedNodes = [];
+      }
     }
     if (key === 'Delete') {
       if (toggleDrawNodeFlag) {
+        let edges = nodesEdges[selectedNodes[0]];
+        for (const edge of edges) {
+          if (edge) {
+
+            linesContainer.removeChild(edge);
+          }
+        }
+        nodesEdges[selectedNodes[0]] = [];
         nodesContainer.removeChild(document.getElementById(selectedNodes[0]))
         // console.log(selectedNodes[0]);
         selectedNodes = [];
