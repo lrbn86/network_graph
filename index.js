@@ -7,6 +7,7 @@ const normalColor = '#2F3B47';
 const criticalColor = '#FF7353';
 const lineStrokeWidth = 10;
 let currentNumNodes = 0;
+let currentNumLines = 0;
 
 const zoomSlider = document.querySelector('#zoom-slider');
 const zoomLevelLabel = document.querySelector('#zoom-level');
@@ -144,7 +145,7 @@ function EventListeners() {
               document.getElementById(nodeA).setAttribute('stroke', 'none');
               document.getElementById(nodeB).setAttribute('stroke', 'none');
             }, 500);
-            selectedNodes = [];
+            reset();
           }
         }
       } else {
@@ -162,8 +163,7 @@ function EventListeners() {
         for (const line of linesSVGGroup) {
           line.setAttribute('stroke-opacity', '');
         }
-        selectedNodes = [];
-        selectedObject = null;
+        reset();
       }
     }
     // Handle text creation
@@ -269,7 +269,7 @@ function EventListeners() {
         for (const node of selectedNodes) {
           document.getElementById(node).setAttribute('stroke', 'none');
         }
-        selectedNodes = [];
+        reset();
         isPlacingNodes = false;
       }
     }
@@ -281,11 +281,11 @@ function EventListeners() {
           linesContainer.removeChild(selectedObject);
           setStatus('Deleted an edge');
         } else if (className === 'node') {
+          // TODO: Also delete all the edges that were connected to this deleted node
           nodesContainer.removeChild(selectedObject);
           setStatus(`Deleted Node ${selectedObject.getAttribute('id')}`);
         }
-        selectedNodes = [];
-        selectedObject = null;
+        reset();
       }
     }
   });
@@ -307,6 +307,8 @@ function drawNode(x, y) {
 
 function createLine(x1, y1, x2, y2) {
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  currentNumLines++;
+  line.setAttribute('id', `line${currentNumLines}`);
   line.setAttribute('class', 'line');
   line.setAttribute('stroke', normalColor);
   line.setAttribute('stroke-width', lineStrokeWidth);
@@ -322,18 +324,17 @@ function createLine(x1, y1, x2, y2) {
 function drawText(x, y, matrixX, matrixY) {
 }
 
-// This function is called if the user changes mode or presses ESC while placing a node
 function reset() {
-  isPlacingNodes = false;
+  selectedObject = null;
   selectedNodes = [];
 }
 
 function offFlag() {
+  isPlacingNodes = false;
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
   toggleDrawTextFlag = false;
-  selectedObject = null;
   reset();
 }
 
