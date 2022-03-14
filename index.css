@@ -116,3 +116,10 @@ body {
   outline: 1px solid black;
   background-color: lightblue;
 }
+
+#status-message {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  bottom: 50px;
+}

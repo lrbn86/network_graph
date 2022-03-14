@@ -1,5 +1,6 @@
 const root = document.querySelector('#root');
 const svg = document.querySelector('#svg');
+const statusMsg = document.querySelector('#status-message');
 
 const nodeRadius = 45;
 const normalColor = '#2F3B47';
@@ -102,25 +103,44 @@ function EventListeners() {
     if (toggleDrawNodeFlag) {
       // TODO: There's a lot of problems here, let's just go ahead and do graph algos and then we can visualize it here.
       // showVisualLines(); 
-      isPlacingNodes = true;
       if (event.target.getAttribute('class') === 'node') {
-        console.log('Another node');
-        selectedNodes.push(event.target.getAttribute('id'));
-        if (selectedNodes.length > 1) {
-          const nodeA = parseInt(selectedNodes[0]);
-          const nodeB = parseInt(selectedNodes[1]);
-          if (!graph[nodeA].includes(nodeB)) {
-            graph[nodeA].push(nodeB);
+        event.target.setAttribute('stroke', normalColor);
+        event.target.setAttribute('stroke-width', '45');
+        event.target.setAttribute('stroke-opacity', '.2');
+        isPlacingNodes = false;
+        if (!isPlacingNodes) {
+          selectedNodes.push(event.target.getAttribute('id'));
+          if (selectedNodes.length > 1) {
+            const nodeA = parseInt(selectedNodes[0]);
+            const nodeB = parseInt(selectedNodes[1]);
+            if (!graph[nodeA].includes(nodeB) && nodeA !== nodeB) {
+              graph[nodeA].push(nodeB);
+              setStatus(`Node ${nodeA} has been connected to Node ${nodeB}`);
+            } else {
+              setStatus(`Node ${nodeA} has already been connected to Node ${nodeB}`);
+              document.getElementById(nodeA).setAttribute('stroke', 'none');
+              document.getElementById(nodeB).setAttribute('stroke', 'none');
+            }
+            setTimeout(() => {
+              document.getElementById(nodeA).setAttribute('stroke', 'none');
+              document.getElementById(nodeB).setAttribute('stroke', 'none');
+            }, 500);
+            // We are creating a directed graph. Uncomment this if we are doing a undirected graph.
+            // if (!graph[nodeB].includes(nodeA)) {
+            //   graph[nodeB].push(nodeA);
+            // }
+            selectedNodes = [];
           }
-          // We are creating a directed graph. Uncomment this if we are doing a undirected graph.
-          // if (!graph[nodeB].includes(nodeA)) {
-          //   graph[nodeB].push(nodeA);
-          // }
-          selectedNodes = [];
         }
       } else {
+        isPlacingNodes = true;
+        setStatus('Placing nodes');
         drawNode(matrix.x, matrix.y);
         graph[currentNumNodes] = [];
+        for (selected of selectedNodes) {
+          document.getElementById(selected).setAttribute('stroke', 'none');
+        }
+        selectedNodes = [];
       }
     }
     
@@ -239,7 +259,6 @@ function drawNode(x, y) {
   node.setAttribute('fill', normalColor);
   node.setAttribute('cx', x);
   node.setAttribute('cy', y);
-  node.appendChild(text);
   nodesContainer.appendChild(node);
 }
 
@@ -262,6 +281,7 @@ function drawText(x, y, matrixX, matrixY) {
 // This function is called if the user changes mode or presses ESC while placing a node
 function reset() {
   isPlacingNodes = false;
+  selectedNodes = [];
 }
 
 function offFlag() {
@@ -275,6 +295,10 @@ function offFlag() {
 
 function getNodeDistance(x1, y1, x2, y2) {
   return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+}
+
+function setStatus(message) {
+  statusMsg.innerHTML = message;
 }
 
 // This function handles all buttons interactivity on the UI.
@@ -297,23 +321,26 @@ function UIButtonEvents() {
         case 'pointer-btn':
           offFlag();
           toggleDragObjectFlag = true;
+          setStatus('Moving mode selected');
           break;
-          case 'pan-btn':
-            offFlag();
-            togglePanningFlag = true;
-            break;
-            case 'create-node-btn':
-              offFlag();
-              toggleDrawNodeFlag = true;
-              break;
-              case 'create-text-btn':
-                offFlag();
+        case 'pan-btn':
+          offFlag();
+          togglePanningFlag = true;
+          setStatus('Panning mode selected');
+          break;
+        case 'create-node-btn':
+          offFlag();
+          setStatus('Create node mode selected');
+          toggleDrawNodeFlag = true;
+          break;
+        case 'create-text-btn':
+          offFlag();
           toggleDrawTextFlag = true;
           break;
         case 'create-comment-btn':
           offFlag();
           break;
-        }
+      }
     });
   });
 }
