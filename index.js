@@ -42,7 +42,6 @@ nodesContainer.setAttribute('id', 'nodes-container')
 svg.appendChild(nodesContainer);
 
 let isPlacingNodes = false;
-let isConnectingToNode = false;
 
 let nodePoints = [];
 let linePoints = [];
@@ -74,7 +73,6 @@ function EventListeners() {
     x: 0,
     y: 0
   };
-
   
   // Handle MOUSE DOWN event
   svg.addEventListener('mousedown', (event) => {
@@ -82,7 +80,6 @@ function EventListeners() {
     isDragging = true;
     pointerOrigin.x = event.x;
     pointerOrigin.y = event.y;
-    
     // Handle object dragging
     // Objects will be identified by their class name
     if (event.target.getAttribute('class') === 'node') {
@@ -93,16 +90,12 @@ function EventListeners() {
         selectedObject.setAttribute('stroke-opacity', '.2');
       }
     }
-    
     // Convert screen coordinates to SVG coordinate
     svgPoint.x = event.x;
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-    
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      // TODO: There's a lot of problems here, let's just go ahead and do graph algos and then we can visualize it here.
-      // showVisualLines(); 
       if (event.target.getAttribute('class') === 'node') {
         event.target.setAttribute('stroke', normalColor);
         event.target.setAttribute('stroke-width', '45');
@@ -114,8 +107,10 @@ function EventListeners() {
             const nodeA = parseInt(selectedNodes[0]);
             const nodeB = parseInt(selectedNodes[1]);
             if (!graph[nodeA].includes(nodeB) && nodeA !== nodeB) {
+              // The graph is directed. Check for graph[nodeB].includes(nodeB) for undirected.
               graph[nodeA].push(nodeB);
               setStatus(`Node ${nodeA} has been connected to Node ${nodeB}`);
+
             } else {
               setStatus(`Node ${nodeA} has already been connected to Node ${nodeB}`);
               document.getElementById(nodeA).setAttribute('stroke', 'none');
@@ -125,10 +120,6 @@ function EventListeners() {
               document.getElementById(nodeA).setAttribute('stroke', 'none');
               document.getElementById(nodeB).setAttribute('stroke', 'none');
             }, 500);
-            // We are creating a directed graph. Uncomment this if we are doing a undirected graph.
-            // if (!graph[nodeB].includes(nodeA)) {
-            //   graph[nodeB].push(nodeA);
-            // }
             selectedNodes = [];
           }
         }
@@ -143,7 +134,6 @@ function EventListeners() {
         selectedNodes = [];
       }
     }
-    
     // Handle text creation
     if (toggleDrawTextFlag) {
       // TODO:
@@ -241,10 +231,6 @@ function EventListeners() {
     // TODO: Do we want to implement hotkey shortcuts?
     const key = event.code;
     if (key === 'Escape') {
-      // If we are currently in drawing nodes/line mode when we press ESC
-      if (toggleDrawNodeFlag) {
-        reset();
-      }
     }
   });
 }
