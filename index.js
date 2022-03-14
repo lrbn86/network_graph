@@ -223,31 +223,32 @@ function EventListeners() {
     const deltaY = event.deltaY;
     if (deltaY < 0) { // Zooming in
       zoomSlider.value = parseInt(zoomSlider.value) - stepRange;
-      if (zoomLevel > minRange) {
-        zoomPercentage += 1;
-      }
+      // if (zoomLevel > minRange) {
+      //   zoomPercentage += 1;
+      // }
     } else if (deltaY > 0) { // Zooming out
       zoomSlider.value = parseInt(zoomSlider.value) + stepRange;
-      if (zoomLevel < maxRange) {
-        zoomPercentage -=1;
-      }
+      // if (zoomLevel < maxRange) {
+      //   zoomPercentage -=1;
+      // }
     }
     // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
     // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
   });
-  // Hacky way of keeping zoom percentages consistent with UI and mouse wheel control
-  let zoomLevelsPercentageMap = {};
-  let percent = 25;
-  for (let i = maxRange; i >= minRange; i -= stepRange) {
-    zoomLevelsPercentageMap[i] = percent;
-    percent += 1;
-  }
+  // // Hacky way of keeping zoom percentages consistent with UI and mouse wheel control
+  // let zoomLevelsPercentageMap = {};
+  // let percent = 25;
+  // for (let i = maxRange; i >= minRange; i -= stepRange) {
+  //   zoomLevelsPercentageMap[i] = percent;
+  //   percent += 1;
+  // }
   // Handle zooming on the UI
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
     zoomLevel = value;
-    zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
+    // zoomLevelLabel.textContent = zoomLevel;
+    // zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
   
