@@ -106,15 +106,29 @@ function EventListeners() {
           if (selectedNodes.length > 1) {
             const nodeA = parseInt(selectedNodes[0]);
             const nodeB = parseInt(selectedNodes[1]);
-            if (!graph[nodeA].includes(nodeB) && nodeA !== nodeB) {
-              // The graph is directed. Check for graph[nodeB].includes(nodeB) for undirected.
-              graph[nodeA].push(nodeB);
-              setStatus(`Node ${nodeA} has been connected to Node ${nodeB}`);
+            if (graph[nodeA].includes(nodeB) && graph[nodeB].includes(nodeA)) {
+              setStatus(`Node ${nodeA} and Node ${nodeB} are already connected`);
+            }
 
+            if (nodeA !== nodeB) {
+              if (!graph[nodeA].includes(nodeB)) {
+                graph[nodeA].push(nodeB);
+                const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                edge.setAttribute('stroke', criticalColor);
+                edge.setAttribute('stroke-width', '10');
+                edge.setAttribute('x1', document.getElementById(nodeA).getAttribute('cx'));
+                edge.setAttribute('y1', document.getElementById(nodeA).getAttribute('cy'));
+                edge.setAttribute('x2', document.getElementById(nodeB).getAttribute('cx'));
+                edge.setAttribute('y2', document.getElementById(nodeB).getAttribute('cy'));
+                linesContainer.appendChild(edge);
+                setStatus(`Node ${nodeA} and Node ${nodeB} are now connected`);
+              }
+              if (!graph[nodeB].includes(nodeA)) {
+                graph[nodeB].push(nodeA);
+              }
+              
             } else {
-              setStatus(`Node ${nodeA} has already been connected to Node ${nodeB}`);
-              document.getElementById(nodeA).setAttribute('stroke', 'none');
-              document.getElementById(nodeB).setAttribute('stroke', 'none');
+              setStatus(`Node ${nodeA} cannot connect itself`);
             }
             setTimeout(() => {
               document.getElementById(nodeA).setAttribute('stroke', 'none');
