@@ -114,7 +114,7 @@ function EventListeners() {
               if (!graph[nodeA].includes(nodeB)) {
                 graph[nodeA].push(nodeB);
                 const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                edge.setAttribute('stroke', criticalColor);
+                edge.setAttribute('stroke', normalColor);
                 edge.setAttribute('stroke-width', '10');
                 edge.setAttribute('x1', document.getElementById(nodeA).getAttribute('cx'));
                 edge.setAttribute('y1', document.getElementById(nodeA).getAttribute('cy'));
