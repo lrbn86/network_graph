@@ -44,9 +44,6 @@ svg.appendChild(nodesContainer);
 
 let isPlacingNodes = false;
 
-let nodePoints = [];
-let linePoints = [];
-
 let graph = {};
 let nodesLines = [];
 
