@@ -42,6 +42,10 @@ const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g
 nodesContainer.setAttribute('id', 'nodes-container')
 svg.appendChild(nodesContainer);
 
+const commentContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+commentContainer.setAttribute('id', 'comment-container');
+svg.appendChild(commentContainer);
+
 let isPlacingNodes = false;
 
 let graph = {};
@@ -56,7 +60,7 @@ const svgPoint = svg.createSVGPoint();
 let togglePanningFlag = false;
 let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
-let toggleDrawTextFlag = false;
+let toggleDrawCommentFlag = false;
 let selectedObject = null;
 
 function EventListeners() {
@@ -163,9 +167,12 @@ function EventListeners() {
         reset();
       }
     }
-    // Handle text creation
-    if (toggleDrawTextFlag) {
-      // TODO:
+      // Handle comment creation
+      if (toggleDrawCommentFlag) {
+
+
+
+          drawComment(matrix.x, matrix.y);
     }
   });
   
@@ -317,8 +324,21 @@ function createLine(x1, y1, x2, y2) {
   return line;
 }
 
-// Draw a text at a point
-function drawText(x, y, matrixX, matrixY) {
+// Draw a comment at a point
+function drawComment(x, y) {
+    const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    const input = document.createElement('input')
+    input.setAttribute('type', 'text');
+    input.setAttribute('style', 'width:500px; height:50px; font-size:40px;');
+    input.setAttribute('autofocus', true);
+    object.setAttribute('x', x);
+    object.setAttribute('y', y);
+    object.setAttribute('height', 50);
+    object.setAttribute('width', 500);
+    object.appendChild(input);
+    commentContainer.appendChild(object);
+    return object;
+
 }
 
 function reset() {
@@ -331,7 +351,7 @@ function offFlag() {
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
-  toggleDrawTextFlag = false;
+  toggleDrawCommentFlag = false;
   reset();
 }
 
@@ -381,6 +401,7 @@ function UIButtonEvents() {
           break;
         case 'create-comment-btn':
           offFlag();
+          toggleDrawCommentFlag = true;
           break;
       }
     });
