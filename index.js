@@ -154,7 +154,7 @@ function EventListeners() {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
         
-        // Update the positions
+        // Update the positions of the nodes and edges
         if (connectedNodes) {
           connectedNodes.forEach((group) => {
             const nodeA = group[0];
