@@ -118,6 +118,11 @@ function EventListeners() {
           connectNodes(nodeA, nodeB);
         }
       }
+      if (event.target.getAttribute('id') === 'svg' && selectedNodes.length === 1) {
+        document.getElementById(selectedNodes[0]).setAttribute('stroke', 'none');
+        selectedNodes = [];
+        selectedObject = null;
+      }
     }
     // TODO: Handle comment creation
     if (toggleDrawCommentFlag) {
