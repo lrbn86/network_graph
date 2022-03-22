@@ -119,12 +119,9 @@ function EventListeners() {
         }
       }
     }
-      // Handle comment creation
-      if (toggleDrawCommentFlag) {
-
-
-
-          drawComment(matrix.x, matrix.y);
+    // TODO: Handle comment creation
+    if (toggleDrawCommentFlag) {
+      drawComment(matrix.x, matrix.y);
     }
   });
   
@@ -293,6 +290,7 @@ function drawEdge(x1, y1, x2, y2) {
   return edge;
 }
 
+// TODO:
 function drawComment(x, y) {
   const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
   const input = document.createElement('input');
