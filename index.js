@@ -150,9 +150,6 @@ function EventListeners() {
     svgPoint.y = event.y;
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
     
-    if (toggleDrawNodeFlag) {
-    }
-    
     // Check if we are currently holding an object
     if (selectedObject) {
       // Handle object dragging
