@@ -246,7 +246,7 @@ function deleteNode(targetID) {
   // Remove the node from the DOM
   nodesContainer.removeChild(document.getElementById(targetID));
 
-  
+  // Delete all the edges that were connected to that deleted node
   const edgesToDelete = nodesEdges[targetID];
   for (const id in nodesEdges) nodesEdges[id] = nodesEdges[id].filter((edgeID) => !edgesToDelete.includes(edgeID));
   // Remove the reference to the deleted node in nodesEdges
