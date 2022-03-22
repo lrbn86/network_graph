@@ -328,7 +328,7 @@ function UIButtonEvents() {
           break;
         case 'create-node-btn':
           offFlag();
-          setStatus('Create node mode selected');
+          setStatus('Edit node/edge mode selected');
           toggleDrawNodeFlag = true;
           break;
         case 'create-text-btn':
