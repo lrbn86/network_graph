@@ -285,7 +285,6 @@ function offFlag() {
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
   toggleDrawCommentFlag = false;
-  reset();
 }
 
 function getNodeDistance(x1, y1, x2, y2) {
