@@ -7,7 +7,7 @@ const normalColor = '#2F3B47';
 const criticalColor = '#FF7353';
 const lineStrokeWidth = 10;
 let currentNumNodes = 0;
-let currentNumLines = 0;
+let currentNumEdges = 0;
 
 const zoomSlider = document.querySelector('#zoom-slider');
 const zoomLevelLabel = document.querySelector('#zoom-level');
@@ -34,12 +34,12 @@ function initialize() {
   UIButtonEvents();
 }
 
-const linesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-linesContainer.setAttribute('id', 'lines-container')
-svg.appendChild(linesContainer);
+const edgesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+edgesContainer.setAttribute('id', 'edges-container');
+svg.appendChild(edgesContainer);
 
 const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-nodesContainer.setAttribute('id', 'nodes-container')
+nodesContainer.setAttribute('id', 'nodes-container');
 svg.appendChild(nodesContainer);
 
 const commentContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -49,14 +49,12 @@ svg.appendChild(commentContainer);
 let isPlacingNodes = false;
 
 let graph = {};
-let nodesLines = [];
-
-let nodesSVGGroup = [];
-let linesSVGGroup = [];
-
+let connectedNodes = [];
+let nodesEdges = {};
 let selectedNodes = [];
 
 const svgPoint = svg.createSVGPoint();
+
 let togglePanningFlag = false;
 let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
@@ -88,7 +86,7 @@ function EventListeners() {
     pointerOrigin.y = event.y;
     // Handle object dragging
     // Objects will be identified by their class name
-    if (event.target.getAttribute('class') === 'node') {
+    if (event.target.getAttribute('class') === 'node' || event.target.getAttribute('class') === 'line') {
       selectedObject = event.target;
       if (toggleDragObjectFlag) {
         selectedObject.setAttribute('stroke', normalColor);
@@ -102,69 +100,23 @@ function EventListeners() {
     const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
     // Handle node creation
     if (toggleDrawNodeFlag) {
-      if (event.target.getAttribute('class') === 'line') {
-        event.target.setAttribute('stroke-opacity', '.5');
-        selectedObject = event.target;
-        isPlacingNodes = false;
-      } else if (event.target.getAttribute('class') === 'node') {
+      // Make sure that we are not holding an object before we draw a node
+      if (!selectedObject) {
+        setStatus('Placing nodes');
+        drawNode(matrix.x, matrix.y);
+        graph[`node${currentNumNodes}`] = [];
+        nodesEdges[`node${currentNumNodes}`] = [];
+      }
+      if (event.target.getAttribute('class') === 'node') {
         event.target.setAttribute('stroke', normalColor);
         event.target.setAttribute('stroke-width', '45');
         event.target.setAttribute('stroke-opacity', '.2');
-        isPlacingNodes = false;
-        if (!isPlacingNodes) {
-          selectedObject = event.target;
-          selectedNodes.push(event.target.getAttribute('id'));
-          if (selectedNodes.length > 1) {
-            const nodeA = parseInt(selectedNodes[0]);
-            const nodeB = parseInt(selectedNodes[1]);
-            if (graph[nodeA].includes(nodeB) && graph[nodeB].includes(nodeA)) {
-              setStatus(`Node ${nodeA} and Node ${nodeB} are already connected`);
-            }
-            if (nodeA !== nodeB) {
-              if (!graph[nodeA].includes(nodeB)) {
-                graph[nodeA].push(nodeB);
-                const node1 = document.getElementById(nodeA);
-                const node2 = document.getElementById(nodeB);
-                const nodeAx = node1.getAttribute('cx');
-                const nodeAy = node1.getAttribute('cy');
-                const nodeBx = node2.getAttribute('cx');
-                const nodeBy = node2.getAttribute('cy');
-                const edge = createLine(nodeAx, nodeAy, nodeBx, nodeBy);
-                linesContainer.appendChild(edge);
-                linesSVGGroup.push(edge);
-                nodesLines.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
-                setStatus(`Node ${nodeA} and Node ${nodeB} are now connected`);
-              }
-              if (!graph[nodeB].includes(nodeA)) {
-                graph[nodeB].push(nodeA);
-              }
-              
-            } else {
-              setStatus(`Node ${nodeA} cannot connect itself`);
-            }
-            setTimeout(() => {
-              document.getElementById(nodeA).setAttribute('stroke', 'none');
-              document.getElementById(nodeB).setAttribute('stroke', 'none');
-            }, 500);
-            reset();
-          }
+        selectedNodes.push(event.target.getAttribute('id'));
+        if (selectedNodes.length > 1) {
+          const nodeA = selectedNodes[0];
+          const nodeB = selectedNodes[1];
+          connectNodes(nodeA, nodeB);
         }
-      } else {
-        // Make sure that we are not holding an object before we draw a node
-        if (!selectedObject) {
-          isPlacingNodes = true;
-          setStatus('Placing nodes');
-          nodesSVGGroup.push(drawNode(matrix.x, matrix.y));
-          graph[currentNumNodes] = [];
-        }
-        // Clear selections
-        for (const node of nodesSVGGroup) {
-          node.setAttribute('stroke', 'none');
-        }
-        for (const line of linesSVGGroup) {
-          line.setAttribute('stroke-opacity', '');
-        }
-        reset();
       }
     }
       // Handle comment creation
@@ -211,9 +163,9 @@ function EventListeners() {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
         
-        // Update the positions
-        if (nodesLines) {
-          for (let group of nodesLines) {
+        // Update the positions of the nodes and edges
+        if (connectedNodes) {
+          connectedNodes.forEach((group) => {
             const nodeA = group[0];
             const nodeB = group[1];
             const edge = group[2];
@@ -221,15 +173,12 @@ function EventListeners() {
             edge.setAttribute('y1', nodeA.getAttribute('cy'));
             edge.setAttribute('x2', nodeB.getAttribute('cx'));
             edge.setAttribute('y2', nodeB.getAttribute('cy'));
-          }
+          });
         }
       }
     }
   });
 
-  svg.addEventListener('mouseover', (event) => {
-  });
-  
   // Handle zooming with the mouse
   svg.addEventListener('wheel', (event) => {
     const deltaY = event.deltaY;
@@ -270,26 +219,33 @@ function EventListeners() {
     const key = event.code;
     if (key === 'Escape') {
       if (toggleDrawNodeFlag) {
-        for (const node of selectedNodes) {
-          document.getElementById(node).setAttribute('stroke', 'none');
-        }
-        reset();
-        isPlacingNodes = false;
+        selectedNodes.forEach((nodeID) => document.getElementById(nodeID).setAttribute('stroke', 'none'));
+        selectedNodes = [];
+        selectedObject = null;
       }
     }
     if (key === 'Delete' || key === 'Backspace') {
       if (toggleDrawNodeFlag) {
-        console.log('Deleting this object', selectedObject);
         const className = selectedObject.getAttribute('class');
         if (className === 'line') {
-          linesContainer.removeChild(selectedObject);
-          setStatus('Deleted an edge');
         } else if (className === 'node') {
-          // TODO: Also delete all the edges that were connected to this deleted node
-          nodesContainer.removeChild(selectedObject);
-          setStatus(`Deleted Node ${selectedObject.getAttribute('id')}`);
+          const targetID = selectedObject.getAttribute('id');
+          for (const nodeID in graph) {
+            const arr = graph[nodeID];
+            const index = arr.indexOf(targetID);
+            if (index > -1) {
+              arr.splice(index, 1);
+            }
+          }
+          delete graph[targetID];
+          nodesContainer.removeChild(document.getElementById(targetID));
+          let edges = [];
+          nodesEdges[targetID].forEach((edge) => {edges.push(edge); edgesContainer.removeChild(edge)});
+          console.log(edges);
+          delete nodesEdges[targetID];
+          selectedNodes = [];
+          selectedObject = null;
         }
-        reset();
       }
     }
   });
@@ -299,7 +255,7 @@ function EventListeners() {
 function drawNode(x, y) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   currentNumNodes++;
-  node.setAttribute('id', `${currentNumNodes}`);
+  node.setAttribute('id', `node${currentNumNodes}`);
   node.setAttribute('class', 'node');
   node.setAttribute('r', nodeRadius);
   node.setAttribute('fill', normalColor);
@@ -309,45 +265,22 @@ function drawNode(x, y) {
   return node;
 }
 
-function createLine(x1, y1, x2, y2) {
-  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  currentNumLines++;
-  line.setAttribute('id', `line${currentNumLines}`);
-  line.setAttribute('class', 'line');
-  line.setAttribute('stroke', normalColor);
-  line.setAttribute('stroke-width', lineStrokeWidth);
-  line.setAttribute('x1', x1);
-  line.setAttribute('y1', y1);
-  line.setAttribute('x2', x2);
-  line.setAttribute('y2', y2);
-  linesContainer.appendChild(line);
-  return line;
-}
-
-// Draw a comment at a point
-function drawComment(x, y) {
-    const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    const input = document.createElement('input')
-    input.setAttribute('type', 'text');
-    input.setAttribute('style', 'width:500px; height:50px; font-size:40px;');
-    input.setAttribute('autofocus', true);
-    object.setAttribute('x', x);
-    object.setAttribute('y', y);
-    object.setAttribute('height', 50);
-    object.setAttribute('width', 500);
-    object.appendChild(input);
-    commentContainer.appendChild(object);
-    return object;
-
-}
-
-function reset() {
-  selectedObject = null;
-  selectedNodes = [];
+function drawEdge(x1, y1, x2, y2) {
+  const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  currentNumEdges++;
+  edge.setAttribute('id', `line${currentNumEdges}`);
+  edge.setAttribute('class', 'line');
+  edge.setAttribute('stroke', normalColor);
+  edge.setAttribute('stroke-width', lineStrokeWidth);
+  edge.setAttribute('x1', x1);
+  edge.setAttribute('y1', y1);
+  edge.setAttribute('x2', x2);
+  edge.setAttribute('y2', y2);
+  edgesContainer.appendChild(edge);
+  return edge;
 }
 
 function offFlag() {
-  isPlacingNodes = false;
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
@@ -361,6 +294,30 @@ function getNodeDistance(x1, y1, x2, y2) {
 
 function setStatus(message) {
   statusMsg.innerHTML = message;
+}
+
+function connectNodes(nodeA, nodeB) {
+  if (nodeA !== nodeB && (!graph[nodeA].includes(nodeB) && !graph[nodeB].includes(nodeA))) {
+    graph[nodeA].push(nodeB);
+    graph[nodeB].push(nodeA);
+    const x1 = document.getElementById(nodeA).getAttribute('cx');
+    const y1 = document.getElementById(nodeA).getAttribute('cy');
+    const x2 = document.getElementById(nodeB).getAttribute('cx');
+    const y2 = document.getElementById(nodeB).getAttribute('cy');
+    const edge = drawEdge(x1, y1, x2, y2);
+    nodesEdges[nodeA].push(edge);
+    nodesEdges[nodeB].push(edge);
+    connectedNodes.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
+    setStatus(`${nodeA} and ${nodeB} are now connected.`);
+    setTimeout(() => {
+      document.getElementById(nodeA).setAttribute('stroke', 'none');
+      document.getElementById(nodeB).setAttribute('stroke', 'none');
+    }, 500);
+  } else {
+    selectedNodes.forEach((nodeID) => document.getElementById(nodeID).setAttribute('stroke', 'none'));
+  }
+  selectedObject = null;
+  selectedNodes = [];
 }
 
 // This function handles all buttons interactivity on the UI.
@@ -392,7 +349,7 @@ function UIButtonEvents() {
           break;
         case 'create-node-btn':
           offFlag();
-          setStatus('Create node mode selected');
+          setStatus('Edit node/edge mode selected');
           toggleDrawNodeFlag = true;
           break;
         case 'create-text-btn':
