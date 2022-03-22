@@ -240,6 +240,7 @@ function EventListeners() {
           delete graph[targetID];
           nodesContainer.removeChild(document.getElementById(targetID));
           let edges = [];
+          // TODO: Also need to delete the edges from nodesEdges as well
           nodesEdges[targetID].forEach((edge) => {edges.push(edge); edgesContainer.removeChild(edge)});
           console.log(edges);
           delete nodesEdges[targetID];
