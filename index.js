@@ -230,6 +230,37 @@ function EventListeners() {
   });
 }
 
+// TODO:
+function drawComment(x, y) {
+  const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+  const input = document.createElement('input');
+  input.setAttribute('type', 'text');
+  input.setAttribute('style', 'width: 500px; height:50px; font-size:40px;');
+  input.setAttribute('autofocus', true);
+  object.setAttribute('x', x);
+  object.setAttribute('y', y);
+  object.setAttribute('height', 50);
+  object.setAttribute('width', 500);
+  object.appendChild(input);
+  commentContainer.appendChild(object);
+  return object;
+}
+
+// Draw a node at a point
+function drawNode(x, y) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  currentNumNodes++;
+  node.setAttribute('id', `node${currentNumNodes}`);
+  node.setAttribute('class', 'node');
+  node.setAttribute('r', nodeRadius);
+  node.setAttribute('fill', normalColor);
+  node.setAttribute('cx', x);
+  node.setAttribute('cy', y);
+  nodesContainer.appendChild(node);
+  return node;
+}
+
+// Delete a specific node
 function deleteNode(targetID) {
   // Remove the deleted node references in graph
   for (const id in graph) {
@@ -254,66 +285,7 @@ function deleteNode(targetID) {
   selectedObject = null;
 }
 
-// Draw a node at a point 
-function drawNode(x, y) {
-  const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  currentNumNodes++;
-  node.setAttribute('id', `node${currentNumNodes}`);
-  node.setAttribute('class', 'node');
-  node.setAttribute('r', nodeRadius);
-  node.setAttribute('fill', normalColor);
-  node.setAttribute('cx', x);
-  node.setAttribute('cy', y);
-  nodesContainer.appendChild(node);
-  return node;
-}
-
-function drawEdge(x1, y1, x2, y2) {
-  const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  currentNumEdges++;
-  edge.setAttribute('id', `line${currentNumEdges}`);
-  edge.setAttribute('class', 'line');
-  edge.setAttribute('stroke', normalColor);
-  edge.setAttribute('stroke-width', lineStrokeWidth);
-  edge.setAttribute('x1', x1);
-  edge.setAttribute('y1', y1);
-  edge.setAttribute('x2', x2);
-  edge.setAttribute('y2', y2);
-  edgesContainer.appendChild(edge);
-  return edge;
-}
-
-// TODO:
-function drawComment(x, y) {
-  const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-  const input = document.createElement('input');
-  input.setAttribute('type', 'text');
-  input.setAttribute('style', 'width: 500px; height:50px; font-size:40px;');
-  input.setAttribute('autofocus', true);
-  object.setAttribute('x', x);
-  object.setAttribute('y', y);
-  object.setAttribute('height', 50);
-  object.setAttribute('width', 500);
-  object.appendChild(input);
-  commentContainer.appendChild(object);
-  return object;
-}
-
-function offFlag() {
-  togglePanningFlag = false;
-  toggleDragObjectFlag = false;
-  toggleDrawNodeFlag = false;
-  toggleDrawCommentFlag = false;
-}
-
-function getNodeDistance(x1, y1, x2, y2) {
-  return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
-}
-
-function setStatus(message) {
-  statusMsg.innerHTML = message;
-}
-
+// Connect two nodes with an edge/line
 function connectNodes(nodeA, nodeB) {
   if (nodeA !== nodeB && (!graph[nodeA].includes(nodeB) && !graph[nodeB].includes(nodeA))) {
     graph[nodeA].push(nodeB);
@@ -336,6 +308,37 @@ function connectNodes(nodeA, nodeB) {
   }
   selectedObject = null;
   selectedNodes = [];
+}
+
+// Create an edge/line between two points
+function drawEdge(x1, y1, x2, y2) {
+  const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  currentNumEdges++;
+  edge.setAttribute('id', `line${currentNumEdges}`);
+  edge.setAttribute('class', 'line');
+  edge.setAttribute('stroke', normalColor);
+  edge.setAttribute('stroke-width', lineStrokeWidth);
+  edge.setAttribute('x1', x1);
+  edge.setAttribute('y1', y1);
+  edge.setAttribute('x2', x2);
+  edge.setAttribute('y2', y2);
+  edgesContainer.appendChild(edge);
+  return edge;
+}
+
+function offFlag() {
+  togglePanningFlag = false;
+  toggleDragObjectFlag = false;
+  toggleDrawNodeFlag = false;
+  toggleDrawCommentFlag = false;
+}
+
+function getNodeDistance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+}
+
+function setStatus(message) {
+  statusMsg.innerHTML = message;
 }
 
 // This function handles all buttons interactivity on the UI.
