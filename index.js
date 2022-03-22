@@ -253,9 +253,6 @@ function deleteNode(targetID) {
   // Remove the edges from the DOM
   edgesToDelete.forEach((edgeID) => edgesContainer.removeChild(document.getElementById(edgeID)));
   
-  console.log(graph);
-  console.log(nodesEdges);
-  
   selectedNodes = [];
   selectedObject = null;
 }
