@@ -235,7 +235,6 @@ function EventListeners() {
 
 function deleteNode(targetID) {
   // Remove the deleted node references in graph
-  // for (const id in graph) graph[id] = graph[id].filter((nodeID) => !graph[id].includes(targetID));
   for (const id in graph) {
     const arr = graph[id];
     const index = arr.indexOf(targetID);
