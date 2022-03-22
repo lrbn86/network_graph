@@ -282,6 +282,21 @@ function drawEdge(x1, y1, x2, y2) {
   return edge;
 }
 
+function drawComment(x, y) {
+  const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+  const input = document.createElement('input');
+  input.setAttribute('type', 'text');
+  input.setAttribute('style', 'width: 500px; height:50px; font-size:40px;');
+  input.setAttribute('autofocus', true);
+  object.setAttribute('x', x);
+  object.setAttribute('y', y);
+  object.setAttribute('height', 50);
+  object.setAttribute('width', 500);
+  object.appendChild(input);
+  commentContainer.appendChild(object);
+  return object;
+}
+
 function offFlag() {
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
