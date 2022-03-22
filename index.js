@@ -241,6 +241,7 @@ function EventListeners() {
           nodesContainer.removeChild(document.getElementById(targetID));
           let edges = [];
           // TODO: Also need to delete the edges from nodesEdges as well
+          // save the edges that were connected to the deleted node and loop over them and delete those edges
           nodesEdges[targetID].forEach((edge) => {edges.push(edge); edgesContainer.removeChild(edge)});
           console.log(edges);
           delete nodesEdges[targetID];
