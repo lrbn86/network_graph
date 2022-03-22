@@ -86,7 +86,7 @@ function EventListeners() {
     pointerOrigin.y = event.y;
     // Handle object dragging
     // Objects will be identified by their class name
-    if (event.target.getAttribute('class') === 'node' || event.target.getAttribute('class') === 'line') {
+    if (event.target.getAttribute('class') === 'node') {
       selectedObject = event.target;
       if (toggleDragObjectFlag) {
         selectedObject.setAttribute('stroke', normalColor);
@@ -227,30 +227,41 @@ function EventListeners() {
     if (key === 'Delete' || key === 'Backspace') {
       if (toggleDrawNodeFlag) {
         const className = selectedObject.getAttribute('class');
-        if (className === 'line') {
-        } else if (className === 'node') {
+        if (className === 'node') {
           const targetID = selectedObject.getAttribute('id');
-          for (const nodeID in graph) {
-            const arr = graph[nodeID];
-            const index = arr.indexOf(targetID);
-            if (index > -1) {
-              arr.splice(index, 1);
-            }
-          }
-          delete graph[targetID];
-          nodesContainer.removeChild(document.getElementById(targetID));
-          let edges = [];
-          // TODO: Also need to delete the edges from nodesEdges as well
-          // save the edges that were connected to the deleted node and loop over them and delete those edges
-          nodesEdges[targetID].forEach((edge) => {edges.push(edge); edgesContainer.removeChild(edge)});
-          console.log(edges);
-          delete nodesEdges[targetID];
-          selectedNodes = [];
-          selectedObject = null;
+          deleteNode(targetID);
         }
       }
     }
   });
+}
+
+function deleteNode(targetID) {
+  // Remove the deleted node references in graph
+  // for (const id in graph) graph[id] = graph[id].filter((nodeID) => !graph[id].includes(targetID));
+  for (const id in graph) {
+    const arr = graph[id];
+    const index = arr.indexOf(targetID);
+    if (index > -1) arr.splice(index, 1);
+  }
+  // Remove the node from graph
+  delete graph[targetID];
+  // Remove the node from the DOM
+  nodesContainer.removeChild(document.getElementById(targetID));
+
+  
+  const edgesToDelete = nodesEdges[targetID];
+  for (const id in nodesEdges) nodesEdges[id] = nodesEdges[id].filter((edgeID) => !edgesToDelete.includes(edgeID));
+  // Remove the reference to the deleted node in nodesEdges
+  delete nodesEdges[targetID];
+  // Remove the edges from the DOM
+  edgesToDelete.forEach((edgeID) => edgesContainer.removeChild(document.getElementById(edgeID)));
+  
+  console.log(graph);
+  console.log(nodesEdges);
+  
+  selectedNodes = [];
+  selectedObject = null;
 }
 
 // Draw a node at a point 
@@ -321,8 +332,8 @@ function connectNodes(nodeA, nodeB) {
     const x2 = document.getElementById(nodeB).getAttribute('cx');
     const y2 = document.getElementById(nodeB).getAttribute('cy');
     const edge = drawEdge(x1, y1, x2, y2);
-    nodesEdges[nodeA].push(edge);
-    nodesEdges[nodeB].push(edge);
+    nodesEdges[nodeA].push(edge.getAttribute('id'));
+    nodesEdges[nodeB].push(edge.getAttribute('id'));
     connectedNodes.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
     setStatus(`${nodeA} and ${nodeB} are now connected.`);
     setTimeout(() => {
