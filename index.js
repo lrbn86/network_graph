@@ -148,7 +148,6 @@ function EventListeners() {
       newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
       newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
       svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
-      selectedObject = null;
     }
     
     // Convert screen coordinates to SVG coordinate
@@ -337,6 +336,8 @@ function offFlag() {
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
   toggleDrawCommentFlag = false;
+  selectedNodes = []
+  selectedObject = null;
 }
 
 function getNodeDistance(x1, y1, x2, y2) {
