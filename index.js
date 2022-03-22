@@ -44,6 +44,7 @@ svg.appendChild(nodesContainer);
 
 let graph = {};
 let connectedNodes = [];
+let nodesEdges = {};
 let selectedNodes = [];
 
 const svgPoint = svg.createSVGPoint();
@@ -79,7 +80,7 @@ function EventListeners() {
     pointerOrigin.y = event.y;
     // Handle object dragging
     // Objects will be identified by their class name
-    if (event.target.getAttribute('class') === 'node') {
+    if (event.target.getAttribute('class') === 'node' || event.target.getAttribute('class') === 'line') {
       selectedObject = event.target;
       if (toggleDragObjectFlag) {
         selectedObject.setAttribute('stroke', normalColor);
@@ -98,6 +99,7 @@ function EventListeners() {
         setStatus('Placing nodes');
         drawNode(matrix.x, matrix.y);
         graph[`node${currentNumNodes}`] = [];
+        nodesEdges[`node${currentNumNodes}`] = [];
       }
       if (event.target.getAttribute('class') === 'node') {
         event.target.setAttribute('stroke', normalColor);
@@ -217,14 +219,26 @@ function EventListeners() {
     }
     if (key === 'Delete' || key === 'Backspace') {
       if (toggleDrawNodeFlag) {
-        console.log('Deleting this object', selectedObject);
         const className = selectedObject.getAttribute('class');
         if (className === 'line') {
-          setStatus('Deleted an edge');
         } else if (className === 'node') {
-          setStatus(`Deleted ${selectedObject.getAttribute('id')}`);
+          const targetID = selectedObject.getAttribute('id');
+          for (const nodeID in graph) {
+            const arr = graph[nodeID];
+            const index = arr.indexOf(targetID);
+            if (index > -1) {
+              arr.splice(index, 1);
+            }
+          }
+          delete graph[targetID];
+          nodesContainer.removeChild(document.getElementById(targetID));
+          let edges = [];
+          nodesEdges[targetID].forEach((edge) => {edges.push(edge); edgesContainer.removeChild(edge)});
+          console.log(edges);
+          delete nodesEdges[targetID];
+          selectedNodes = [];
+          selectedObject = null;
         }
-        reset();
       }
     }
   });
@@ -286,6 +300,8 @@ function connectNodes(nodeA, nodeB) {
     const x2 = document.getElementById(nodeB).getAttribute('cx');
     const y2 = document.getElementById(nodeB).getAttribute('cy');
     const edge = drawEdge(x1, y1, x2, y2);
+    nodesEdges[nodeA].push(edge);
+    nodesEdges[nodeB].push(edge);
     connectedNodes.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
     setStatus(`${nodeA} and ${nodeB} are now connected.`);
     setTimeout(() => {
