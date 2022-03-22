@@ -42,17 +42,12 @@ const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g
 nodesContainer.setAttribute('id', 'nodes-container');
 svg.appendChild(nodesContainer);
 
-let isPlacingNodes = false;
-
 let graph = {};
 let connectedNodes = [];
-
-let nodesSVGGroup = [];
-let edgesSVGGroup = [];
-
 let selectedNodes = [];
 
 const svgPoint = svg.createSVGPoint();
+
 let togglePanningFlag = false;
 let toggleDragObjectFlag = true;
 let toggleDrawNodeFlag = false;
@@ -215,11 +210,9 @@ function EventListeners() {
     const key = event.code;
     if (key === 'Escape') {
       if (toggleDrawNodeFlag) {
-        for (const node of selectedNodes) {
-          document.getElementById(node).setAttribute('stroke', 'none');
-        }
-        reset();
-        isPlacingNodes = false;
+        selectedNodes.forEach((nodeID) => document.getElementById(nodeID).setAttribute('stroke', 'none'));
+        selectedNodes = [];
+        selectedObject = null;
       }
     }
     if (key === 'Delete' || key === 'Backspace') {
@@ -227,12 +220,9 @@ function EventListeners() {
         console.log('Deleting this object', selectedObject);
         const className = selectedObject.getAttribute('class');
         if (className === 'line') {
-          linesContainer.removeChild(selectedObject);
           setStatus('Deleted an edge');
         } else if (className === 'node') {
-          // TODO: Also delete all the edges that were connected to this deleted node
-          nodesContainer.removeChild(selectedObject);
-          setStatus(`Deleted Node ${selectedObject.getAttribute('id')}`);
+          setStatus(`Deleted ${selectedObject.getAttribute('id')}`);
         }
         reset();
       }
@@ -269,22 +259,14 @@ function drawEdge(x1, y1, x2, y2) {
   return edge;
 }
 
-// Draw a text at a point
-function drawText(x, y, matrixX, matrixY) {
-}
-
-function reset() {
-  selectedObject = null;
-  selectedNodes = [];
-}
-
 function offFlag() {
-  isPlacingNodes = false;
   togglePanningFlag = false;
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
   toggleDrawTextFlag = false;
-  reset();
+  selectedObject = null;
+  selectedNodes.forEach((nodeID) => document.getElementById(nodeID).setAttribute('stroke', 'none'));
+  selectedNodes = [];
 }
 
 function getNodeDistance(x1, y1, x2, y2) {
@@ -305,7 +287,7 @@ function connectNodes(nodeA, nodeB) {
     const y2 = document.getElementById(nodeB).getAttribute('cy');
     const edge = drawEdge(x1, y1, x2, y2);
     connectedNodes.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
-    setStatus(`Node ${nodeA} and Node ${nodeB} are now connected.`);
+    setStatus(`${nodeA} and ${nodeB} are now connected.`);
     setTimeout(() => {
       document.getElementById(nodeA).setAttribute('stroke', 'none');
       document.getElementById(nodeB).setAttribute('stroke', 'none');
