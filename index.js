@@ -235,20 +235,27 @@ function EventListeners() {
   });
 }
 
-// TODO:
+// TODO: 
+// Draw comment at a point
 function drawComment(x, y) {
-  const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-  const input = document.createElement('input');
-  input.setAttribute('type', 'text');
-  input.setAttribute('style', 'width: 500px; height:50px; font-size:40px;');
-  input.setAttribute('autofocus', true);
-  object.setAttribute('x', x);
-  object.setAttribute('y', y);
-  object.setAttribute('height', 50);
-  object.setAttribute('width', 500);
-  object.appendChild(input);
-  commentContainer.appendChild(object);
-  return object;
+    const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    const input = document.createElement('textarea');
+    const image = document.createElement('img');
+    image.setAttribute('src', 'images/comment.svg');
+    image.setAttribute('height', 75);
+    image.setAttribute('width', 75);
+    input.setAttribute('class', 'comment');
+    input.setAttribute('autofocus', true);
+    input.setAttribute('cols', 400);
+    input.setAttribute('rows', 120);
+    object.setAttribute('x', x);
+    object.setAttribute('y', y);
+    object.setAttribute('height', 300);
+    object.setAttribute('width', 500);
+    object.appendChild(image);
+    object.appendChild(input);
+    commentContainer.appendChild(object);
+    return object;
 }
 
 // Draw a node at a point
