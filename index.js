@@ -338,13 +338,27 @@ function drawEdge(x1, y1, x2, y2) {
   edge.setAttribute('x2', x2);
   edge.setAttribute('y2', y2);
   edgesContainer.appendChild(edge);
+  drawTaskBox();
   return edge;
+}
+
+function drawTaskBox() {
+  const taskBox = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+  taskBox.setAttribute('x', '150');
+  taskBox.setAttribute('y', '150');
+  const div = document.createElement('div');
+  div.setAttribute('class', 'taskbox');
+  div.setAttribute('xmlns', "http://www.w3.org/1999/xhtml");
+  div.innerHTML = `
+    <p>Estimated Time</p>
+  `;
+  taskBox.appendChild(div);
+  edgesContainer.appendChild(taskBox);
 }
 
 function drawGridPoints() {
   const gridPointsContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   gridPointsContainer.setAttribute('id', 'grid-points-container');
-  console.log(svg.width, svg.height);
   svg.appendChild(gridPointsContainer);
 }
 

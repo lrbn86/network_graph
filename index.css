@@ -9,6 +9,11 @@ body {
   user-select: none;
 }
 
+.taskbox {
+  display: inline-block;
+  color: blue;
+}
+
 #svg {
   background-color: #fff;
   position: absolute;
