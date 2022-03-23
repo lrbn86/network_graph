@@ -336,6 +336,7 @@ function offFlag() {
   toggleDragObjectFlag = false;
   toggleDrawNodeFlag = false;
   toggleDrawCommentFlag = false;
+  selectedNodes.forEach((node) => document.getElementById(node).setAttribute('stroke', 'none'));
   selectedNodes = []
   selectedObject = null;
 }
