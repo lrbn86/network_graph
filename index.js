@@ -30,10 +30,13 @@ function initialize() {
   zoomSlider.value = zoomLevel;
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
   root.appendChild(svg);
+  drawGridPoints();
   EventListeners();
   UIButtonEvents();
 }
 
+// These containers help control what should be drawn first since SVG is based on the painter-model
+// e.g. the nodes will be drawn on top of the edges
 const edgesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 edgesContainer.setAttribute('id', 'edges-container');
 svg.appendChild(edgesContainer);
@@ -45,6 +48,10 @@ svg.appendChild(nodesContainer);
 const commentContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 commentContainer.setAttribute('id', 'comment-container');
 svg.appendChild(commentContainer);
+
+const datesTextContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+datesTextContainer.setAttribute('id', 'dates-text-container');
+svg.appendChild(datesTextContainer);
 
 let isPlacingNodes = false;
 
@@ -115,7 +122,12 @@ function EventListeners() {
         if (selectedNodes.length > 1) {
           const nodeA = selectedNodes[0];
           const nodeB = selectedNodes[1];
-          connectNodes(nodeA, nodeB);
+          if (nodeA !== nodeB) {
+            connectNodes(nodeA, nodeB);
+          } else {
+            // TODO: If we click on the same node again, we will edit the date
+            console.log('Same node');
+          }
         }
       }
       if (event.target.getAttribute('id') === 'svg' && selectedNodes.length === 1) {
@@ -292,7 +304,7 @@ function deleteNode(targetID) {
 
 // Connect two nodes with an edge/line
 function connectNodes(nodeA, nodeB) {
-  if (nodeA !== nodeB && (!graph[nodeA].includes(nodeB) && !graph[nodeB].includes(nodeA))) {
+  if (!graph[nodeA].includes(nodeB) && !graph[nodeB].includes(nodeA)) {
     graph[nodeA].push(nodeB);
     graph[nodeB].push(nodeA);
     const x1 = document.getElementById(nodeA).getAttribute('cx');
@@ -329,6 +341,13 @@ function drawEdge(x1, y1, x2, y2) {
   edge.setAttribute('y2', y2);
   edgesContainer.appendChild(edge);
   return edge;
+}
+
+function drawGridPoints() {
+  const gridPointsContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  gridPointsContainer.setAttribute('id', 'grid-points-container');
+  console.log(svg.width, svg.height);
+  svg.appendChild(gridPointsContainer);
 }
 
 function offFlag() {
