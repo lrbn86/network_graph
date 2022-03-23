@@ -9,6 +9,17 @@ body {
   user-select: none;
 }
 
+.taskbox {
+  color: blue;
+  width: 100%;
+  height: 100%;
+}
+
+.taskbox > p {
+  margin: 0;
+  padding: 0;
+}
+
 #svg {
   background-color: #fff;
   position: absolute;
