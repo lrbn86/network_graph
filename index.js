@@ -8,6 +8,7 @@ const criticalColor = '#FF7353';
 const lineStrokeWidth = 10;
 let currentNumNodes = 0;
 let currentNumLines = 0;
+let currentNumComments = 0;
 
 const zoomSlider = document.querySelector('#zoom-slider');
 const zoomLevelLabel = document.querySelector('#zoom-level');
@@ -169,9 +170,6 @@ function EventListeners() {
     }
       // Handle comment creation
       if (toggleDrawCommentFlag) {
-
-
-
           drawComment(matrix.x, matrix.y);
     }
   });
@@ -227,7 +225,7 @@ function EventListeners() {
     }
   });
 
-  svg.addEventListener('mouseover', (event) => {
+    svg.addEventListener('mouseover', (event) => {
   });
   
   // Handle zooming with the mouse
@@ -327,16 +325,30 @@ function createLine(x1, y1, x2, y2) {
 // Draw a comment at a point
 function drawComment(x, y) {
     const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    const input = document.createElement('input')
-    input.setAttribute('type', 'text');
-    input.setAttribute('style', 'width:500px; height:50px; font-size:40px;');
+    const input = document.createElement('textarea');
+    const image = document.createElement('img');
+    currentNumComments++;
+
+    image.setAttribute('src', 'images/comment.svg');
+    image.setAttribute('height', 100);
+    image.setAttribute('width', 100);
+
+    input.setAttribute('class', 'comment');
+    input.setAttribute('id', 'comment' + currentNumComments);
+    input.setAttribute('maxlength', '500');
+    input.setAttribute('cols', 400);
+    input.setAttribute('rows', 80);
     input.setAttribute('autofocus', true);
+
     object.setAttribute('x', x);
     object.setAttribute('y', y);
-    object.setAttribute('height', 50);
+    object.setAttribute('height', 500);
     object.setAttribute('width', 500);
+
+    object.appendChild(image);
     object.appendChild(input);
     commentContainer.appendChild(object);
+
     return object;
 
 }
