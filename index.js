@@ -53,8 +53,6 @@ const datesTextContainer = document.createElementNS('http://www.w3.org/2000/svg'
 datesTextContainer.setAttribute('id', 'dates-text-container');
 svg.appendChild(datesTextContainer);
 
-let isPlacingNodes = false;
-
 let graph = {};
 let connectedNodes = [];
 let nodesEdges = {};
