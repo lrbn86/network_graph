@@ -346,6 +346,8 @@ function drawTaskBox() {
   const taskBox = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
   taskBox.setAttribute('x', '150');
   taskBox.setAttribute('y', '150');
+  taskBox.setAttribute('width', '200');
+  taskBox.setAttribute('height', '200');
   const div = document.createElement('div');
   div.setAttribute('class', 'taskbox');
   div.setAttribute('xmlns', "http://www.w3.org/1999/xhtml");
