@@ -12,7 +12,6 @@ let currentNumEdges = 0;
 const zoomSlider = document.querySelector('#zoom-slider');
 const zoomLevelLabel = document.querySelector('#zoom-level');
 // Get attributes from the zoomSlider element
-// Purpose: If the html attributes are changed, there's no need to update this JS file.
 let maxRange = parseInt(zoomSlider.getAttribute('max'));
 let minRange = parseInt(zoomSlider.getAttribute('min'));
 let stepRange = parseInt(zoomSlider.getAttribute('step'));
@@ -20,19 +19,18 @@ let zoomLevel = 1250; // Get the middle number
 let zoomPercentage = 100; // Default percentage is 100%
 
 
-function startApp() {
+function main() {
   initialize();
 }
-startApp();
+main();
 
 // Initialization
 function initialize() {
   zoomSlider.value = zoomLevel;
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
   root.appendChild(svg);
-  drawGridPoints();
-  EventListeners();
-  UIButtonEvents();
+  SVGEventListeners();
+  UIEventListeners();
 }
 
 // These containers help control what should be drawn first since SVG is based on the painter-model
@@ -49,9 +47,9 @@ const commentContainer = document.createElementNS('http://www.w3.org/2000/svg', 
 commentContainer.setAttribute('id', 'comment-container');
 svg.appendChild(commentContainer);
 
-const datesTextContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-datesTextContainer.setAttribute('id', 'dates-text-container');
-svg.appendChild(datesTextContainer);
+const textContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+textContainer.setAttribute('id', 'text-container');
+svg.appendChild(textContainer);
 
 let graph = {};
 let connectedNodes = [];
@@ -60,115 +58,117 @@ let selectedNodes = [];
 
 const svgPoint = svg.createSVGPoint();
 
-let togglePanningFlag = false;
-let toggleDragObjectFlag = true;
-let toggleDrawNodeFlag = false;
-let toggleDrawCommentFlag = false;
-let selectedObject = null;
+function SVGEventListeners() {
 
-function EventListeners() {
-  let isDragging = false;
-  let pointerOrigin = {
-    x: 0,
-    y: 0
-  };
-  let currentViewBox = {
-    x: 0,
-    y: 0,
-    width: zoomLevel,
-    height: zoomLevel
-  };
-  let newViewBox = {
-    x: 0,
-    y: 0
-  };
+  let selectedObject = null;
+  let isPanning = false;
+  let pointerOrigin = { x: 0, y: 0 };
+  let currentViewBox = { x: 0, y: 0, width: zoomLevel, height: zoomLevel };
+  let newViewBox = { x: 0, y: 0 };
+
+  function convertToSVGCoordinates(x, y) { svgPoint.x = x; svgPoint.y = y; return svgPoint.matrixTransform(svg.getScreenCTM().inverse()); }
   
-  // Handle MOUSE DOWN event
   svg.addEventListener('mousedown', (event) => {
-    // Handle panning
-    isDragging = true;
-    pointerOrigin.x = event.x;
-    pointerOrigin.y = event.y;
-    // Handle object dragging
-    // Objects will be identified by their class name
-    if (event.target.getAttribute('class') === 'node') {
-      selectedObject = event.target;
-      if (toggleDragObjectFlag) {
-        selectedObject.setAttribute('stroke', normalColor);
-        selectedObject.setAttribute('stroke-width', '45');
-        selectedObject.setAttribute('stroke-opacity', '.2');
+
+    const target = event.target;
+    const targetID = target.getAttribute('id');
+    const targetClass = target.getAttribute('class');
+    const matrix = convertToSVGCoordinates(event.x, event.y);
+
+    if (UIMode['select-btn'][0]) {
+
+      if (targetClass === 'node') {
+
+        selectedObject = target;
+        selectedObject.setAttribute('stroke', '#000');
+        selectedObject.setAttribute('stroke-width', '2');
+
       }
+
     }
-    // Convert screen coordinates to SVG coordinate
-    svgPoint.x = event.x;
-    svgPoint.y = event.y;
-    const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+
+    if (UIMode['move-btn'][0]) {
+
+      isPanning = true;
+      pointerOrigin.x = event.x;
+      pointerOrigin.y = event.y;
+
+    }
+
     // Handle node creation
-    if (toggleDrawNodeFlag) {
+    if (UIMode['add-node-btn'][0]) {
       // Make sure that we are not holding an object before we draw a node
       if (!selectedObject) {
-        setStatus('Placing nodes');
         drawNode(matrix.x, matrix.y);
         graph[`node${currentNumNodes}`] = [];
         nodesEdges[`node${currentNumNodes}`] = [];
       }
-      if (event.target.getAttribute('class') === 'node') {
-        event.target.setAttribute('stroke', normalColor);
-        event.target.setAttribute('stroke-width', '45');
-        event.target.setAttribute('stroke-opacity', '.2');
-        selectedNodes.push(event.target.getAttribute('id'));
+    }
+
+    if (UIMode['connect-nodes-btn'][0]) {
+
+      if (targetClass === 'node') {
+        target.setAttribute('stroke', normalColor);
+        target.setAttribute('stroke-width', '45');
+        target.setAttribute('stroke-opacity', '.2');
+        selectedNodes.push(target.getAttribute('id'));
         if (selectedNodes.length > 1) {
-          const nodeA = selectedNodes[0];
-          const nodeB = selectedNodes[1];
-          if (nodeA !== nodeB) {
-            connectNodes(nodeA, nodeB);
-          } else {
-            // TODO: If we click on the same node again, we will edit the date
-            console.log('Same node');
-          }
+          const [nodeA, nodeB] = selectedNodes;
+          if (nodeA !== nodeB) connectNodes(nodeA, nodeB);
         }
       }
-      if (event.target.getAttribute('id') === 'svg' && selectedNodes.length === 1) {
-        document.getElementById(selectedNodes[0]).setAttribute('stroke', 'none');
-        selectedNodes = [];
-        selectedObject = null;
-      }
+
     }
-    // TODO: Handle comment creation
-    if (toggleDrawCommentFlag) {
+
+    // TODO:
+    if (UIMode['add-task-btn'][0]) {
+
+    }
+
+    // TODO:
+    if (UIMode['add-comment-btn'][0]) {
       drawComment(matrix.x, matrix.y);
     }
+
   });
   
-  // Handle MOUSE UP event
   svg.addEventListener('mouseup', (event) => {
-    isDragging = false;
-    currentViewBox.x = newViewBox.x;
-    currentViewBox.y = newViewBox.y;
-    if (selectedObject && toggleDragObjectFlag) {
-      selectedObject.setAttribute('stroke', 'none');
+    
+    if (UIMode['select-btn'][0]) {
+
+      if (selectedObject && selectedObject.getAttribute('class') === 'node') {
+
+        selectedObject.setAttribute('stroke', 'none');
+
+      }
+
       selectedObject = null;
+
     }
+
+    if (UIMode['move-btn'][0]) {
+
+      isPanning = false;
+      currentViewBox.x = newViewBox.x;
+      currentViewBox.y = newViewBox.y;
+
+    }
+
   });
   
-  // Handle MOUSE MOVE event
   svg.addEventListener('mousemove', (event) => {
-    // Handle panning
-    if (isDragging && togglePanningFlag) {
-      newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
-      newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
-      svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
+    const matrix = convertToSVGCoordinates(event.x, event.y);
+
+    if (UIMode['move-btn'][0]) {
+      if (isPanning) {
+        newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
+        newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
+        svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);
+      }
     }
     
-    // Convert screen coordinates to SVG coordinate
-    svgPoint.x = event.x;
-    svgPoint.y = event.y;
-    const matrix = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-    
-    // Check if we are currently holding an object
-    if (selectedObject) {
-      // Handle object dragging
-      if (toggleDragObjectFlag) {
+    if (UIMode['select-btn'][0]) {
+      if (selectedObject) {
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
         
@@ -186,6 +186,7 @@ function EventListeners() {
         }
       }
     }
+
   });
 
   // Handle zooming with the mouse
@@ -193,79 +194,57 @@ function EventListeners() {
     const deltaY = event.deltaY;
     if (deltaY < 0) { // Zooming in
       zoomSlider.value = parseInt(zoomSlider.value) - stepRange;
-      // if (zoomLevel > minRange) {
-      //   zoomPercentage += 1;
-      // }
+      if (zoomLevel > minRange) {
+        zoomPercentage += 1;
+      }
     } else if (deltaY > 0) { // Zooming out
       zoomSlider.value = parseInt(zoomSlider.value) + stepRange;
-      // if (zoomLevel < maxRange) {
-      //   zoomPercentage -=1;
-      // }
+      if (zoomLevel < maxRange) {
+        zoomPercentage -=1;
+      }
     }
     // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
     // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
   });
   // // Hacky way of keeping zoom percentages consistent with UI and mouse wheel control
-  // let zoomLevelsPercentageMap = {};
-  // let percent = 25;
-  // for (let i = maxRange; i >= minRange; i -= stepRange) {
-  //   zoomLevelsPercentageMap[i] = percent;
-  //   percent += 1;
-  // }
+  let zoomLevelsPercentageMap = {};
+  let percent = 25;
+  for (let i = maxRange; i >= minRange; i -= stepRange) {
+    zoomLevelsPercentageMap[i] = percent;
+    percent += 1;
+  }
   // Handle zooming on the UI
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
     zoomLevel = value;
-    // zoomLevelLabel.textContent = zoomLevel;
-    // zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
+    zoomLevelLabel.textContent = zoomLevel;
+    zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
-  });
-  
-  // Listen for any key presses
-  document.addEventListener('keydown', (event) => {
-    // TODO: Do we want to implement hotkey shortcuts?
-    const key = event.code;
-    if (key === 'Escape') {
-      if (toggleDrawNodeFlag) {
-        selectedNodes.forEach((nodeID) => document.getElementById(nodeID).setAttribute('stroke', 'none'));
-        selectedNodes = [];
-        selectedObject = null;
-      }
-    }
-    if (key === 'Delete' || key === 'Backspace') {
-      if (toggleDrawNodeFlag) {
-        const className = selectedObject.getAttribute('class');
-        if (className === 'node') {
-          const targetID = selectedObject.getAttribute('id');
-          deleteNode(targetID);
-        }
-      }
-    }
   });
 }
 
-// TODO: 
+// TODO:
 // Draw comment at a point
 function drawComment(x, y) {
-    const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    const input = document.createElement('textarea');
-    const image = document.createElement('img');
-    image.setAttribute('src', 'images/comment.svg');
-    image.setAttribute('height', 75);
-    image.setAttribute('width', 75);
-    input.setAttribute('class', 'comment');
-    input.setAttribute('autofocus', true);
-    input.setAttribute('cols', 400);
-    input.setAttribute('rows', 120);
-    object.setAttribute('x', x);
-    object.setAttribute('y', y);
-    object.setAttribute('height', 300);
-    object.setAttribute('width', 500);
-    object.appendChild(image);
-    object.appendChild(input);
-    commentContainer.appendChild(object);
-    return object;
+  const object = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+  const input = document.createElement('textarea');
+  const image = document.createElement('img');
+  image.setAttribute('src', 'images/comment.svg');
+  image.setAttribute('height', 75);
+  image.setAttribute('width', 75);
+  input.setAttribute('class', 'comment');
+  input.setAttribute('autofocus', true);
+  input.setAttribute('cols', 400);
+  input.setAttribute('rows', 120);
+  object.setAttribute('x', x);
+  object.setAttribute('y', y);
+  object.setAttribute('height', 300);
+  object.setAttribute('width', 500);
+  object.appendChild(image);
+  object.appendChild(input);
+  commentContainer.appendChild(object);
+  return object;
 }
 
 // Draw a node at a point
@@ -320,7 +299,6 @@ function connectNodes(nodeA, nodeB) {
     nodesEdges[nodeA].push(edge.getAttribute('id'));
     nodesEdges[nodeB].push(edge.getAttribute('id'));
     connectedNodes.push([document.getElementById(nodeA), document.getElementById(nodeB), edge]);
-    setStatus(`${nodeA} and ${nodeB} are now connected.`);
     setTimeout(() => {
       document.getElementById(nodeA).setAttribute('stroke', 'none');
       document.getElementById(nodeB).setAttribute('stroke', 'none');
@@ -345,91 +323,96 @@ function drawEdge(x1, y1, x2, y2) {
   edge.setAttribute('x2', x2);
   edge.setAttribute('y2', y2);
   edgesContainer.appendChild(edge);
-  drawTaskBox();
+  drawTaskBox(x1, y1);
   return edge;
 }
 
-function drawTaskBox() {
+function drawTaskBox(x, y) {
   const taskBox = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-  taskBox.setAttribute('x', '150');
-  taskBox.setAttribute('y', '150');
-  taskBox.setAttribute('width', '200');
-  taskBox.setAttribute('height', '200');
+  taskBox.setAttribute('x', x);
+  taskBox.setAttribute('y', y);
+  taskBox.setAttribute('width', '335');
+  taskBox.setAttribute('height', '102');
   const div = document.createElement('div');
   div.setAttribute('class', 'taskbox');
-  div.setAttribute('xmlns', "http://www.w3.org/1999/xhtml");
+  // div.setAttribute('xmlns', "http://www.w3.org/1999/xhtml");
   div.innerHTML = `
+    <p>Task</p>
+    <p>Assigned member</p>
     <p>Estimated Time</p>
   `;
   taskBox.appendChild(div);
-  edgesContainer.appendChild(taskBox);
+  textContainer.appendChild(taskBox);
 }
 
-function drawGridPoints() {
-  const gridPointsContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  gridPointsContainer.setAttribute('id', 'grid-points-container');
-  svg.appendChild(gridPointsContainer);
-}
+// Determine what mode we are currently in
+const UIMode = {
+  'select-btn': [true, 'Select'],
+  'move-btn': [false, 'Move'],
+  'add-node-btn': [false, 'Add Node'],
+  'connect-nodes-btn': [false, 'Connect Nodes'],
+  'add-task-btn': [false, 'Edit Tasks'],
+  'add-comment-btn': [false, 'Add Comment']
+};
 
-function offFlag() {
-  togglePanningFlag = false;
-  toggleDragObjectFlag = false;
-  toggleDrawNodeFlag = false;
-  toggleDrawCommentFlag = false;
-  selectedNodes.forEach((node) => document.getElementById(node).setAttribute('stroke', 'none'));
-  selectedNodes = []
-  selectedObject = null;
-}
+// This function handles all interactivity on the UI.
+function UIEventListeners() {
 
-function getNodeDistance(x1, y1, x2, y2) {
-  return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
-}
+  // The select button is selected by default
+  document.querySelector('#select-btn').classList.add('btn-selected');
 
-function setStatus(message) {
-  statusMsg.innerHTML = message;
-}
+  document.addEventListener('click', (event) => {
 
-// This function handles all buttons interactivity on the UI.
-function UIButtonEvents() {
-  // TODO: The 'Present' button will clear all the UI, the user can only pan the SVG.
-  
-  // The pointer button will be the default select.
-  document.querySelectorAll('.btn-function')[0].classList.add('btn-selected');
-  document.querySelectorAll('.btn-function').forEach((btn) => {
-    // Add an click event listener for each button
-    btn.addEventListener('click', () => {
-      // Deselect all buttons, reset
-      document.querySelectorAll('.btn-function').forEach((btn) => {
-        btn.classList.remove('btn-selected');
-      });
-      // The button that was clicked will be selected
-      btn.classList.add('btn-selected');
-      // Determine which button was actually clicked and toggle the appropriate functionality
-      switch (btn.id) {
-        case 'pointer-btn':
-          offFlag();
-          toggleDragObjectFlag = true;
-          setStatus('Moving mode selected');
-          break;
-        case 'pan-btn':
-          offFlag();
-          togglePanningFlag = true;
-          setStatus('Panning mode selected');
-          break;
-        case 'create-node-btn':
-          offFlag();
-          setStatus('Edit node/edge mode selected');
-          toggleDrawNodeFlag = true;
-          break;
-        case 'create-text-btn':
-          offFlag();
-          toggleDrawTextFlag = true;
-          break;
-        case 'create-comment-btn':
-          offFlag();
-          toggleDrawCommentFlag = true;
-          break;
-      }
-    });
+    const target = event.target;
+    const btnID = event.target.getAttribute('id');
+
+    // Check if we are clicking on the buttons on the top-left sidebar
+    if (target.classList.contains('btn-function')) {
+
+      // Reset selection
+      document.querySelectorAll('.btn-function').forEach((btn) => btn.classList.remove('btn-selected'));
+
+      // Select this button
+      target.classList.add('btn-selected');
+
+      // Reset selection
+      for (const id in UIMode) UIMode[id][0] = false;
+
+      // Toggle UI mode (e.g., if UI mode for Select button is already false, then set it to true, vice versa)
+      UIMode[btnID][0] = UIMode[btnID][0] ? false: true;
+
+      // Set status message according to what button we selected
+      if (UIMode[btnID]) setStatus(UIMode[btnID][1]);
+
+      if (btnID === 'undo-btn')
+        setStatus('Undo');
+      else if (btnID === 'redo-btn')
+        setStatus('Redo');
+
+    }
+
   });
+
+  document.addEventListener('keydown', (event) => {});
+
+  document.addEventListener('contextmenu', (event) => event.preventDefault() );
+
+  function setStatus(status) {
+    const statusMsg = document.querySelector('#status-message');
+    statusMsg.textContent = status;
+  }
+
 }
+
+
+
+/**
+ * TODO:
+ * 1. Draw the nodes
+ * 2. Connect the nodes with edge, the user will continue to draw polyline/line (little nodes, might be complicated) until another node is selected or user presses esc in connect nodes mode.
+ * 3. Create task boxes on top of the edges manually, how can we relate the connectivity between task boxes?
+ * 4. The nodes, edges, and boxes cannot be moved in selection mode to keep things simple, or they can be moved 
+ *    Nodes, edges, and boxes can only be deleted and recreated to "move" them to a new place
+ * 5. Once the user select save changes, grab all the information from the node dates and task boxes and relate them into a json/object
+ * 
+ */
