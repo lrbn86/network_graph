@@ -433,9 +433,9 @@ function UIButtonEvents() {
 /**
  * TODO:
  * 1. Draw the nodes
- * 2. Connect the nodes with edge, the user will continue to draw lines until finished
+ * 2. Connect the nodes with edge, the user will continue to draw polyline/line (little nodes, might be complicated) until another node is selected or user presses esc in connect nodes mode.
  * 3. Create task boxes on top of the edges manually, how can we relate the connectivity between task boxes?
- * 4. The nodes, edges, and boxes cannot be moved in selection mode to keep things simple
+ * 4. The nodes, edges, and boxes cannot be moved in selection mode to keep things simple, or they can be moved 
  *    Nodes, edges, and boxes can only be deleted and recreated to "move" them to a new place
  * 5. Once the user select save changes, grab all the information from the node dates and task boxes and relate them into a json/object
  * 
