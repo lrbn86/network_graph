@@ -134,6 +134,11 @@ function SVGEventListeners() {
         }
       }
 
+      if (targetID === 'svg') {
+        selectedNodes.forEach((node) => { const nodeDOM = document.getElementById(node); nodeDOM.setAttribute('stroke', 'none') });
+        selectedNodes = [];
+      }
+
     }
 
     // TODO:
@@ -149,7 +154,7 @@ function SVGEventListeners() {
   });
   
   svg.addEventListener('mouseup', (event) => {
-    
+
     if (UIMode['select-btn'][0]) {
 
       if (selectedObject && selectedObject.getAttribute('class') === 'node') {
