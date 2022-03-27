@@ -5,7 +5,7 @@ const statusMsg = document.querySelector('#status-message');
 const nodeRadius = 45;
 const normalColor = '#2F3B47';
 const criticalColor = '#FF7353';
-const lineStrokeWidth = 10;
+const lineStrokeWidth = 20;
 let currentNumNodes = 0;
 let currentNumEdges = 0;
 
@@ -74,14 +74,27 @@ function SVGEventListeners() {
     const targetID = target.getAttribute('id');
     const targetClass = target.getAttribute('class');
     const matrix = convertToSVGCoordinates(event.x, event.y);
+    
+    // Right click to change color of nodes/edges
+    if (event.button === 2) {
+      if (targetClass === 'node') {
+        const color = target.getAttribute('fill') === normalColor ? criticalColor : normalColor;
+        target.setAttribute('fill', color);
+      } else if (targetClass === 'line') {
+        const color = target.getAttribute('stroke') === normalColor ? criticalColor : normalColor;
+        target.setAttribute('stroke', color);
+      }
+      return;
+    }
 
     if (UIMode['select-btn'][0]) {
 
       if (targetClass === 'node') {
 
         selectedObject = target;
-        selectedObject.setAttribute('stroke', '#000');
-        selectedObject.setAttribute('stroke-width', '2');
+        selectedObject.setAttribute('stroke', normalColor);
+        selectedObject.setAttribute('stroke-width', '45');
+        selectedObject.setAttribute('stroke-opacity', '.2');
 
       }
 
@@ -99,9 +112,12 @@ function SVGEventListeners() {
     if (UIMode['add-node-btn'][0]) {
       // Make sure that we are not holding an object before we draw a node
       if (!selectedObject) {
-        drawNode(matrix.x, matrix.y);
-        graph[`node${currentNumNodes}`] = [];
-        nodesEdges[`node${currentNumNodes}`] = [];
+        // Don't draw on top of another node or edge
+        if (targetClass !== 'node' && targetClass !== 'line') {
+          drawNode(matrix.x, matrix.y);
+          graph[`node${currentNumNodes}`] = [];
+          nodesEdges[`node${currentNumNodes}`] = [];
+        }
       }
     }
 
@@ -122,7 +138,7 @@ function SVGEventListeners() {
 
     // TODO:
     if (UIMode['add-task-btn'][0]) {
-
+      drawTaskBox(matrix.x, matrix.y);
     }
 
     // TODO:
@@ -168,7 +184,9 @@ function SVGEventListeners() {
     }
     
     if (UIMode['select-btn'][0]) {
+
       if (selectedObject) {
+
         selectedObject.setAttribute('cx', matrix.x);
         selectedObject.setAttribute('cy', matrix.y);
         
@@ -323,7 +341,6 @@ function drawEdge(x1, y1, x2, y2) {
   edge.setAttribute('x2', x2);
   edge.setAttribute('y2', y2);
   edgesContainer.appendChild(edge);
-  drawTaskBox(x1, y1);
   return edge;
 }
 
@@ -395,7 +412,9 @@ function UIEventListeners() {
 
   document.addEventListener('keydown', (event) => {});
 
-  document.addEventListener('contextmenu', (event) => event.preventDefault() );
+  document.addEventListener('contextmenu', (event) => {
+    event.preventDefault() 
+  });
 
   function setStatus(status) {
     const statusMsg = document.querySelector('#status-message');
