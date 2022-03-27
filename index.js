@@ -33,6 +33,7 @@ function initialize() {
   UIEventListeners();
 }
 
+
 // These containers help control what should be drawn first since SVG is based on the painter-model
 // e.g. the nodes will be drawn on top of the edges
 const edgesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -50,6 +51,8 @@ svg.appendChild(commentContainer);
 const textContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 textContainer.setAttribute('id', 'text-container');
 svg.appendChild(textContainer);
+
+drawTaskBox(450, 450);
 
 let graph = {};
 let connectedNodes = [];
@@ -143,7 +146,8 @@ function SVGEventListeners() {
 
     // TODO:
     if (UIMode['add-task-btn'][0]) {
-      drawTaskBox(matrix.x, matrix.y);
+      console.log(target.parentNode);
+        // drawTaskBox(matrix.x, matrix.y);
     }
 
     // TODO:
@@ -351,6 +355,7 @@ function drawEdge(x1, y1, x2, y2) {
 
 function drawTaskBox(x, y) {
   const taskBox = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+  taskBox.setAttribute('class', 'taskboxObj');
   taskBox.setAttribute('x', x);
   taskBox.setAttribute('y', y);
   taskBox.setAttribute('width', '335');
@@ -359,9 +364,9 @@ function drawTaskBox(x, y) {
   div.setAttribute('class', 'taskbox');
   // div.setAttribute('xmlns', "http://www.w3.org/1999/xhtml");
   div.innerHTML = `
-    <p>Task</p>
-    <p>Assigned member</p>
-    <p>Estimated Time</p>
+    <p contenteditable>Task</p>
+    <p contenteditable>Assigned member</p>
+    <p contenteditable>Estimated Time</p>
   `;
   taskBox.appendChild(div);
   textContainer.appendChild(taskBox);
