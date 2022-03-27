@@ -351,7 +351,7 @@ const UIMode = {
   'move-btn': [false, 'Move'],
   'add-node-btn': [false, 'Add Node'],
   'connect-nodes-btn': [false, 'Connect Nodes'],
-  'add-task-btn': [false, 'Edit Tasks'],
+  'add-task-btn': [false, 'Add Task'],
   'add-comment-btn': [false, 'Add Comment']
 };
 
