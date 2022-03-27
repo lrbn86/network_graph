@@ -12,7 +12,6 @@ let currentNumEdges = 0;
 const zoomSlider = document.querySelector('#zoom-slider');
 const zoomLevelLabel = document.querySelector('#zoom-level');
 // Get attributes from the zoomSlider element
-// Purpose: If the html attributes are changed, there's no need to update this JS file.
 let maxRange = parseInt(zoomSlider.getAttribute('max'));
 let minRange = parseInt(zoomSlider.getAttribute('min'));
 let stepRange = parseInt(zoomSlider.getAttribute('step'));
@@ -30,7 +29,6 @@ function initialize() {
   zoomSlider.value = zoomLevel;
   svg.setAttribute('viewBox', `0 0 ${zoomLevel} ${zoomLevel}`);
   root.appendChild(svg);
-  drawGridPoints();
   EventListeners();
   UIButtonEvents();
 }
@@ -49,9 +47,9 @@ const commentContainer = document.createElementNS('http://www.w3.org/2000/svg', 
 commentContainer.setAttribute('id', 'comment-container');
 svg.appendChild(commentContainer);
 
-const datesTextContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-datesTextContainer.setAttribute('id', 'dates-text-container');
-svg.appendChild(datesTextContainer);
+const textContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+textContainer.setAttribute('id', 'text-container');
+svg.appendChild(textContainer);
 
 let graph = {};
 let connectedNodes = [];
@@ -125,6 +123,7 @@ function EventListeners() {
           } else {
             // TODO: If we click on the same node again, we will edit the date
             console.log('Same node');
+            selectedNodes = [];
           }
         }
       }
@@ -193,32 +192,32 @@ function EventListeners() {
     const deltaY = event.deltaY;
     if (deltaY < 0) { // Zooming in
       zoomSlider.value = parseInt(zoomSlider.value) - stepRange;
-      // if (zoomLevel > minRange) {
-      //   zoomPercentage += 1;
-      // }
+      if (zoomLevel > minRange) {
+        zoomPercentage += 1;
+      }
     } else if (deltaY > 0) { // Zooming out
       zoomSlider.value = parseInt(zoomSlider.value) + stepRange;
-      // if (zoomLevel < maxRange) {
-      //   zoomPercentage -=1;
-      // }
+      if (zoomLevel < maxRange) {
+        zoomPercentage -=1;
+      }
     }
     // This dispatch is required so that if the user uses the wheel on the mouse, it will trigger the slider
     // to change accordingly. Without this, the slider will not be in the appropriate position.
     zoomSlider.dispatchEvent(new Event('input'));
   });
   // // Hacky way of keeping zoom percentages consistent with UI and mouse wheel control
-  // let zoomLevelsPercentageMap = {};
-  // let percent = 25;
-  // for (let i = maxRange; i >= minRange; i -= stepRange) {
-  //   zoomLevelsPercentageMap[i] = percent;
-  //   percent += 1;
-  // }
+  let zoomLevelsPercentageMap = {};
+  let percent = 25;
+  for (let i = maxRange; i >= minRange; i -= stepRange) {
+    zoomLevelsPercentageMap[i] = percent;
+    percent += 1;
+  }
   // Handle zooming on the UI
   zoomSlider.addEventListener('input', (event) => {
     const value = event.target.value;
     zoomLevel = value;
-    // zoomLevelLabel.textContent = zoomLevel;
-    // zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
+    zoomLevelLabel.textContent = zoomLevel;
+    zoomLevelLabel.textContent = zoomLevelsPercentageMap[zoomLevel] + '%';
     svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`);
   });
   
@@ -338,24 +337,26 @@ function drawEdge(x1, y1, x2, y2) {
   edge.setAttribute('x2', x2);
   edge.setAttribute('y2', y2);
   edgesContainer.appendChild(edge);
-  drawTaskBox();
+  drawTaskBox(x1, y1);
   return edge;
 }
 
-function drawTaskBox() {
+function drawTaskBox(x, y) {
   const taskBox = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-  taskBox.setAttribute('x', '150');
-  taskBox.setAttribute('y', '150');
-  taskBox.setAttribute('width', '200');
-  taskBox.setAttribute('height', '200');
+  taskBox.setAttribute('x', x);
+  taskBox.setAttribute('y', y);
+  taskBox.setAttribute('width', '335');
+  taskBox.setAttribute('height', '102');
   const div = document.createElement('div');
   div.setAttribute('class', 'taskbox');
-  div.setAttribute('xmlns', "http://www.w3.org/1999/xhtml");
+  // div.setAttribute('xmlns', "http://www.w3.org/1999/xhtml");
   div.innerHTML = `
+    <p>Task</p>
+    <p>Assigned member</p>
     <p>Estimated Time</p>
   `;
   taskBox.appendChild(div);
-  edgesContainer.appendChild(taskBox);
+  textContainer.appendChild(taskBox);
 }
 
 function drawGridPoints() {
