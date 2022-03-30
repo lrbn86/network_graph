@@ -1,44 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PERT</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="main.js" type="module" defer></script>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PERT</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="main.js" type="module" defer></script>
 </head>
 <body>
-    <div id="left-sidebar" class="sidebar">
-        <input id="select-btn" class="btn btn-function" title="Select" type="image" src="images/pointer.svg" />
-        <input id="move-btn" class="btn btn-function" title="Move" type="image" src="images/pan.svg" />
-        <input id="add-node-btn" class="btn btn-function" title="Add Node" type="image" src="images/add-node.svg" />
-        <input id="connect-nodes-btn" class="btn btn-function" title="Connect Nodes" type="image" src="images/connect-nodes.svg" />
-        <input id="add-comment-btn" class="btn btn-function" title="Add Comment" type="image" src="images/add-comment.svg" />
+<div id="ui-container">
+  <div id="left-sidebar" class="sidebar">
+    <input id="select-btn" class="btn btn-function" title="Select" type="image" src="images/pointer.svg" />
+    <input id="move-btn" class="btn btn-function" title="Move" type="image" src="images/pan.svg" />
+    <input id="add-node-btn" class="btn btn-function" title="Add Node" type="image" src="images/add-node.svg" />
+    <input id="connect-nodes-btn" class="btn btn-function" title="Connect Nodes" type="image" src="images/connect-nodes.svg" />
+    <input id="add-comment-btn" class="btn btn-function" title="Add Comment" type="image" src="images/add-comment.svg" />
+  </div>
+  <div id="bottom-left-sidebar" class="sidebar">
+    <input id="undo-btn" class="btn" name="undo" title="Undo" type="image" src="images/undo.svg" />
+    <input id="redo-btn" class="btn" name="redo" title="Redo" type="image" src="images/redo.svg" />
+  </div>
+  <div id="close-right-sidebar" class="sidebar">
+    <input id="graph-btn" class="btn" name="graph" title="Graph" type="image" src="images/graph.svg" />
+    <input id="present-btn" class="btn" name="present" title="Present" type="image" src="images/presentation.svg" /> 
+  </div>
+  <div id="far-right-sidebar" class="sidebar">
+    <input id="account-btn" class="btn" name="account" title="Account" type="image" src="images/account.svg" />
+    <input id="export-btn" class="btn" name="share" title="Export" type="image" src="images/export.svg" />
+  </div>
+  <div id="zoom-sidebar" class="sidebar">
+    <div>
+      <span id="zoom-level">100%</span>
     </div>
-    <div id="bottom-left-sidebar" class="sidebar">
-        <input id="undo-btn" class="btn" name="undo" title="Undo" type="image" src="images/undo.svg" />
-        <input id="redo-btn" class="btn" name="redo" title="Redo" type="image" src="images/redo.svg" />
+    <div>
+      <input id="zoom-slider" class="zoom-btn" type="range" min="500" max="2000" step="10">
     </div>
-    <div id="close-right-sidebar" class="sidebar">
-        <input id="graph-btn" class="btn" name="graph" title="Graph" type="image" src="images/graph.svg" />
-        <input id="present-btn" class="btn" name="present" title="Present" type="image" src="images/presentation.svg" /> 
-    </div>
-    <div id="far-right-sidebar" class="sidebar">
-        <input id="account-btn" class="btn" name="account" title="Account" type="image" src="images/account.svg" />
-        <input id="share-btn" class="btn" name="share" title="Share" type="image" src="images/export.svg" />
-    </div>
-    <div id="zoom-sidebar" class="sidebar">
-        <div>
-            <span id="zoom-level">100%</span>
-        </div>
-        <div>
-            <input id="zoom-slider" class="zoom-btn" type="range" min="500" max="2000" step="10">
-        </div>
-    </div>
-    <div id="root">
-        <svg id="svg"></svg>
-    </div>
-    <noscript>[REQUIRED] JavaScript must be enabled on this browser to use this application.</noscript>
+  </div>
+</div>
+<div id="root">
+  <svg id="svg">
+    <g id="line-container"></g>
+    <g id="node-container"></g>
+    <g id="text-container"></g>
+  </svg>
+</div>
+<noscript>[REQUIRED] JavaScript must be enabled on this browser to use this application.</noscript>
 </body>
 </html>
