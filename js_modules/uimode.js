@@ -1,5 +1,5 @@
 export const UIMode = {
-  'select-btn': false,
+  'select-btn': true,
   'move-btn': false,
   'add-node-btn': false,
   'connect-nodes-btn': false,

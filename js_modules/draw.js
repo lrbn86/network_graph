@@ -10,8 +10,8 @@ const textContainer = doc.querySelector('#text-container');
 export function drawTask(x, y) {
 
   const taskBox = document.createElementNS(NS, 'foreignObject');
-  const width = 330; 
-  const height = 200;
+  const width = 340; 
+  const height = 120;
   taskBox.setAttribute('class', 'taskbox');
   taskBox.setAttribute('width', width);
   taskBox.setAttribute('height', height);
@@ -19,20 +19,17 @@ export function drawTask(x, y) {
   taskBox.setAttribute('y', y);
   const div = document.createElement('div');
   div.innerHTML = `
-    <div>
-      <input class='task-name' type='text' placeholder='Enter task name' />
-      <p>team</p>
-    </div>
-    <span class='estimated-length'>Estimated Length</span>
-    <div>
-      <p>Slack Time: <span class='slack-time'>-</span></p>
-      <select>
-        <option>-</option>
-        <option>Completed</option>
-        <option>In Progress</option>
-        <option>Delayed</option>
-      </select>
-    </div>
+    <input class='task-name' type='text' placeholder='Enter task name / description' />
+    <input class='team-name' type='text' placeholder='Enter team name' />
+    <input class='assignee-name' type='text' placeholder='Enter assignee name' />
+    <input class='expected-time' type='text' placeholder='Enter expected time' />
+    <label>Status:</label>
+    <select>
+      <option>-</option>
+      <option>Completed</option>
+      <option>In Progress</option>
+      <option>Delayed</option>
+    </select>
   `;
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);

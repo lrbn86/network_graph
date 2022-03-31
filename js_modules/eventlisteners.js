@@ -9,10 +9,14 @@ const lineContainer = doc.querySelector('#line-container');
 const nodeContainer = doc.querySelector('#node-container');
 const textContainer = doc.querySelector('#text-container');
 
+
+
 export function EventListeners() {
 
   drawTask(350, 350);
   drawTask(350, 650);
+
+  doc.querySelector('#select-btn').classList.add('btn-selected');
 
   uiContainer.addEventListener('click', handleUIClick);
 
@@ -22,12 +26,6 @@ export function EventListeners() {
 
   svg.addEventListener('mousemove', handleMouseMove);
 
-  doc.querySelectorAll('.estimated-length').forEach((e) => e.addEventListener('click', handleEstimatedLength));
-
-}
-
-function handleEstimatedLength(event) {
-  console.log(event.target);
 }
 
 function handleUIClick(event) {
@@ -52,14 +50,23 @@ function handleUIClick(event) {
 
 }
 
+let selectedObject = null;
+const svgPoint = svg.createSVGPoint();
+function convertToSVGCoordinates(x, y) { svgPoint.x = x; svgPoint.y = y; return svgPoint.matrixTransform(svg.getScreenCTM().inverse()); }
+
 function handleMouseDown(event) {
 
   const target = event.target;
   const targetID = target.getAttribute('id');
   const targetClass = target.getAttribute('class');
+  const targetParent = target.parentNode;
+  const targetParentClass = targetParent.getAttribute('class');
 
   if (UIMode['select-btn']) {
-
+    if (targetParentClass === 'taskbox') {
+      selectedObject = targetParent;
+      console.log(selectedObject);
+    }
   }
 
   if (UIMode['move-btn']) {
@@ -85,9 +92,11 @@ function handleMouseUp(event) {
   const target = event.target;
   const targetID = target.getAttribute('id');
   const targetClass = target.getAttribute('class');
+  const targetParent = target.parentNode;
+  const targetParentClass = targetParent.getAttribute('class');
 
   if (UIMode['select-btn']) {
-
+    selectedObject = null;
   }
 
   if (UIMode['move-btn']) {
@@ -113,9 +122,16 @@ function handleMouseMove(event) {
   const target = event.target;
   const targetID = target.getAttribute('id');
   const targetClass = target.getAttribute('class');
+  const targetParent = target.parentNode;
+  const targetParentClass = targetParent.getAttribute('class');
+
+  const matrix = convertToSVGCoordinates(event.x, event.y);
 
   if (UIMode['select-btn']) {
-
+    if (selectedObject) {
+      selectedObject.setAttribute('x', matrix.x);
+      selectedObject.setAttribute('y', matrix.y);
+    }
   }
 
   if (UIMode['move-btn']) {
