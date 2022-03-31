@@ -9,6 +9,14 @@ const textContainer = doc.querySelector('#text-container');
 
 export function drawTask(x, y) {
 
+  const g = document.createElementNS(NS, 'g');
+  
+  const node = document.createElementNS(NS, 'circle');
+  node.setAttribute('fill', normalColor);
+  node.setAttribute('cx', y );
+  node.setAttribute('cy', x);
+  node.setAttribute('r', '45');
+  
   const taskBox = document.createElementNS(NS, 'foreignObject');
   const width = 340; 
   const height = 120;
@@ -19,26 +27,28 @@ export function drawTask(x, y) {
   taskBox.setAttribute('y', y);
   const div = document.createElement('div');
   div.innerHTML = `
-    <input class='task-name' type='text' placeholder='Enter task name / description' />
-    <input class='team-name' type='text' placeholder='Enter team name' />
-    <input class='assignee-name' type='text' placeholder='Enter assignee name' />
-    <input class='expected-time' type='text' placeholder='Enter expected time' />
-    <label>Status:</label>
-    <select>
-      <option>-</option>
-      <option>Completed</option>
-      <option>In Progress</option>
-      <option>Delayed</option>
-    </select>
+  <input class='task-name' type='text' placeholder='Enter task name / description' />
+  <input class='team-name' type='text' placeholder='Enter team name' />
+  <input class='assignee-name' type='text' placeholder='Enter assignee name' />
+  <input class='expected-time' type='text' placeholder='Enter expected time' />
+  <label>Status:</label>
+  <select>
+  <option>-</option>
+  <option>Completed</option>
+  <option>In Progress</option>
+  <option>Delayed</option>
+  </select>
   `;
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);
-  nodeContainer.appendChild(taskBox);
-
+  g.appendChild(taskBox);
+  g.appendChild(node);
+  nodeContainer.appendChild(g);
+  
 }
 
 export function drawLine(nodeA, nodeB) {
-
+  
   const line = createElementNS(NS, 'line');
   lineContainer.appendChild(lineContainer);
 

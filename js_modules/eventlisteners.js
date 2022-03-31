@@ -65,7 +65,6 @@ function handleMouseDown(event) {
   if (UIMode['select-btn']) {
     if (targetParentClass === 'taskbox') {
       selectedObject = targetParent;
-      console.log(selectedObject);
     }
   }
 
