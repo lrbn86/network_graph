@@ -178,24 +178,25 @@ function handleMouseMove(event) {
 
   if (UIMode['select-btn']) {
     if (selectedObject) {
-      selectedObject.setAttribute('x', matrix.x);
-      selectedObject.setAttribute('y', matrix.y);
 
-      for (const node in graph) {
-        const connected = graph[node];
-        if (connected) {
-          console.log('updating');
-          for (const arr of connected) {
-            const [nodeB, edge] = arr;
-            const nodeBDOM = doc.querySelector(`#${nodeB}`);
-            const edgeDOM = doc.querySelector(`#${edge}`);
-            edgeDOM.setAttribute('x1', selectedObject.getAttribute('data-centerX'));
-            edgeDOM.setAttribute('y1', selectedObject.getAttribute('data-centerY'));
-            edgeDOM.setAttribute('x2', 450);
-            edgeDOM.setAttribute('y2', 450);
-          }
-        }
-      }
+      const centerX = matrix.x - (selectedObject.getAttribute('width') / 2);
+      const centerY = matrix.y - (selectedObject.getAttribute('height') / 2);
+
+      selectedObject.setAttribute('x', centerX);
+      selectedObject.setAttribute('y', centerY);
+
+      // const x = selectedObject.getAttribute('x');
+      // const y = selectedObject.getAttribute('y');
+      // const width = selectedObject.getAttribute('width');
+      // const height = selectedObject.getAttribute('height');
+      // selectedObject.setAttribute('data-centerX', x + (width / 2));
+      // selectedObject.setAttribute('data-centerY', y + (height / 2));
+      // const centerX = selectedObject.getAttribute('data-centerX');
+      // const centerY = selectedObject.getAttribute('data-centerY');
+      // const id = selectedObject.getAttribute('id');
+      // const connected = graph[id];
+
+
     }
   }
 
@@ -223,7 +224,7 @@ function handleMouseMove(event) {
 
 function handleMouseWheel(event) {
   const deltaY = event.deltaY;
-  if (deltaY < 0) { // Zooming in
+  if (deltaY < 0 && zoomLevel > 360) { // Zooming in
     zoomLevel -= 10;
   }
   else if (deltaY > 0) { // Zooming out
