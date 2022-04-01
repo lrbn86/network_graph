@@ -8,17 +8,16 @@ const uiContainer = doc.querySelector('#ui-container');
 const lineContainer = doc.querySelector('#line-container');
 const nodeContainer = doc.querySelector('#node-container');
 const textContainer = doc.querySelector('#text-container');
+const zoomSlider = doc.querySelector('#zoom-slider');
 
-
+let currentNumTasks = 0;
+let currentNumEdges = 0;
 
 export function EventListeners() {
 
-  drawTask(200, 350);
-  drawTask(750, 350);
-  drawTask(200, 550);
-  drawTask(750, 550);
-
   doc.querySelector('#select-btn').classList.add('btn-selected');
+
+  doc.addEventListener('keydown', handleKeyDown);
 
   uiContainer.addEventListener('click', handleUIClick);
 
@@ -27,6 +26,8 @@ export function EventListeners() {
   svg.addEventListener('mouseup', handleMouseUp);
 
   svg.addEventListener('mousemove', handleMouseMove);
+
+  svg.addEventListener('wheel', handleMouseWheel);
 
 }
 
@@ -56,13 +57,16 @@ let selectedObject = null;
 const svgPoint = svg.createSVGPoint();
 function convertToSVGCoordinates(x, y) { svgPoint.x = x; svgPoint.y = y; return svgPoint.matrixTransform(svg.getScreenCTM().inverse()); }
 
-let zoomLevel = 750;
+let zoomLevel = 1250;
 let isPanning = false;
 let pointerOrigin = { x: 0, y: 0 };
 let currentViewBox = { x: 0, y: 0, width: zoomLevel, height: zoomLevel };
 let newViewBox = { x: 0, y: 0 };
+svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`)
 
 let selectedTaskboxes = [];
+
+let graph = {};
 
 function handleMouseDown(event) {
 
@@ -71,6 +75,8 @@ function handleMouseDown(event) {
   const targetClass = target.getAttribute('class');
   const targetParent = target.parentNode;
   const targetParentClass = targetParent.getAttribute('class');
+
+  const matrix = convertToSVGCoordinates(event.x, event.y);
 
   if (UIMode['select-btn']) {
     if (targetParentClass === 'taskbox') {
@@ -85,7 +91,10 @@ function handleMouseDown(event) {
   }
   
   if (UIMode['add-node-btn']) {
-
+    currentNumTasks++;
+    const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks)
+    const taskBoxID = taskBox.getAttribute('id');
+    graph[taskBoxID] = [];
   }
 
   if (UIMode['connect-nodes-btn']) {
@@ -102,7 +111,16 @@ function handleMouseDown(event) {
         const cx2 = nodeB.getAttribute('data-centerX');
         const cy2 = nodeB.getAttribute('data-centerY');
 
-        drawLine(cx1, cy1, cx2, cy2);
+        if (nodeA != nodeB) {
+
+          currentNumEdges++;
+          const edge = drawLine(cx1, cy1, cx2, cy2, currentNumEdges);
+          const edgeID = edge.getAttribute('id');
+
+          graph[nodeA.getAttribute('id')].push([nodeB.getAttribute('id'), edgeID])
+          graph[nodeB.getAttribute('id')].push([nodeA.getAttribute('id'), edgeID])
+
+        }
 
         selectedTaskboxes = [];
 
@@ -162,6 +180,22 @@ function handleMouseMove(event) {
     if (selectedObject) {
       selectedObject.setAttribute('x', matrix.x);
       selectedObject.setAttribute('y', matrix.y);
+
+      for (const node in graph) {
+        const connected = graph[node];
+        if (connected) {
+          console.log('updating');
+          for (const arr of connected) {
+            const [nodeB, edge] = arr;
+            const nodeBDOM = doc.querySelector(`#${nodeB}`);
+            const edgeDOM = doc.querySelector(`#${edge}`);
+            edgeDOM.setAttribute('x1', selectedObject.getAttribute('data-centerX'));
+            edgeDOM.setAttribute('y1', selectedObject.getAttribute('data-centerY'));
+            edgeDOM.setAttribute('x2', 450);
+            edgeDOM.setAttribute('y2', 450);
+          }
+        }
+      }
     }
   }
 
@@ -186,3 +220,16 @@ function handleMouseMove(event) {
   }
 
 }
+
+function handleMouseWheel(event) {
+  const deltaY = event.deltaY;
+  if (deltaY < 0) { // Zooming in
+    zoomLevel += 10;
+  }
+  else if (deltaY > 0) { // Zooming out
+    zoomLevel -= 10;
+  }
+  svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`)
+}
+
+function handleKeyDown(event) {}

@@ -7,7 +7,7 @@ const lineContainer = doc.querySelector('#line-container');
 const nodeContainer = doc.querySelector('#node-container');
 const textContainer = doc.querySelector('#text-container');
 
-export function drawTask(x, y) {
+export function drawTask(x, y, id) {
 
   const width = 340; 
   const height = 120;
@@ -16,6 +16,7 @@ export function drawTask(x, y) {
   const centerY = y + (height / 2);
   
   const taskBox = document.createElementNS(NS, 'foreignObject');
+  taskBox.setAttribute('id', `node${id}`);
   taskBox.setAttribute('class', 'taskbox');
   taskBox.setAttribute('width', width);
   taskBox.setAttribute('height', height);
@@ -42,12 +43,14 @@ export function drawTask(x, y) {
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);
   nodeContainer.appendChild(taskBox);
-  
+  return taskBox; 
+
 }
 
-export function drawLine(x1, y1, x2, y2) {
+export function drawLine(x1, y1, x2, y2, id) {
   
   const line = document.createElementNS(NS, 'line');
+  line.setAttribute('id', `edge${id}`);
   line.setAttribute('class', 'line');
   line.setAttribute('stroke', normalColor);
   line.setAttribute('stroke-width', '10');
@@ -56,6 +59,7 @@ export function drawLine(x1, y1, x2, y2) {
   line.setAttribute('x2', x2);
   line.setAttribute('y2', y2);
   lineContainer.appendChild(line);
+  return line;
 
 }
 
