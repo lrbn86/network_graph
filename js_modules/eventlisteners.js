@@ -13,8 +13,8 @@ const textContainer = doc.querySelector('#text-container');
 
 export function EventListeners() {
 
-  drawTask(350, 350);
-  drawTask(350, 650);
+  drawTask(200, 350);
+  drawTask(750, 350);
 
   doc.querySelector('#select-btn').classList.add('btn-selected');
 
@@ -54,6 +54,12 @@ let selectedObject = null;
 const svgPoint = svg.createSVGPoint();
 function convertToSVGCoordinates(x, y) { svgPoint.x = x; svgPoint.y = y; return svgPoint.matrixTransform(svg.getScreenCTM().inverse()); }
 
+let zoomLevel = 750;
+let isPanning = false;
+let pointerOrigin = { x: 0, y: 0 };
+let currentViewBox = { x: 0, y: 0, width: zoomLevel, height: zoomLevel };
+let newViewBox = { x: 0, y: 0 };
+
 function handleMouseDown(event) {
 
   const target = event.target;
@@ -69,7 +75,9 @@ function handleMouseDown(event) {
   }
 
   if (UIMode['move-btn']) {
-
+    isPanning = true;
+    pointerOrigin.x = event.x;
+    pointerOrigin.y = event.y;
   }
   
   if (UIMode['add-node-btn']) {
@@ -99,7 +107,9 @@ function handleMouseUp(event) {
   }
 
   if (UIMode['move-btn']) {
-
+    isPanning = false;
+    currentViewBox.x = newViewBox.x;
+    currentViewBox.y = newViewBox.y;
   }
   
   if (UIMode['add-node-btn']) {
@@ -134,7 +144,11 @@ function handleMouseMove(event) {
   }
 
   if (UIMode['move-btn']) {
-
+    if (isPanning) {
+      newViewBox.x = currentViewBox.x - (event.x - pointerOrigin.x);
+      newViewBox.y = currentViewBox.y - (event.y - pointerOrigin.y);
+      svg.setAttribute('viewBox', `${newViewBox.x} ${newViewBox.y} ${zoomLevel} ${zoomLevel}`);0
+    }
   }
   
   if (UIMode['add-node-btn']) {
