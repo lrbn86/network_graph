@@ -11,20 +11,17 @@ export function drawTask(x, y, id) {
 
   const width = 340; 
   const height = 120;
-
-  const centerX = x + (width / 2);
-  const centerY = y + (height / 2);
   
   const taskBox = document.createElementNS(NS, 'foreignObject');
   taskBox.setAttribute('id', `node${id}`);
   taskBox.setAttribute('class', 'taskbox');
   taskBox.setAttribute('width', width);
   taskBox.setAttribute('height', height);
-  taskBox.setAttribute('x', x);
-  taskBox.setAttribute('y', y);
-  taskBox.setAttribute('data-centerX', centerX);
-  taskBox.setAttribute('data-centerY', centerY);
-
+  taskBox.setAttribute('x', x - (width / 2));
+  taskBox.setAttribute('y', y - (height / 2));
+  taskBox.setAttribute('data-centerX', x);
+  taskBox.setAttribute('data-centerY', y);
+  
   const div = document.createElement('div');
   div.innerHTML = `
     <input class='task-name' type='text' placeholder='Enter task name / description' />
@@ -39,12 +36,20 @@ export function drawTask(x, y, id) {
       <option>Delayed</option>
     </select>
   `;
-
+  
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);
   nodeContainer.appendChild(taskBox);
-  return taskBox; 
 
+  // const n = document.createElementNS(NS, 'circle');
+  // n.setAttribute('fill', 'black');
+  // n.setAttribute('r', '45');
+  // n.setAttribute('cx', centerX);
+  // n.setAttribute('cy', centerY);
+  // nodeContainer.appendChild(n);
+
+  return taskBox; 
+  
 }
 
 export function drawLine(x1, y1, x2, y2, id) {
