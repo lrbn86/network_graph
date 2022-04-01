@@ -105,7 +105,9 @@ function handleMouseDown(event) {
 
       if (selectedTaskboxes.length >= 2) {
         const nodeA = selectedTaskboxes[0];
+        const nodeA_ID = nodeA.getAttribute('id');
         const nodeB = selectedTaskboxes[1];
+        const nodeB_ID = nodeB.getAttribute('id');
 
         const cx1 = nodeA.getAttribute('data-centerX');
         const cy1 = nodeA.getAttribute('data-centerY');
@@ -114,12 +116,13 @@ function handleMouseDown(event) {
 
         if (nodeA != nodeB) {
 
-          currentNumEdges++;
-          const edge = drawLine(cx1, cy1, cx2, cy2, currentNumEdges);
-          const edgeID = edge.getAttribute('id');
-
-          graph[nodeA.getAttribute('id')].push([nodeB.getAttribute('id'), edgeID])
-          graph[nodeB.getAttribute('id')].push([nodeA.getAttribute('id'), edgeID])
+          if (!graph[nodeA_ID].some(row => row[0] === nodeB_ID) && !graph[nodeB_ID].some(row => row[0] === nodeA_ID)) {
+            currentNumEdges++;
+            const edge = drawLine(cx1, cy1, cx2, cy2, currentNumEdges);
+            const edgeID = edge.getAttribute('id');
+            graph[nodeA_ID].push([nodeB_ID, edgeID])
+            graph[nodeB_ID].push([nodeA_ID, edgeID])
+          }
 
         }
 
@@ -187,11 +190,8 @@ function handleMouseMove(event) {
 
       selectedObject.setAttribute('x', centerX);
       selectedObject.setAttribute('y', centerY);
-      selectedObject.setAttribute('data-centerX', centerX);
-      selectedObject.setAttribute('data-centerY', centerY);
-
-      const x1 = selectedObject.getAttribute('x');
-      const y1 = selectedObject.getAttribute('y');
+      selectedObject.setAttribute('data-centerX', matrix.x);
+      selectedObject.setAttribute('data-centerY', matrix.y);
 
       const id = selectedObject.getAttribute('id');
       const connected = graph[id];
@@ -200,10 +200,10 @@ function handleMouseMove(event) {
         const [node, edge] = arr;
         const nodeDOM = doc.querySelector(`#${node}`);
         const edgeDOM = doc.querySelector(`#${edge}`);
-        edgeDOM.setAttribute('x1', x1);
-        edgeDOM.setAttribute('y1', y1);
-        edgeDOM.setAttribute('x2', nodeDOM.getAttribute('x'));
-        edgeDOM.setAttribute('y2', nodeDOM.getAttribute('y'));
+        edgeDOM.setAttribute('x1', selectedObject.getAttribute('data-centerX'));
+        edgeDOM.setAttribute('y1', selectedObject.getAttribute('data-centerY'));
+        edgeDOM.setAttribute('x2', nodeDOM.getAttribute('data-centerX'));
+        edgeDOM.setAttribute('y2', nodeDOM.getAttribute('data-centerY'));
       }
 
     }
