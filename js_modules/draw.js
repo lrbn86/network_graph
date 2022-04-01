@@ -14,8 +14,6 @@ export function drawTask(x, y) {
 
   const centerX = x + (width / 2);
   const centerY = y + (height / 2);
-
-  const g = document.createElementNS(NS, 'g');
   
   const taskBox = document.createElementNS(NS, 'foreignObject');
   taskBox.setAttribute('class', 'taskbox');
@@ -43,8 +41,7 @@ export function drawTask(x, y) {
 
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);
-  g.appendChild(taskBox);
-  nodeContainer.appendChild(g);
+  nodeContainer.appendChild(taskBox);
   
 }
 

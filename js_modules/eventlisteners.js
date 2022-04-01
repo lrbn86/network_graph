@@ -1,5 +1,5 @@
 import { UIMode } from './uimode.js';
-import { drawTask } from './draw.js';
+import { drawLine, drawTask } from './draw.js';
 import { calculateExpectedTime } from '../js_modules/calculations.js';
 
 const doc = document;
@@ -15,6 +15,8 @@ export function EventListeners() {
 
   drawTask(200, 350);
   drawTask(750, 350);
+  drawTask(200, 550);
+  drawTask(750, 550);
 
   doc.querySelector('#select-btn').classList.add('btn-selected');
 
@@ -60,6 +62,8 @@ let pointerOrigin = { x: 0, y: 0 };
 let currentViewBox = { x: 0, y: 0, width: zoomLevel, height: zoomLevel };
 let newViewBox = { x: 0, y: 0 };
 
+let selectedTaskboxes = [];
+
 function handleMouseDown(event) {
 
   const target = event.target;
@@ -85,7 +89,25 @@ function handleMouseDown(event) {
   }
 
   if (UIMode['connect-nodes-btn']) {
+    if (targetParentClass === 'taskbox') {
 
+      selectedTaskboxes.push(targetParent);
+
+      if (selectedTaskboxes.length >= 2) {
+        const nodeA = selectedTaskboxes[0];
+        const nodeB = selectedTaskboxes[1];
+
+        const cx1 = nodeA.getAttribute('data-centerX');
+        const cy1 = nodeA.getAttribute('data-centerY');
+        const cx2 = nodeB.getAttribute('data-centerX');
+        const cy2 = nodeB.getAttribute('data-centerY');
+
+        drawLine(cx1, cy1, cx2, cy2);
+
+        selectedTaskboxes = [];
+
+      }
+    }
   }
 
   if (UIMode['add-comment-btn']) {
