@@ -224,10 +224,10 @@ function handleMouseMove(event) {
 function handleMouseWheel(event) {
   const deltaY = event.deltaY;
   if (deltaY < 0) { // Zooming in
-    zoomLevel += 10;
+    zoomLevel -= 10;
   }
   else if (deltaY > 0) { // Zooming out
-    zoomLevel -= 10;
+    zoomLevel += 10;
   }
   svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel} ${zoomLevel}`)
 }
