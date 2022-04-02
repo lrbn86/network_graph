@@ -25,7 +25,7 @@ export function drawTask(x, y, id) {
   const div = document.createElement('div');
   div.innerHTML = `
 
-    <p>Task: <input class='task-name' type='text' placeholder='Enter task name / description' /></p>
+    <p>Task Name: <input class='task-name' type='text' placeholder='Enter task name' /></p>
     <p>Team Name: <input class='team-name' type='text' placeholder='Enter team name' /></p>
 
     <p>Assigned to: <input class='assignee-name' type='text' placeholder='Enter assignee name' /></p>
