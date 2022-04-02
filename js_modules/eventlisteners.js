@@ -1,5 +1,5 @@
 import { UIMode } from './uimode.js';
-import { drawLine, drawTask } from './draw.js';
+import { normalColor, criticalColor, drawLine, drawTask } from './draw.js';
 import { calculateExpectedTime } from '../js_modules/calculations.js';
 
 const doc = document;
@@ -107,6 +107,8 @@ function handleMouseDown(event) {
 
     if (targetParentClass === 'taskbox') {
 
+      targetParent.children[0].style.borderColor = 'gray';
+
       selectedTaskboxes.push(targetParent);
 
       if (selectedTaskboxes.length >= 2) {
@@ -132,9 +134,15 @@ function handleMouseDown(event) {
 
         }
 
-        selectedTaskboxes = [];
+        setTimeout(() => {
+          for (const box of selectedTaskboxes) box.children[0].style.borderColor = normalColor;
+          selectedTaskboxes = [];
+        }, 1000);
 
       }
+    } else if (targetID === 'svg') {
+      for (const box of selectedTaskboxes) box.children[0].style.borderColor = normalColor;
+      selectedTaskboxes = [];
     }
   }
 

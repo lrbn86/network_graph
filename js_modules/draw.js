@@ -1,6 +1,6 @@
 const NS = 'http://www.w3.org/2000/svg';
-const criticalColor = '#ff7353';
-const normalColor = '#2f3b47';
+export const criticalColor = '#ff7353';
+export const normalColor = '#2f3b47';
 
 const doc = document;
 const lineContainer = doc.querySelector('#line-container');
