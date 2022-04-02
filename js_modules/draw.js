@@ -42,16 +42,9 @@ export function drawTask(x, y, id) {
     </select>
   `;
 
-  
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);
   nodeContainer.appendChild(taskBox);
-  // const n = document.createElementNS(NS, 'circle');
-  // n.setAttribute('fill', 'black');
-  // n.setAttribute('r', '45');
-  // n.setAttribute('cx', centerX);
-  // n.setAttribute('cy', centerY);
-  // nodeContainer.appendChild(n);
 
   return taskBox; 
   
