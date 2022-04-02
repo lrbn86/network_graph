@@ -5,7 +5,6 @@ export const normalColor = '#2f3b47';
 const doc = document;
 const lineContainer = doc.querySelector('#line-container');
 const nodeContainer = doc.querySelector('#node-container');
-const textContainer = doc.querySelector('#text-container');
 
 export function drawTask(x, y, id) {
 
@@ -73,5 +72,3 @@ export function drawLine(x1, y1, x2, y2, id) {
   return line;
 
 }
-
-export function drawComment() {}

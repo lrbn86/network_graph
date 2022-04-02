@@ -12,6 +12,28 @@ body {
   user-select: none;
 }
 
+#comment-container {
+  position: absolute;
+  z-index: 1;
+}
+
+.comment-box {
+  position: absolute;
+  border: 1px solid black;
+  padding: 1rem;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.comment-msg {
+  padding: 1rem;
+}
+
+.comment-close-btn {
+  width: 30px;
+  height: 30px;
+}
+
 .taskboxDIV {
   box-sizing: border-box;
   background-color: #d8dde2;

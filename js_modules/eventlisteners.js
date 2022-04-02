@@ -7,8 +7,9 @@ const svg = doc.querySelector('#svg');
 const uiContainer = doc.querySelector('#ui-container');
 const lineContainer = doc.querySelector('#line-container');
 const nodeContainer = doc.querySelector('#node-container');
-const textContainer = doc.querySelector('#text-container');
+const commentContainer = doc.querySelector('#comment-container');
 const zoomSlider = doc.querySelector('#zoom-slider');
+const commentBox = doc.querySelector('#comment-box');
 
 let currentNumTasks = 0;
 let currentNumEdges = 0;
@@ -188,7 +189,28 @@ function handleMouseDown(event) {
   }
 
   if (UIMode['add-comment-btn']) {
+    if (targetID === 'svg') {
+      const commentBox = document.createElement('div');
+      commentBox.setAttribute('class', 'comment-box');
+      const closeBtn = document.createElement('button');
+      closeBtn.setAttribute('class', 'comment-close-btn');
+      closeBtn.innerHTML = 'X';
+      closeBtn.addEventListener('click', (event) => {
+        commentContainer.removeChild(closeBtn.parentElement);
+      });
+      commentBox.appendChild(closeBtn);
 
+      const commentMsg = document.createElement('div');
+      commentMsg.setAttribute('class', 'comment-msg');
+      commentMsg.setAttribute('contenteditable', 'true');
+      commentMsg.innerHTML = 'Enter comment here';
+      commentBox.appendChild(commentMsg);
+
+      commentBox.style.left = event.x + 'px';
+      commentBox.style.top = event.y + 'px';
+      commentContainer.appendChild(commentBox);
+
+    }
   }
   
 }
