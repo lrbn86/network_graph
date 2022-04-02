@@ -10,7 +10,7 @@ const textContainer = doc.querySelector('#text-container');
 export function drawTask(x, y, id) {
 
   const width = 340; 
-  const height = 120;
+  const height = 245;
   
   const taskBox = document.createElementNS(NS, 'foreignObject');
   taskBox.setAttribute('id', `node${id}`);
@@ -27,7 +27,10 @@ export function drawTask(x, y, id) {
     <input class='task-name' type='text' placeholder='Enter task name / description' />
     <input class='team-name' type='text' placeholder='Enter team name' />
     <input class='assignee-name' type='text' placeholder='Enter assignee name' />
-    <input class='expected-time' type='text' placeholder='Enter expected time' />
+    <input class='topt' type='number' placeholder='Enter optimistic time' />
+    <input class='tlikely' type='number' placeholder='Enter most likely time' />
+    <input class='tpess' type='number' placeholder='Enter pessimistic time' />
+    <p>Expected Time: <span class='expected-time'></span></p>
     <label>Status:</label>
     <select>
       <option>-</option>
@@ -36,6 +39,12 @@ export function drawTask(x, y, id) {
       <option>Delayed</option>
     </select>
   `;
+
+  if (doc.querySelector('.topt')) {
+    doc.querySelector('.topt').addEventListener('input', (event) => {
+      console.log(event.target.value);
+    })
+  }
   
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);

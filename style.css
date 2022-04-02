@@ -22,7 +22,11 @@ body {
   height: 100%;
 }
 
-input[type="text"] {
+.taskboxDIV > * {
+  margin-bottom: 10px;
+}
+
+input {
   display: block;
   background-color: inherit;
   border: none;
