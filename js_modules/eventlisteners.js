@@ -29,6 +29,8 @@ export function EventListeners() {
 
   svg.addEventListener('wheel', handleMouseWheel);
 
+  svg.addEventListener('contextmenu', handleContextMenu);
+
 }
 
 function handleUIClick(event) {
@@ -283,3 +285,5 @@ function handleMouseWheel(event) {
 }
 
 function handleKeyDown(event) {}
+
+function handleContextMenu(event) {event.preventDefault();}
