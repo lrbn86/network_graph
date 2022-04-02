@@ -91,14 +91,20 @@ function handleMouseDown(event) {
   }
   
   if (UIMode['add-node-btn']) {
-    if (targetParentClass === 'taskboxDIV' || targetParentClass === 'taskbox') return;
-    currentNumTasks++;
-    const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks)
-    const taskBoxID = taskBox.getAttribute('id');
-    graph[taskBoxID] = [];
+
+    if (targetID === 'svg') {
+
+      currentNumTasks++;
+      const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks)
+      const taskBoxID = taskBox.getAttribute('id');
+      graph[taskBoxID] = [];
+
+    }
+
   }
 
   if (UIMode['connect-nodes-btn']) {
+
     if (targetParentClass === 'taskbox') {
 
       selectedTaskboxes.push(targetParent);
