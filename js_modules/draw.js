@@ -9,8 +9,8 @@ const textContainer = doc.querySelector('#text-container');
 
 export function drawTask(x, y, id) {
 
-  const width = 340; 
-  const height = 245;
+  const width = 400; 
+  const height = 265;
   
   const taskBox = document.createElementNS(NS, 'foreignObject');
   taskBox.setAttribute('id', `node${id}`);
@@ -24,13 +24,17 @@ export function drawTask(x, y, id) {
   
   const div = document.createElement('div');
   div.innerHTML = `
-    <input class='task-name' type='text' placeholder='Enter task name / description' />
-    <input class='team-name' type='text' placeholder='Enter team name' />
-    <input class='assignee-name' type='text' placeholder='Enter assignee name' />
-    <input class='topt' type='number' placeholder='Enter optimistic time' />
-    <input class='tlikely' type='number' placeholder='Enter most likely time' />
-    <input class='tpess' type='number' placeholder='Enter pessimistic time' />
-    <p>Expected Time: <span class='expected-time'> _ </span> days</p>
+
+    <p>Task: <input class='task-name' type='text' placeholder='Enter task name / description' /></p>
+    <p>Team Name: <input class='team-name' type='text' placeholder='Enter team name' /></p>
+
+    <p>Assigned to: <input class='assignee-name' type='text' placeholder='Enter assignee name' /></p>
+
+    <p>Optimistic Time:  <input class='topt' type='number' /> days</p>
+    <p>Most Likely Time: <input class='tlikely' type='number' /> days</p>
+    <p>Pessimistic Time: <input class='tpess' type='number' /> days</p>
+
+    <p>Expected Time: <span class='expected-time'> ___ </span> days</p>
     <label>Status:</label>
     <select>
       <option>-</option>

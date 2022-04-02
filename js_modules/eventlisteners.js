@@ -15,6 +15,8 @@ let currentNumEdges = 0;
 
 export function EventListeners() {
 
+  drawTask(100, 350);
+
   doc.querySelector('#select-btn').classList.add('btn-selected');
 
   doc.addEventListener('keydown', handleKeyDown);
@@ -59,7 +61,7 @@ let selectedObject = null;
 const svgPoint = svg.createSVGPoint();
 function convertToSVGCoordinates(x, y) { svgPoint.x = x; svgPoint.y = y; return svgPoint.matrixTransform(svg.getScreenCTM().inverse()); }
 
-let zoomLevel = 1250;
+let zoomLevel = 800;
 let isPanning = false;
 let pointerOrigin = { x: 0, y: 0 };
 let currentViewBox = { x: 0, y: 0, width: zoomLevel, height: zoomLevel };
@@ -99,10 +101,12 @@ function handleMouseDown(event) {
       currentNumTasks++;
       const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks);
 
-      const topt = taskBox.children[0].children[3];
-      const tlikely = taskBox.children[0].children[4];
-      const tpess = taskBox.children[0].children[5];
+      const topt = taskBox.children[0].children[3].children[0];
+      const tlikely = taskBox.children[0].children[4].children[0];
+      const tpess = taskBox.children[0].children[5].children[0];
       const expectedTime = taskBox.children[0].children[6].children[0];
+      console.log(topt, tlikely, tpess);
+      console.log(expectedTime);
 
       topt.addEventListener('input', (event) => {
         if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
@@ -238,14 +242,18 @@ function handleMouseMove(event) {
       const id = selectedObject.getAttribute('id');
       const connected = graph[id];
 
-      for (let arr of connected) {
-        const [node, edge] = arr;
-        const nodeDOM = doc.querySelector(`#${node}`);
-        const edgeDOM = doc.querySelector(`#${edge}`);
-        edgeDOM.setAttribute('x1', selectedObject.getAttribute('data-centerX'));
-        edgeDOM.setAttribute('y1', selectedObject.getAttribute('data-centerY'));
-        edgeDOM.setAttribute('x2', nodeDOM.getAttribute('data-centerX'));
-        edgeDOM.setAttribute('y2', nodeDOM.getAttribute('data-centerY'));
+      if (connected) {
+        
+        for (let arr of connected) {
+          const [node, edge] = arr;
+          const nodeDOM = doc.querySelector(`#${node}`);
+          const edgeDOM = doc.querySelector(`#${edge}`);
+          edgeDOM.setAttribute('x1', selectedObject.getAttribute('data-centerX'));
+          edgeDOM.setAttribute('y1', selectedObject.getAttribute('data-centerY'));
+          edgeDOM.setAttribute('x2', nodeDOM.getAttribute('data-centerX'));
+          edgeDOM.setAttribute('y2', nodeDOM.getAttribute('data-centerY'));
+        }
+
       }
 
     }

@@ -26,14 +26,23 @@ body {
   margin-bottom: 10px;
 }
 
+.topt, .tlikely, .tpess {
+  text-align: center;
+}
+
 input {
+  font-size: inherit;
+  color: inherit;
+}
+
+/* input[type='text'] {
   display: block;
   background-color: inherit;
   border: none;
   color: inherit;
   font-size: inherit;
   width: 100%;
-}
+} */
 
 #svg {
   background-color: #fff;
