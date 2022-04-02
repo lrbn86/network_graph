@@ -30,7 +30,7 @@ export function drawTask(x, y, id) {
     <input class='topt' type='number' placeholder='Enter optimistic time' />
     <input class='tlikely' type='number' placeholder='Enter most likely time' />
     <input class='tpess' type='number' placeholder='Enter pessimistic time' />
-    <p>Expected Time: <span class='expected-time'></span></p>
+    <p>Expected Time: <span class='expected-time'> _ </span> days</p>
     <label>Status:</label>
     <select>
       <option>-</option>
@@ -40,16 +40,10 @@ export function drawTask(x, y, id) {
     </select>
   `;
 
-  if (doc.querySelector('.topt')) {
-    doc.querySelector('.topt').addEventListener('input', (event) => {
-      console.log(event.target.value);
-    })
-  }
   
   div.setAttribute('class', 'taskboxDIV');
   taskBox.appendChild(div);
   nodeContainer.appendChild(taskBox);
-
   // const n = document.createElementNS(NS, 'circle');
   // n.setAttribute('fill', 'black');
   // n.setAttribute('r', '45');

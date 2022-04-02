@@ -95,7 +95,31 @@ function handleMouseDown(event) {
     if (targetID === 'svg') {
 
       currentNumTasks++;
-      const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks)
+      const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks);
+
+      const topt = taskBox.children[0].children[3];
+      const tlikely = taskBox.children[0].children[4];
+      const tpess = taskBox.children[0].children[5];
+      const expectedTime = taskBox.children[0].children[6].children[0];
+
+      topt.addEventListener('input', (event) => {
+        if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
+          expectedTime.textContent = calculateExpectedTime(tpess.value, topt.value, tlikely.value);
+        }
+      });
+
+      tlikely.addEventListener('input', (event) => {
+        if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
+          expectedTime.textContent = calculateExpectedTime(tpess.value, topt.value, tlikely.value);
+        }
+      });
+
+      tpess.addEventListener('input', (event) => {
+        if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
+          expectedTime.textContent = calculateExpectedTime(tpess.value, topt.value, tlikely.value);
+        }
+      });
+
       const taskBoxID = taskBox.getAttribute('id');
       graph[taskBoxID] = [];
 
