@@ -15,8 +15,6 @@ let currentNumEdges = 0;
 
 export function EventListeners() {
 
-  drawTask(100, 350);
-
   doc.querySelector('#select-btn').classList.add('btn-selected');
 
   doc.addEventListener('keydown', handleKeyDown);
@@ -105,8 +103,7 @@ function handleMouseDown(event) {
       const tlikely = taskBox.children[0].children[4].children[0];
       const tpess = taskBox.children[0].children[5].children[0];
       const expectedTime = taskBox.children[0].children[6].children[0];
-      console.log(topt, tlikely, tpess);
-      console.log(expectedTime);
+      const status = taskBox.children[0].children[8];
 
       topt.addEventListener('input', (event) => {
         if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
@@ -123,6 +120,18 @@ function handleMouseDown(event) {
       tpess.addEventListener('input', (event) => {
         if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
           expectedTime.textContent = calculateExpectedTime(tpess.value, topt.value, tlikely.value);
+        }
+      });
+
+      status.addEventListener('change', (event) => {
+        const value = event.target.value;
+        const div = taskBox.children[0];
+        if (value === 'Completed') {
+          div.style.borderColor = '#b1d5b1';
+        } else if (value === 'Delayed') {
+          div.style.borderColor = '#ffcd75';
+        } else if (value === 'In Progress') {
+          div.style.borderColor = '#2f3b47';
         }
       });
 
