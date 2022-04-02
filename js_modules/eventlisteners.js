@@ -140,10 +140,12 @@ function handleMouseDown(event) {
         }, 1000);
 
       }
-    } else if (targetID === 'svg') {
+    }
+    else if (targetID === 'svg') {
       for (const box of selectedTaskboxes) box.children[0].style.borderColor = normalColor;
       selectedTaskboxes = [];
     }
+
   }
 
   if (UIMode['add-comment-btn']) {
