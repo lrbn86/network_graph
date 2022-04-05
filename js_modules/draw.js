@@ -22,9 +22,10 @@ export function drawTask(x, y, id) {
   taskBox.setAttribute('data-centerY', y);
   
   const div = document.createElement('div');
+  div.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
   div.innerHTML = `
 
-    <p>Task Name: <input class='task-name' type='text' placeholder='Enter task name' /></p>
+    <p>Task Name: <input class='task-name' type='text' placeholder='Enter task nme' /></p>
     <p>Team Name: <input class='team-name' type='text' placeholder='Enter team name' /></p>
 
     <p>Assigned to: <input class='assignee-name' type='text' placeholder='Enter assignee name' /></p>

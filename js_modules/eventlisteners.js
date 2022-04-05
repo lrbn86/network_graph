@@ -149,7 +149,6 @@ function handleMouseDown(event) {
       selectedTaskboxes.push(node);
       
       if (selectedTaskboxes.length >= 2) {
-        console.log(node);
         const nodeA = selectedTaskboxes[0];
         const nodeA_ID = nodeA.getAttribute('id');
         const nodeB = selectedTaskboxes[1];
@@ -172,6 +171,7 @@ function handleMouseDown(event) {
 
         }
         selectedTaskboxes = [];
+        console.log(graph);
       }
     }
     else if (target.id === 'svg') {
