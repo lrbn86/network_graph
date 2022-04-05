@@ -74,16 +74,15 @@ let graph = {};
 function handleMouseDown(event) {
 
   const target = event.target;
-  const targetID = target.getAttribute('id');
-  const targetClass = target.getAttribute('class');
-  const targetParent = target.parentNode;
-  const targetParentClass = targetParent.getAttribute('class');
-
   const matrix = convertToSVGCoordinates(event.x, event.y);
 
+  let node = target.closest('.taskbox');
+
   if (UIMode['select-btn']) {
-    if (targetParentClass === 'taskbox') {
-      selectedObject = targetParent;
+    if (target.className !== 'task-name' && target.className !== 'team-name' && target.className !== 'assignee-name' && target.className !== 'topt' && target.className !== 'tlikely' && target.className !== 'tpess' && target.className !== 'select-status') {
+      if (node) {
+        selectedObject = node;
+      }
     }
   }
 
@@ -95,7 +94,7 @@ function handleMouseDown(event) {
   
   if (UIMode['add-node-btn']) {
 
-    if (targetID === 'svg') {
+    if (target.id === 'svg') {
 
       currentNumTasks++;
       const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks);
@@ -145,11 +144,9 @@ function handleMouseDown(event) {
 
   if (UIMode['connect-nodes-btn']) {
 
-    if (targetParentClass === 'taskbox') {
+    if (node) {
 
-      targetParent.children[0].style.borderColor = 'gray';
-
-      selectedTaskboxes.push(targetParent);
+      selectedTaskboxes.push(node);
 
       if (selectedTaskboxes.length >= 2) {
         const nodeA = selectedTaskboxes[0];
@@ -189,7 +186,7 @@ function handleMouseDown(event) {
   }
 
   if (UIMode['add-comment-btn']) {
-    if (targetID === 'svg') {
+    if (target.id === 'svg') {
       const commentBox = document.createElement('div');
       commentBox.setAttribute('class', 'comment-box');
       const closeBtn = document.createElement('button');

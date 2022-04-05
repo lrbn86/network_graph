@@ -35,7 +35,7 @@ export function drawTask(x, y, id) {
 
     <p>Expected Time: <span class='expected-time'> ___ </span> days</p>
     <label>Status:</label>
-    <select>
+    <select class='select-status'>
       <option>In Progress</option>
       <option>Completed</option>
       <option>Delayed</option>
