@@ -143,12 +143,13 @@ function handleMouseDown(event) {
   }
 
   if (UIMode['connect-nodes-btn']) {
-
+    
     if (node) {
-
+      
       selectedTaskboxes.push(node);
-
+      
       if (selectedTaskboxes.length >= 2) {
+        console.log(node);
         const nodeA = selectedTaskboxes[0];
         const nodeA_ID = nodeA.getAttribute('id');
         const nodeB = selectedTaskboxes[1];
@@ -170,6 +171,7 @@ function handleMouseDown(event) {
           }
 
         }
+        selectedTaskboxes = [];
       }
     }
     else if (target.id === 'svg') {
