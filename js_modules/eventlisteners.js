@@ -170,16 +170,9 @@ function handleMouseDown(event) {
           }
 
         }
-
-        setTimeout(() => {
-          for (const box of selectedTaskboxes) box.children[0].style.borderColor = normalColor;
-          selectedTaskboxes = [];
-        }, 1000);
-
       }
     }
-    else if (targetID === 'svg') {
-      for (const box of selectedTaskboxes) box.children[0].style.borderColor = normalColor;
+    else if (target.id === 'svg') {
       selectedTaskboxes = [];
     }
 
