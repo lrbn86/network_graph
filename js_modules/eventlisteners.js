@@ -1,6 +1,7 @@
 import { UIMode } from './uimode.js';
 import { normalColor, criticalColor, drawLine, drawTask } from './draw.js';
 import { calculateExpectedTime } from '../js_modules/calculations.js';
+import { Task } from './task.js';
 
 const doc = document;
 const svg = doc.querySelector('#svg');
@@ -52,6 +53,8 @@ function handleUIClick(event) {
   } else if (targetID === 'present-btn') {
   } else if (targetID === 'account-btn') {
   } else if (targetID === 'export-btn') {
+    getCriticalPath();
+    console.log(network);
   }
 
 }
@@ -70,20 +73,21 @@ svg.setAttribute('viewBox', `${currentViewBox.x} ${currentViewBox.y} ${zoomLevel
 let selectedTaskboxes = [];
 
 let graph = {};
+let network = {};
+
 
 function handleMouseDown(event) {
 
   const target = event.target;
-  const targetID = target.getAttribute('id');
-  const targetClass = target.getAttribute('class');
-  const targetParent = target.parentNode;
-  const targetParentClass = targetParent.getAttribute('class');
-
   const matrix = convertToSVGCoordinates(event.x, event.y);
 
+  let node = target.closest('.taskbox');
+
   if (UIMode['select-btn']) {
-    if (targetParentClass === 'taskbox') {
-      selectedObject = targetParent;
+    if (target.className !== 'task-name' && target.className !== 'team-name' && target.className !== 'assignee-name' && target.className !== 'topt' && target.className !== 'tlikely' && target.className !== 'tpess' && target.className !== 'select-status') {
+      if (node) {
+        selectedObject = node;
+      }
     }
   }
 
@@ -95,10 +99,15 @@ function handleMouseDown(event) {
   
   if (UIMode['add-node-btn']) {
 
-    if (targetID === 'svg') {
+    if (target.id === 'svg') {
 
       currentNumTasks++;
+      const task = new Task(currentNumTasks);
+      network[`node${currentNumTasks}`] = task;
+
       const taskBox = drawTask(matrix.x, matrix.y, currentNumTasks);
+      const id = taskBox.getAttribute('id');
+      network[id].dom = taskBox;
 
       const topt = taskBox.children[0].children[3].children[0];
       const tlikely = taskBox.children[0].children[4].children[0];
@@ -109,18 +118,21 @@ function handleMouseDown(event) {
       topt.addEventListener('input', (event) => {
         if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
           expectedTime.textContent = calculateExpectedTime(tpess.value, topt.value, tlikely.value);
+          network[id].duration = Number(expectedTime.textContent);
         }
       });
 
       tlikely.addEventListener('input', (event) => {
         if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
           expectedTime.textContent = calculateExpectedTime(tpess.value, topt.value, tlikely.value);
+          network[id].duration = Number(expectedTime.textContent);
         }
       });
 
       tpess.addEventListener('input', (event) => {
         if (topt.value !== '' && tlikely.value !== '' && tpess.value !== '') {
           expectedTime.textContent = calculateExpectedTime(tpess.value, topt.value, tlikely.value);
+          network[id].duration = Number(expectedTime.textContent);
         }
       });
 
@@ -144,13 +156,11 @@ function handleMouseDown(event) {
   }
 
   if (UIMode['connect-nodes-btn']) {
-
-    if (targetParentClass === 'taskbox') {
-
-      targetParent.children[0].style.borderColor = 'gray';
-
-      selectedTaskboxes.push(targetParent);
-
+    
+    if (node) {
+      
+      selectedTaskboxes.push(node);
+      
       if (selectedTaskboxes.length >= 2) {
         const nodeA = selectedTaskboxes[0];
         const nodeA_ID = nodeA.getAttribute('id');
@@ -170,26 +180,22 @@ function handleMouseDown(event) {
             const edgeID = edge.getAttribute('id');
             graph[nodeA_ID].push([nodeB_ID, edgeID])
             graph[nodeB_ID].push([nodeA_ID, edgeID])
+
+            network[nodeB_ID].predecessors.push(network[nodeA_ID]);
+            network[nodeA_ID].successors.push(network[nodeB_ID]);
           }
-
         }
-
-        setTimeout(() => {
-          for (const box of selectedTaskboxes) box.children[0].style.borderColor = normalColor;
-          selectedTaskboxes = [];
-        }, 1000);
-
+        selectedTaskboxes = [];
       }
     }
-    else if (targetID === 'svg') {
-      for (const box of selectedTaskboxes) box.children[0].style.borderColor = normalColor;
+    else if (target.id === 'svg') {
       selectedTaskboxes = [];
     }
 
   }
 
   if (UIMode['add-comment-btn']) {
-    if (targetID === 'svg') {
+    if (target.id === 'svg') {
       const commentBox = document.createElement('div');
       commentBox.setAttribute('class', 'comment-box');
       const closeBtn = document.createElement('button');
@@ -326,3 +332,57 @@ function handleMouseWheel(event) {
 function handleKeyDown(event) {}
 
 function handleContextMenu(event) {event.preventDefault();}
+
+
+function performForwardPass() {
+  const g = Object.values(network);
+  const n = g.length;
+  const durations = g.map((e) => e.duration);
+  if (durations.every((val) => val > -1)) {
+    g[0].es = 1;
+    g[0].ef = g[0].es + g[0].duration - 1;
+    for (let i = 1; i < n; i++) {
+      const task = g[i];
+      const maxEF = Math.max(...task.predecessors.map((task) => task.ef));
+      task.ef = maxEF + task.duration;
+      task.es = maxEF + 1;
+    }
+  }
+}
+
+function performBackwardPass() {
+  const g = Object.values(network);
+  const n = g.length;
+  g[n - 1].lf = g[n - 1].ef;
+  g[n - 1].ls = g[n - 1].lf - g[n - 1].duration + 1;
+  for (let i = n - 2; i >= 0; i--) {
+    const task = g[i];
+    const minLS = Math.min(...task.successors.map((task) => task.ls));
+    task.lf = minLS - 1;
+    task.ls = task.lf - task.duration + 1;
+  }
+}
+
+function calculateTaskFloats() {
+  const g = Object.values(network);
+  for (const task of g) {
+    task.float = task.lf - task.ef;
+    if (task.float === 0) {
+      task.isCritical = true;
+    }
+  }
+}
+
+function getCriticalPath() {
+  // TODO: This only works once everything is all set up. The nodes have to be properly connected and the estimations should be given. We can calculate path with button click
+  // The passes can produce unexpected values if we attempt to do it each time we connect a node
+  performForwardPass();
+  performBackwardPass();
+  calculateTaskFloats();
+}
+
+
+
+
+
+
